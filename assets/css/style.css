@@ -1,0 +1,603 @@
+/* ==========================================
+   ELITE VAULT GRADING - MAIN STYLESHEET
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+    --bg-dark: #050505;
+    --bg-card: #0c0c0c;
+    --gold: #c9a050;
+    --gold-bright: #e5be6b;
+    --gold-hover: #b38b3d;
+    --text-main: #e0e0e0;
+    --text-muted: #888888;
+    --border-color: #1a1a1a;
+    --border-gold: rgba(201, 160, 80, 0.25);
+    --font-sans: 'Montserrat', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 15px;
+}
+
+a {
+    color: var(--text-main);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--gold);
+}
+
+/* --- BUTTONS --- */
+.btn-custom {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-sans);
+}
+
+.btn-gold {
+    background-color: var(--gold);
+    color: #000;
+    border: 1px solid var(--gold);
+}
+
+.btn-gold:hover {
+    background-color: var(--gold-hover);
+    border-color: var(--gold-hover);
+    color: #000;
+}
+
+.btn-outline-gold {
+    background-color: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+}
+
+.btn-outline-gold:hover {
+    background-color: rgba(201, 160, 80, 0.1);
+    color: var(--gold);
+}
+
+/* --- HEADER --- */
+.header {
+    padding: 25px 0;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-mark {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 20px;
+    color: var(--gold);
+    box-shadow: inset 0 0 10px rgba(201, 160, 80, 0.2);
+}
+
+.logo-text {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    line-height: 1.1;
+}
+
+.logo-text span {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.nav-actions .btn-custom {
+    padding: 8px 16px;
+    font-size: 10px;
+}
+
+/* --- HERO SECTION --- */
+.hero {
+    padding: 90px 0;
+    position: relative;
+    background: radial-gradient(ellipse at 70% 50%, rgba(201, 160, 80, 0.08) 0%, rgba(5, 5, 5, 0) 60%);
+}
+
+.hero-subtitle {
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+}
+
+.hero h1 {
+    font-size: 58px;
+    color: var(--gold);
+    margin-bottom: 25px;
+    line-height: 1.05;
+    letter-spacing: 2px;
+}
+
+.hero p {
+    color: var(--text-muted);
+    font-size: 13px;
+    max-width: 85%;
+    margin-bottom: 40px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+.hero-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* --- VAULT DISPLAY --- */
+.vault-container {
+    width: 100%;
+    height: 480px;
+    border-radius: 6px;
+    border: 1px solid var(--border-gold);
+    background: radial-gradient(circle, rgba(30,25,15,0.8) 0%, rgba(8,8,8,0.95) 80%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+}
+
+.vault-door-graphic {
+    width: 320px;
+    height: 320px;
+    border: 8px solid rgba(201, 160, 80, 0.3);
+    border-radius: 50%;
+    position: absolute;
+    left: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+
+.vault-handle {
+    width: 180px;
+    height: 180px;
+    border: 4px solid var(--gold);
+    border-radius: 50%;
+    position: relative;
+}
+
+.vault-handle::before, .vault-handle::after {
+    content: '';
+    position: absolute;
+    background: var(--gold);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.vault-handle::before { width: 100%; height: 4px; }
+.vault-handle::after { width: 4px; height: 100%; }
+
+/* --- GRADED CARD SLAB --- */
+.slab {
+    width: 200px;
+    height: 320px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(5px);
+    padding: 10px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 15px rgba(201, 160, 80, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.slab-label {
+    background: #111;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+}
+
+.slab-logo {
+    font-family: var(--font-serif);
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.slab-grade {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 2px;
+}
+
+.slab-card-art {
+    width: 100%;
+    height: 210px;
+    background: radial-gradient(circle, #3a1c1c 0%, #110808 100%);
+    border-radius: 4px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 11px;
+    font-family: var(--font-serif);
+}
+
+/* --- FEATURE STRIP 1 --- */
+.feature-strip {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 35px 0;
+    background-color: #080808;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.feature-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    flex-shrink: 0;
+    background: rgba(201, 160, 80, 0.05);
+}
+
+.feature-text h4 {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.feature-text p {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+/* --- HOW IT WORKS CARD --- */
+.how-it-works-section {
+    padding: 80px 0;
+}
+
+.section-box {
+    border: 1px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 50px 30px;
+    background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.section-title {
+    color: var(--gold);
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 50px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.step-item {
+    text-align: center;
+    position: relative;
+}
+
+.step-icon-wrap {
+    width: 70px;
+    height: 70px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    background-color: #111;
+    color: var(--gold);
+    position: relative;
+    z-index: 2;
+}
+
+.step-col:not(:last-child) .step-item::after {
+    content: '→';
+    position: absolute;
+    top: 22px;
+    right: -15px;
+    color: var(--border-color);
+    font-size: 18px;
+    z-index: 1;
+}
+
+.step-item h4 {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.step-item p {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 0 5px;
+    margin-bottom: 0;
+}
+
+.how-it-works-action {
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* --- SHOWCASE SECTION --- */
+.showcase-section {
+    padding-bottom: 80px;
+}
+
+.showcase-box {
+    border: 1px solid var(--border-gold);
+    border-radius: 6px;
+    padding: 40px 30px;
+    background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
+}
+
+.showcase-subtitle {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.showcase-title {
+    color: var(--gold);
+    font-size: 22px;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.showcase-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+.card-trio {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.mini-slab {
+    width: 110px;
+    height: 180px;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    background: #111;
+    padding: 5px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mini-slab-header {
+    border: 1px solid var(--gold);
+    background: #000;
+    text-align: center;
+    font-size: 8px;
+    color: var(--gold);
+    padding: 2px;
+}
+
+.mini-slab-art {
+    height: 130px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+}
+
+.art-pikachu { background: linear-gradient(135deg, #4a3b10 0%, #1a1500 100%); }
+.art-charizard { background: linear-gradient(135deg, #5e2212 0%, #210902 100%); }
+.art-blastoise { background: linear-gradient(135deg, #12375e 0%, #021221 100%); }
+
+/* --- BOTTOM STRIP --- */
+.bottom-strip {
+    padding: 30px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    background-color: #080808;
+}
+
+.bottom-strip .feature-item {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bottom-strip .feature-item h4 {
+    margin-bottom: 0;
+    font-size: 14px;
+    color: #fff;
+}
+
+.bottom-strip .feature-item p {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0;
+}
+
+/* --- FOOTER --- */
+.footer {
+    padding: 60px 0 40px;
+    background-color: var(--bg-dark);
+}
+
+.footer-logo-col p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 15px;
+}
+
+.footer-title {
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.footer-links a:hover {
+    color: var(--gold);
+}
+
+.footer-contact p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- RESPONSIVE OVERRIDES --- */
+@media (max-width: 991.98px) {
+    .hero h1 { font-size: 42px; }
+    .step-col:not(:last-child) .step-item::after { display: none; }
+    .vault-container { margin-top: 30px; }
+}
+
+@media (max-width: 767.98px) {
+    .card-trio { flex-wrap: wrap; }
+}
+
+.feature-item h4 {
+  color: var(--gold) !important;
+  font-size: 18px !important;
+  margin-bottom: 10px !important;
+}
+.bottom-strip .feature-item {
+	justify-content: center;
+	align-items: center;
+	text-align: left;
+	flex-direction: row;
+	gap: 8px;
+}
+.nav-link-item {
+	text-transform: uppercase;
+}
+
+/* Override Theme Bootstrap Defaults */
+  .evg-contact-wrapper .text-muted {
+    color: var(--evg-text-muted) !important;
+  }
+  
+  .evg-contact-wrapper .text-light {
+    color: var(--evg-text-light) !important;
+  }
