@@ -3,8 +3,14 @@
  * Template Name: About Us - Executive Tier
  * Description: Ultra-premium company profile for Elite Vault Grading.
  *              Features corporate identity, 8-pillar operational advantages, customer demographic scope,
- *              future transparency roadmap, and a clean luxury dark UI without background grid lines.
+ *              future transparency roadmap, dynamic system options, and a clean luxury dark UI.
  */
+
+// -------------------------------------------------------------------------
+// 1. DYNAMIC SYSTEM SETTINGS RESOLUTION
+// -------------------------------------------------------------------------
+$support_email   = get_option( 'evg_support_email', 'elitevaultgrading@gmail.com' );
+$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
 
 get_header(); ?>
 
@@ -168,9 +174,12 @@ get_header(); ?>
         <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Corporate Overview', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'About', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Elite Vault Grading', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
                 <?php esc_html_e( 'At Elite Vault Grading, we provide collectors with professional, reliable, and consistent card certification. Whether protecting a treasured personal collection, authenticating rare inventory, or preparing cards for market liquidity, our standard is precision you can trust.', 'evg-platform' ); ?>
             </p>
+            <div style="display: inline-flex; align-items: center; gap: 10px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 5px 16px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
+                <span><?php printf( esc_html__( 'CURRENT UK TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
+            </div>
         </header>
 
         <!-- 2. WHO WE ARE & MISSION MODULES -->
@@ -183,7 +192,7 @@ get_header(); ?>
                     <?php esc_html_e( 'Elite Vault Grading is a dedicated UK-based trading card certification company. We are committed to helping collectors protect, preserve, and showcase their Pokémon TCG collections with uncompromising integrity.', 'evg-platform' ); ?>
                 </p>
                 <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
-                    <?php esc_html_e( 'Our experienced team inspects every card across a 4-pillar diagnostic criteria before sonic encapsulation in high-clarity protective slabs. Whether submitting a single card or bulk submissions, we deliver a grading experience that is transparent, highly responsive, and strictly professional.', 'evg-platform' ); ?>
+                    <?php esc_html_e( 'Our experienced team inspects every card across 4 diagnostic pillars before sonic encapsulation in high-clarity protective slabs. Whether submitting a single card or bulk submissions, we deliver a grading experience that is transparent, highly responsive, and strictly professional.', 'evg-platform' ); ?>
                 </p>
             </div>
 
@@ -201,9 +210,9 @@ get_header(); ?>
                 </div>
 
                 <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 16px; margin-top: 20px;">
-                    <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 6px;"><?php esc_html_e( 'UK Operations Hub', 'evg-platform' ); ?></span>
+                    <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 6px;"><?php esc_html_e( 'UK Operations & Support Hub', 'evg-platform' ); ?></span>
                     <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;">
-                        <?php esc_html_e( 'Secure operational facility processing English and Japanese TCG submissions via end-to-end tracked courier logistics.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'Processing English and Japanese TCG submissions via Royal Mail Special Delivery. Contact our desk at %s.', 'evg-platform' ), '<strong style="color: var(--evg-gold-primary);">' . esc_html( $support_email ) . '</strong>' ); ?>
                     </p>
                 </div>
             </div>

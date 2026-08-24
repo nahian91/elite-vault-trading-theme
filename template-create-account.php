@@ -2,41 +2,67 @@
 /**
  * Template Name: Create Account - UK Registry
  * Description: Fully dynamic UK-exclusive account registration template for Elite Vault Grading.
+ *              Includes incoming redirect preservation (e.g. from /marketplace or /grade-now),
+ *              automatic post-registration authentication, metadata binding, password show/hide eye toggles,
+ *              and fixed, non-editable United Kingdom country lock.
  */
 
 // -------------------------------------------------------------------------
-// 1. BACKEND REGISTRATION ENGINE
+// 1. RESOLVE REDIRECT TARGET
+// -------------------------------------------------------------------------
+$redirect_to = '';
+if ( isset( $_REQUEST['redirect_to'] ) && ! empty( $_REQUEST['redirect_to'] ) ) {
+    $redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+}
+
+// Redirect if already authenticated
+if ( is_user_logged_in() && 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+    $current_user = wp_get_current_user();
+    $staff_roles  = array( 'administrator', 'head_grader', 'grader', 'support_team' );
+    
+    if ( ! empty( array_intersect( $staff_roles, (array) $current_user->roles ) ) ) {
+        wp_safe_redirect( admin_url( 'admin.php?page=evg_management_system&tab=dashboard' ) );
+    } elseif ( ! empty( $redirect_to ) ) {
+        wp_safe_redirect( $redirect_to );
+    } else {
+        wp_safe_redirect( home_url( '/my-account' ) );
+    }
+    exit;
+}
+
+// -------------------------------------------------------------------------
+// 2. BACKEND REGISTRATION ENGINE
 // -------------------------------------------------------------------------
 $registration_errors = new WP_Error();
-$form_data = array();
+$form_data           = array();
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'] ) ) {
-    if ( wp_verify_nonce( $_POST['evg_register_nonce'], 'evg_user_registration_action' ) ) {
+    if ( wp_verify_nonce( sanitize_key( $_POST['evg_register_nonce'] ), 'evg_user_registration_action' ) ) {
         
         // Sanitize incoming fields
-        $first_name       = sanitize_text_field( $_POST['first_name'] ?? '' );
-        $last_name        = sanitize_text_field( $_POST['last_name'] ?? '' );
-        $email            = sanitize_email( $_POST['email'] ?? '' );
-        $confirm_email    = sanitize_email( $_POST['confirm_email'] ?? '' );
-        $mobile_number    = sanitize_text_field( $_POST['mobile_number'] ?? '' );
-        $username         = sanitize_user( $_POST['username'] ?? '' );
+        $first_name       = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
+        $last_name        = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
+        $email            = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+        $confirm_email    = sanitize_email( wp_unslash( $_POST['confirm_email'] ?? '' ) );
+        $mobile_number    = sanitize_text_field( wp_unslash( $_POST['mobile_number'] ?? '' ) );
+        $username         = sanitize_user( wp_unslash( $_POST['username'] ?? '' ) );
         $password         = $_POST['password'] ?? '';
         $confirm_password = $_POST['confirm_password'] ?? '';
         
-        // UK Address parameters
-        $house_number     = sanitize_text_field( $_POST['house_number'] ?? '' );
-        $street_address   = sanitize_text_field( $_POST['street_address'] ?? '' );
-        $town_city        = sanitize_text_field( $_POST['town_city'] ?? '' );
-        $county           = sanitize_text_field( $_POST['county'] ?? '' );
-        $postcode         = sanitize_text_field( $_POST['postcode'] ?? '' );
-        $country          = 'United Kingdom';
+        // UK Address parameters (Country strictly locked to United Kingdom)
+        $house_number   = sanitize_text_field( wp_unslash( $_POST['house_number'] ?? '' ) );
+        $street_address = sanitize_text_field( wp_unslash( $_POST['street_address'] ?? '' ) );
+        $town_city      = sanitize_text_field( wp_unslash( $_POST['town_city'] ?? '' ) );
+        $county         = sanitize_text_field( wp_unslash( $_POST['county'] ?? '' ) );
+        $postcode       = sanitize_text_field( wp_unslash( $_POST['postcode'] ?? '' ) );
+        $country        = 'United Kingdom';
         
         // Preferences & Compliance Checkboxes
-        $pref_updates     = isset( $_POST['pref_updates'] ) ? 'yes' : 'no';
-        $pref_offers      = isset( $_POST['pref_offers'] ) ? 'yes' : 'no';
-        $terms_agree      = isset( $_POST['terms_agree'] );
-        $privacy_agree    = isset( $_POST['privacy_agree'] );
-        $age_check        = isset( $_POST['age_check'] );
+        $pref_updates  = isset( $_POST['pref_updates'] ) ? 'yes' : 'no';
+        $pref_offers   = isset( $_POST['pref_offers'] ) ? 'yes' : 'no';
+        $terms_agree   = isset( $_POST['terms_agree'] );
+        $privacy_agree = isset( $_POST['privacy_agree'] );
+        $age_check     = isset( $_POST['age_check'] );
 
         // Retain values on validation failure
         $form_data = compact(
@@ -92,7 +118,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
         }
 
         // Mandatory UK Address Check
-        if ( empty( $house_number ) || empty( $street_address ) || empty( $town_city ) || empty( $county ) || empty( $postcode ) ) {
+        if ( empty( $house_number ) || empty( $street_address ) || empty( $town_city ) || empty( $postcode ) ) {
             $registration_errors->add( 'empty_address', __( 'Please complete all address fields.', 'evg-platform' ) );
         }
 
@@ -101,7 +127,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
             $registration_errors->add( 'terms_required', __( 'You must agree to the Terms, Privacy Policy, and confirm you are over 18.', 'evg-platform' ) );
         }
 
-        // Process Registration
+        // Process Registration & Auto-Login
         if ( empty( $registration_errors->get_error_messages() ) ) {
             $user_id = wp_create_user( $username, $password, $email );
 
@@ -115,7 +141,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
                     'display_name' => trim( $first_name . ' ' . $last_name ),
                 ) );
 
-                // Store Custom User Meta compatible with admin and tracking modules
+                // Store Custom User Meta
                 update_user_meta( $user_id, 'evg_house_number', $house_number );
                 update_user_meta( $user_id, 'evg_street_address', $street_address );
                 update_user_meta( $user_id, 'evg_town_city', $town_city );
@@ -130,7 +156,16 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
                     Elite_Vault_Grading_System::log_activity( "Registered New Collector Account: {$email} (User ID #{$user_id})" );
                 }
 
-                wp_safe_redirect( add_query_arg( 'registration', 'success', get_permalink() ) );
+                // Automatically authenticate user session
+                wp_set_current_user( $user_id );
+                wp_set_auth_cookie( $user_id, true );
+
+                // Direct routing honoring redirect_to
+                if ( ! empty( $redirect_to ) ) {
+                    wp_safe_redirect( $redirect_to );
+                } else {
+                    wp_safe_redirect( home_url( '/my-account' ) );
+                }
                 exit;
             }
         }
@@ -240,7 +275,42 @@ get_header(); ?>
     background: #09090b;
   }
   .evg-form-control::placeholder { color: #4a4f5c; font-weight: 300; }
-  .evg-form-control:read-only { color: var(--evg-gold-primary); background: #07080a; }
+  
+  /* Fixed / Readonly styling for Country */
+  .evg-form-control:read-only { 
+    color: var(--evg-gold-primary) !important; 
+    background: #08080a !important; 
+    border-color: var(--evg-border-gold-faint) !important;
+    cursor: not-allowed;
+    font-weight: 600;
+  }
+
+  /* Password Wrapper with Eye Toggle */
+  .evg-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .evg-password-wrapper input {
+    padding-right: 46px !important;
+  }
+  .evg-eye-toggle {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--evg-text-ash);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+  .evg-eye-toggle:hover {
+    color: var(--evg-gold-primary);
+  }
 
   /* Strength Meter */
   .evg-strength-meter {
@@ -349,22 +419,6 @@ get_header(); ?>
 
         <!-- Form Module -->
         <div class="evg-module">
-            
-            <!-- Success Message -->
-            <?php if ( isset( $_GET['registration'] ) && 'success' === $_GET['registration'] ) : ?>
-                <div style="background: rgba(52, 199, 89, 0.05); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 4px; padding: 30px; text-align: center; margin-bottom: 30px;">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(52, 199, 89, 0.1); border: 1px solid rgba(52, 199, 89, 0.4); color: #34c759; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <h3 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Account Created Successfully', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.9rem; margin: 0 0 20px 0;">
-                        <?php esc_html_e( 'Your Elite Vault account has been created successfully. Please verify your email address before submitting your first grading order.', 'evg-platform' ); ?>
-                    </p>
-                    <a href="<?php echo esc_url( home_url( '/sign-in' ) ); ?>" class="btn-evg-executive" style="display: inline-flex; width: auto; padding: 0.75rem 2rem;">
-                        <?php esc_html_e( 'Sign In to Terminal', 'evg-platform' ); ?> &rarr;
-                    </a>
-                </div>
-            <?php endif; ?>
 
             <!-- Error Messages -->
             <?php if ( ! empty( $registration_errors->get_error_messages() ) ) : ?>
@@ -378,9 +432,13 @@ get_header(); ?>
                 </div>
             <?php endif; ?>
 
-            <form action="<?php echo esc_url( get_permalink() ); ?>" method="post" class="evg-register-form">
+            <form action="<?php echo esc_url( add_query_arg( array(), get_permalink() ) ); ?>" method="post" class="evg-register-form">
                 <?php wp_nonce_field( 'evg_user_registration_action', 'evg_register_nonce' ); ?>
                 
+                <?php if ( ! empty( $redirect_to ) ) : ?>
+                    <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>">
+                <?php endif; ?>
+
                 <!-- SECTION 01: PERSONAL IDENTIFICATION -->
                 <div style="margin-bottom: 40px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 20px;">
@@ -425,11 +483,23 @@ get_header(); ?>
                     <div class="evg-form-grid">
                         <div class="evg-field-wrap">
                             <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
-                            <input type="password" name="password" id="evgPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="new-password">
+                            <div class="evg-password-wrapper">
+                                <input type="password" name="password" id="evgPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="new-password">
+                                <button type="button" class="evg-eye-toggle" data-target="evgPassword" aria-label="Toggle password visibility">
+                                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="eye-closed" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <div class="evg-field-wrap">
                             <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Confirm Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
-                            <input type="password" name="confirm_password" id="evgConfirmPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="new-password">
+                            <div class="evg-password-wrapper">
+                                <input type="password" name="confirm_password" id="evgConfirmPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="new-password">
+                                <button type="button" class="evg-eye-toggle" data-target="evgConfirmPassword" aria-label="Toggle confirm password visibility">
+                                    <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="eye-closed" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="evg-grid-full">
@@ -477,19 +547,16 @@ get_header(); ?>
                             <input type="text" name="town_city" class="evg-form-control" placeholder="e.g. London" value="<?php echo esc_attr( $form_data['town_city'] ?? '' ); ?>" required autocomplete="address-level2">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'County', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
-                            <input type="text" name="county" class="evg-form-control" placeholder="e.g. Greater London" value="<?php echo esc_attr( $form_data['county'] ?? '' ); ?>" required autocomplete="address-level1">
+                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'County', 'evg-platform' ); ?></label>
+                            <input type="text" name="county" class="evg-form-control" placeholder="e.g. Greater London" value="<?php echo esc_attr( $form_data['county'] ?? '' ); ?>" autocomplete="address-level1">
                         </div>
-                        <div class="evg-grid-full">
+                        <div class="evg-field-wrap">
                             <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Postcode', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="postcode" class="evg-form-control" placeholder="e.g. SW1A 1AA" value="<?php echo esc_attr( $form_data['postcode'] ?? '' ); ?>" required autocomplete="postal-code">
                         </div>
-                        <div class="evg-grid-full">
-                            <label class="evg-label-micro" style="margin-bottom: 8px; color: var(--evg-text-ash);"><?php esc_html_e( 'Country (Default: United Kingdom)', 'evg-platform' ); ?></label>
+                        <div class="evg-field-wrap">
+                            <label class="evg-label-micro" style="margin-bottom: 8px; color: var(--evg-text-ash);"><?php esc_html_e( 'Country (Fixed)', 'evg-platform' ); ?></label>
                             <input type="text" name="country" class="evg-form-control" value="United Kingdom" readonly>
-                            <span style="color: var(--evg-text-ash); font-size: 0.72rem; display: block; margin-top: 6px;">
-                                <?php esc_html_e( 'Elite Vault Grading is currently accepting submissions from customers within the UK only.', 'evg-platform' ); ?>
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -547,9 +614,16 @@ get_header(); ?>
                     </svg>
                 </button>
 
+                <!-- Sign In Link -->
+                <?php
+                $signin_url = home_url( '/sign-in' );
+                if ( ! empty( $redirect_to ) ) {
+                    $signin_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $signin_url );
+                }
+                ?>
                 <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
                     <span style="color: var(--evg-text-ash); font-size: 0.85rem;"><?php esc_html_e( 'Already have an account?', 'evg-platform' ); ?></span>
-                    <a href="<?php echo esc_url( home_url( '/sign-in' ) ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
+                    <a href="<?php echo esc_url( $signin_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
                         <?php esc_html_e( 'Sign In →', 'evg-platform' ); ?>
                     </a>
                 </div>
@@ -562,6 +636,7 @@ get_header(); ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Password Strength Validation Logic
     const passwordInput = document.getElementById('evgPassword');
     const label = document.getElementById('strengthIndicatorLabel');
     const reqLen = document.getElementById('reqLen');
@@ -576,55 +651,56 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('seg4')
     ];
 
-    if (!passwordInput) return;
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const val = passwordInput.value;
+            let score = 0;
 
-    passwordInput.addEventListener('input', function() {
-        const val = passwordInput.value;
-        let score = 0;
+            const hasLen = val.length >= 8;
+            const hasCase = /[A-Z]/.test(val) && /[a-z]/.test(val);
+            const hasNum = /[0-9]/.test(val);
+            const hasSpec = /[!@#$%^&*()\-_=+{};:,<.>]/.test(val);
 
-        const hasLen = val.length >= 8;
-        const hasCase = /[A-Z]/.test(val) && /[a-z]/.test(val);
-        const hasNum = /[0-9]/.test(val);
-        const hasSpec = /[!@#$%^&*()\-_=+{};:,<.>]/.test(val);
+            toggleReq(reqLen, hasLen);
+            toggleReq(reqCase, hasCase);
+            toggleReq(reqNum, hasNum);
+            toggleReq(reqSpec, hasSpec);
 
-        toggleReq(reqLen, hasLen);
-        toggleReq(reqCase, hasCase);
-        toggleReq(reqNum, hasNum);
-        toggleReq(reqSpec, hasSpec);
+            if (hasLen) score++;
+            if (hasCase) score++;
+            if (hasNum) score++;
+            if (hasSpec) score++;
 
-        if (hasLen) score++;
-        if (hasCase) score++;
-        if (hasNum) score++;
-        if (hasSpec) score++;
+            segs.forEach(s => s.style.backgroundColor = '#1c1f26');
 
-        segs.forEach(s => s.style.backgroundColor = '#1c1f26');
-
-        if (val.length === 0) {
-            label.textContent = 'AWAITING INPUT';
-            label.style.color = '#8e8e93';
-        } else if (score <= 1) {
-            segs[0].style.backgroundColor = '#ff453a';
-            label.textContent = 'WEAK ENCRYPTION';
-            label.style.color = '#ff453a';
-        } else if (score === 2) {
-            segs[0].style.backgroundColor = '#ff9f0a';
-            segs[1].style.backgroundColor = '#ff9f0a';
-            label.textContent = 'MODERATE';
-            label.style.color = '#ff9f0a';
-        } else if (score === 3) {
-            segs[0].style.backgroundColor = '#d4af37';
-            segs[1].style.backgroundColor = '#d4af37';
-            segs[2].style.backgroundColor = '#d4af37';
-            label.textContent = 'STRONG';
-            label.style.color = '#d4af37';
-        } else if (score === 4) {
-            segs.forEach(s => s.style.backgroundColor = '#34c759');
-            label.textContent = 'EXCELLENT';
-            label.style.color = '#34c759';
-        }
-    });
+            if (val.length === 0) {
+                label.textContent = 'AWAITING INPUT';
+                label.style.color = '#8e8e93';
+            } else if (score <= 1) {
+                segs[0].style.backgroundColor = '#ff453a';
+                label.textContent = 'WEAK ENCRYPTION';
+                label.style.color = '#ff453a';
+            } else if (score === 2) {
+                segs[0].style.backgroundColor = '#ff9f0a';
+                segs[1].style.backgroundColor = '#ff9f0a';
+                label.textContent = 'MODERATE';
+                label.style.color = '#ff9f0a';
+            } else if (score === 3) {
+                segs[0].style.backgroundColor = '#d4af37';
+                segs[1].style.backgroundColor = '#d4af37';
+                segs[2].style.backgroundColor = '#d4af37';
+                label.textContent = 'STRONG';
+                label.style.color = '#d4af37';
+            } else if (score === 4) {
+                segs.forEach(s => s.style.backgroundColor = '#34c759');
+                label.textContent = 'EXCELLENT';
+                label.style.color = '#34c759';
+            }
+        });
+    }
 
     function toggleReq(el, isValid) {
+        if (!el) return;
         if (isValid) {
             el.classList.add('valid');
             el.classList.remove('invalid');
@@ -633,6 +709,29 @@ document.addEventListener('DOMContentLoaded', function() {
             el.classList.add('invalid');
         }
     }
+
+    // 2. Password Toggle Eye Logic
+    const eyeButtons = document.querySelectorAll('.evg-eye-toggle');
+    eyeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const inputField = document.getElementById(targetId);
+            const eyeOpen = this.querySelector('.eye-open');
+            const eyeClosed = this.querySelector('.eye-closed');
+
+            if (!inputField) return;
+
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                eyeOpen.style.display = 'none';
+                eyeClosed.style.display = 'block';
+            } else {
+                inputField.type = 'password';
+                eyeOpen.style.display = 'block';
+                eyeClosed.style.display = 'none';
+            }
+        });
+    });
 });
 </script>
 

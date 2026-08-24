@@ -3,7 +3,8 @@
  * Template Name: Marketplace - Executive Tier
  * Description: Fully dynamic public marketplace catalogue for Elite Vault Grading.
  *              Fetches live inventory from wp_evg_marketplace and wp_evg_cards, supports dynamic
- *              category and grade filtering, sorting, pagination, and provides direct checkout routing.
+ *              category and grade filtering, sorting, pagination, and direct checkout routing
+ *              with guest authentication redirection back to the targeted checkout page.
  */
 
 global $wpdb;
@@ -18,6 +19,7 @@ $current_page = max( 1, get_query_var( 'paged' ) ? get_query_var( 'paged' ) : ( 
 $per_page     = 9;
 $offset       = ( $current_page - 1 ) * $per_page;
 
+$search_keyword    = isset( $_GET['sq'] ) ? sanitize_text_field( wp_unslash( $_GET['sq'] ) ) : '';
 $selected_category = isset( $_GET['cat'] ) ? sanitize_text_field( wp_unslash( $_GET['cat'] ) ) : '';
 $selected_grade    = isset( $_GET['grade'] ) ? sanitize_text_field( wp_unslash( $_GET['grade'] ) ) : '';
 $selected_lang     = isset( $_GET['lang'] ) ? sanitize_text_field( wp_unslash( $_GET['lang'] ) ) : '';
@@ -27,11 +29,24 @@ $selected_sort     = isset( $_GET['sort'] ) ? sanitize_text_field( wp_unslash( $
 $where_clauses = array( "m.status = 'Available'" );
 $query_params  = array();
 
+// Keyword Search
+if ( ! empty( $search_keyword ) ) {
+    $where_clauses[] = "(m.card_title LIKE %s OR c.card_name LIKE %s OR m.set_name LIKE %s OR c.set_name LIKE %s OR m.card_number LIKE %s)";
+    $like_val        = '%' . $wpdb->esc_like( $search_keyword ) . '%';
+    $query_params[]  = $like_val;
+    $query_params[]  = $like_val;
+    $query_params[]  = $like_val;
+    $query_params[]  = $like_val;
+    $query_params[]  = $like_val;
+}
+
+// Category Filter
 if ( ! empty( $selected_category ) && 'all' !== $selected_category ) {
     $where_clauses[] = "m.category = %s";
     $query_params[]  = $selected_category;
 }
 
+// Grade Filter
 if ( ! empty( $selected_grade ) ) {
     if ( 'raw' === strtolower( $selected_grade ) ) {
         $where_clauses[] = "(COALESCE(m.assigned_grade, c.final_grade) IS NULL OR COALESCE(m.assigned_grade, c.final_grade) = 0)";
@@ -41,6 +56,7 @@ if ( ! empty( $selected_grade ) ) {
     }
 }
 
+// Language Filter
 if ( ! empty( $selected_lang ) ) {
     $where_clauses[] = "COALESCE(NULLIF(m.language, ''), c.language, 'English') = %s";
     $query_params[]  = $selected_lang;
@@ -74,7 +90,7 @@ $total_pages = ceil( $total_items / $per_page );
 
 // Fetch Items Query
 $items_query = "SELECT m.*, 
-                       COALESCE(NULLIF(m.card_title, ''), c.card_name, 'Graded Card') as display_name,
+                       COALESCE(NULLIF(m.card_title, ''), c.card_name, 'Certified Card') as display_name,
                        COALESCE(NULLIF(m.set_name, ''), c.set_name, 'N/A') as display_set,
                        COALESCE(NULLIF(m.card_number, ''), c.card_number, 'N/A') as display_number,
                        COALESCE(NULLIF(m.language, ''), c.language, 'English') as display_lang,
@@ -94,7 +110,7 @@ $query_params_with_limits[] = $offset;
 $listings = $wpdb->get_results( $wpdb->prepare( $items_query, $query_params_with_limits ) );
 
 // Fetch Distinct Categories for Sidebar Filter
-$categories_available = $wpdb->get_col( "SELECT DISTINCT category FROM {$table_marketplace} WHERE status = 'Available'" );
+$categories_available = $wpdb->get_col( "SELECT DISTINCT category FROM {$table_marketplace} WHERE status = 'Available' AND category IS NOT NULL AND category != ''" );
 
 get_header(); ?>
 
@@ -184,10 +200,31 @@ get_header(); ?>
     font-size: 0.85rem;
     outline: none;
     transition: all 0.2s ease;
+    box-sizing: border-box;
   }
   .evg-form-control:focus {
     border-color: var(--evg-gold-primary);
     box-shadow: 0 0 0 1px var(--evg-gold-primary);
+  }
+
+  /* Search Input Field */
+  .evg-search-box {
+    position: relative;
+    margin-bottom: 25px;
+  }
+  .evg-search-box input {
+    width: 100%;
+    padding-right: 40px;
+  }
+  .evg-search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--evg-gold-primary);
+    cursor: pointer;
   }
 
   .evg-filter-link {
@@ -255,6 +292,7 @@ get_header(); ?>
     border-color: var(--evg-gold-primary);
   }
 
+  /* Slab Case Wrapper */
   .evg-slab-frame {
     background: #08080a;
     border: 2px solid #2a2a2e;
@@ -265,6 +303,7 @@ get_header(); ?>
     max-width: 190px; 
     position: relative;
     box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    cursor: pointer;
   }
   .evg-slab-label {
     background: #141416; 
@@ -294,9 +333,29 @@ get_header(); ?>
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .evg-slab-frame:hover .evg-slab-art img {
+    transform: scale(1.04);
   }
 
-  /* Executive Buy Button with Checkout Redirect */
+  /* Stock Badge */
+  .evg-stock-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid var(--evg-border-gold-faint);
+    color: var(--evg-gold-primary);
+    font-size: 0.62rem;
+    font-family: monospace;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    z-index: 2;
+  }
+
+  /* Button Elements */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -372,6 +431,40 @@ get_header(); ?>
     color: var(--evg-gold-primary);
   }
 
+  /* Modal Lightbox */
+  .evg-lightbox-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .evg-lightbox-content {
+    max-width: 480px;
+    max-height: 85vh;
+    border: 2px solid var(--evg-gold-primary);
+    border-radius: 8px;
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
+    object-fit: contain;
+  }
+  .evg-lightbox-close {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    color: #ffffff;
+    font-size: 2rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
   @media (max-width: 992px) {
     .evg-marketplace-layout { grid-template-columns: 1fr; }
   }
@@ -385,7 +478,7 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Verified Inventory Access', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Public Slabs', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Marketplace', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'Explore our live inventory of certified Pokémon cards, permanently secured in tamper-evident Elite Vault encapsulation.', 'evg-platform' ); ?>[cite: 1]
+                <?php esc_html_e( 'Explore our live inventory of certified Pokémon cards, permanently secured in tamper-evident Elite Vault encapsulation.', 'evg-platform' ); ?>
             </p>
         </header>
 
@@ -396,6 +489,24 @@ get_header(); ?>
             <aside>
                 <div class="evg-module" style="padding: 25px; position: sticky; top: 2rem;">
                     
+                    <!-- SEARCH BOX -->
+                    <form method="get" action="<?php echo esc_url( get_permalink() ); ?>" class="evg-search-box">
+                        <?php if ( ! empty( $selected_category ) ) : ?>
+                            <input type="hidden" name="cat" value="<?php echo esc_attr( $selected_category ); ?>">
+                        <?php endif; ?>
+                        <?php if ( ! empty( $selected_grade ) ) : ?>
+                            <input type="hidden" name="grade" value="<?php echo esc_attr( $selected_grade ); ?>">
+                        <?php endif; ?>
+                        <?php if ( ! empty( $selected_lang ) ) : ?>
+                            <input type="hidden" name="lang" value="<?php echo esc_attr( $selected_lang ); ?>">
+                        <?php endif; ?>
+                        
+                        <input type="text" name="sq" class="evg-form-control" placeholder="<?php esc_attr_e( 'Search card or set...', 'evg-platform' ); ?>" value="<?php echo esc_attr( $search_keyword ); ?>">
+                        <button type="submit" class="evg-search-btn" aria-label="Search">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </button>
+                    </form>
+
                     <!-- CATEGORIES -->
                     <div style="margin-bottom: 30px;">
                         <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Category Index', 'evg-platform' ); ?></span>
@@ -411,7 +522,7 @@ get_header(); ?>
                                 <?php endforeach; ?>
                             <?php else : ?>
                                 <a href="<?php echo esc_url( add_query_arg( 'cat', 'Elite Vault Graded Cards' ) ); ?>" class="evg-filter-link">
-                                    <?php esc_html_e( 'Elite Vault Graded Cards', 'evg-platform' ); ?>[cite: 1]
+                                    <?php esc_html_e( 'Elite Vault Graded Cards', 'evg-platform' ); ?>
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -453,7 +564,7 @@ get_header(); ?>
                     </div>
 
                     <!-- RESET FILTERS -->
-                    <?php if ( ! empty( $selected_category ) || ! empty( $selected_grade ) || ! empty( $selected_lang ) || ! empty( $selected_sort ) ) : ?>
+                    <?php if ( ! empty( $selected_category ) || ! empty( $selected_grade ) || ! empty( $selected_lang ) || ! empty( $selected_sort ) || ! empty( $search_keyword ) ) : ?>
                         <div style="padding-top: 15px; border-top: 1px solid var(--evg-border-hairline);">
                             <a href="<?php echo esc_url( get_permalink() ); ?>" style="color: #ff453a; font-size: 0.78rem; text-decoration: none; font-weight: 700;">
                                 ✕ <?php esc_html_e( 'Reset All Filters', 'evg-platform' ); ?>
@@ -475,6 +586,9 @@ get_header(); ?>
                     </div>
                     
                     <form method="get" action="<?php echo esc_url( get_permalink() ); ?>" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <?php if ( ! empty( $search_keyword ) ) : ?>
+                            <input type="hidden" name="sq" value="<?php echo esc_attr( $search_keyword ); ?>">
+                        <?php endif; ?>
                         <?php if ( ! empty( $selected_category ) ) : ?>
                             <input type="hidden" name="cat" value="<?php echo esc_attr( $selected_category ); ?>">
                         <?php endif; ?>
@@ -499,19 +613,37 @@ get_header(); ?>
                 <?php if ( ! empty( $listings ) ) : ?>
                     <div class="evg-cards-grid">
                         <?php foreach ( $listings as $card ) : 
-                            $is_in_stock = ( intval( $card->stock_quantity ) > 0 );
-                            $checkout_url = add_query_arg(
+                            $stock_count = intval( $card->stock_quantity );
+                            $is_in_stock = ( $stock_count > 0 );
+                            
+                            // Target Checkout Routing
+                            $target_checkout_url = add_query_arg(
                                 array(
                                     'item_id'   => $card->id,
                                     'item_type' => 'marketplace',
                                 ),
                                 home_url( '/checkout' )
                             );
+
+                            // Intercept guest to sign-in then auto redirect to checkout
+                            if ( is_user_logged_in() ) {
+                                $action_button_url = $target_checkout_url;
+                            } else {
+                                $action_button_url = add_query_arg(
+                                    'redirect_to',
+                                    urlencode( $target_checkout_url ),
+                                    home_url( '/sign-in' )
+                                );
+                            }
                         ?>
                             <div class="evg-module evg-product-card">
                                 <div>
                                     <!-- SLAB CONTAINER -->
-                                    <div class="evg-slab-frame">
+                                    <div class="evg-slab-frame evg-lightbox-trigger" data-img="<?php echo esc_url( $card->display_img ); ?>">
+                                        <?php if ( $stock_count > 0 && $stock_count <= 2 ) : ?>
+                                            <span class="evg-stock-badge"><?php printf( esc_html__( 'ONLY %d LEFT', 'evg-platform' ), $stock_count ); ?></span>
+                                        <?php endif; ?>
+
                                         <div class="evg-slab-label">
                                             <span style="color: var(--evg-gold-primary); font-weight: 800;">
                                                 <?php echo ! empty( $card->display_grade ) ? 'EVG ' . esc_html( $card->display_grade ) : 'RAW'; ?>
@@ -557,12 +689,12 @@ get_header(); ?>
                                 </div>
 
                                 <?php if ( $is_in_stock ) : ?>
-                                    <a href="<?php echo esc_url( $checkout_url ); ?>" class="btn-evg-executive">
+                                    <a href="<?php echo esc_url( $action_button_url ); ?>" class="btn-evg-executive">
                                         <?php esc_html_e( 'Buy It Now &bull; Checkout', 'evg-platform' ); ?>
                                     </a>
                                 <?php else : ?>
                                     <button type="button" class="btn-evg-executive btn-evg-soldout" disabled>
-                                        <?php esc_html_e( 'Sold Out', 'evg-platform' ); ?>[cite: 1]
+                                        <?php esc_html_e( 'Sold Out', 'evg-platform' ); ?>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -591,7 +723,7 @@ get_header(); ?>
                     <div class="evg-module" style="padding: 60px 20px; text-align: center;">
                         <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'No Certified Inventory Matched', 'evg-platform' ); ?></h3>
                         <p style="color: var(--evg-text-ash); font-size: 0.9rem; max-width: 500px; margin: 0 auto 20px auto;">
-                            <?php esc_html_e( 'No certified slabs match your active filter matrix. Try resetting your filters to explore available vault inventory.', 'evg-platform' ); ?>
+                            <?php esc_html_e( 'No certified slabs match your active search or filter matrix. Try resetting your query to explore available vault stock.', 'evg-platform' ); ?>
                         </p>
                         <a href="<?php echo esc_url( get_permalink() ); ?>" class="btn-evg-executive" style="display: inline-flex; width: auto; padding: 0.75rem 2rem;">
                             <?php esc_html_e( 'Clear All Filters', 'evg-platform' ); ?>
@@ -610,11 +742,11 @@ get_header(); ?>
             </div>
             <div class="evg-trust-cell">
                 <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( 'SECURE VAULT', 'evg-platform' ); ?></span>
-                <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Tamper-Evident Slabs', 'evg-platform' ); ?></span>[cite: 1]
+                <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Tamper-Evident Slabs', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-trust-cell">
                 <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( 'TRACKED POST', 'evg-platform' ); ?></span>
-                <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'UK Insured Delivery', 'evg-platform' ); ?></span>[cite: 1]
+                <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'UK Insured Delivery', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-trust-cell">
                 <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( 'REGISTRY MATCHED', 'evg-platform' ); ?></span>
@@ -624,5 +756,43 @@ get_header(); ?>
 
     </div>
 </main>
+
+<!-- 4. CARD INSPECTION LIGHTBOX MODAL -->
+<div id="evg-lightbox" class="evg-lightbox-modal">
+    <span class="evg-lightbox-close">&times;</span>
+    <img class="evg-lightbox-content" id="evg-lightbox-img" src="" alt="Slab Zoom Preview">
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('evg-lightbox');
+    var modalImg = document.getElementById('evg-lightbox-img');
+    var closeBtn = document.querySelector('.evg-lightbox-close');
+
+    document.querySelectorAll('.evg-lightbox-trigger').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            var imgUrl = this.getAttribute('data-img');
+            if (imgUrl) {
+                modal.style.display = 'flex';
+                modalImg.src = imgUrl;
+            }
+        });
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
 
 <?php get_footer(); ?>

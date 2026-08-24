@@ -1,48 +1,78 @@
 <?php
 /**
  * Template Name: Sign In - Executive Tier
- * Description: Fully dynamic authentication terminal matching Elite Vault Grading specifications, featuring server-side authentication, secure role redirection, and a clean luxury dark UI without grid lines.
+ * Description: Fully dynamic authentication terminal matching Elite Vault Grading specifications, 
+ *              featuring server-side authentication, post-login target redirection, captcha filter bypass
+ *              for frontend signons, explicit authentication cookies, and an interactive password toggle eye icon.
  */
 
 // -------------------------------------------------------------------------
-// 1. BACKEND AUTHENTICATION ENGINE
+// 1. RESOLVE REDIRECT TARGET
+// -------------------------------------------------------------------------
+$redirect_to = '';
+if ( isset( $_REQUEST['redirect_to'] ) && ! empty( $_REQUEST['redirect_to'] ) ) {
+    $redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+}
+
+// -------------------------------------------------------------------------
+// 2. BACKEND AUTHENTICATION ENGINE
 // -------------------------------------------------------------------------
 $login_error = '';
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_login_nonce'] ) ) {
-    if ( wp_verify_nonce( $_POST['evg_login_nonce'], 'evg_user_login_action' ) ) {
+    if ( wp_verify_nonce( sanitize_key( $_POST['evg_login_nonce'] ), 'evg_user_login_action' ) ) {
         
-        $user_login = sanitize_text_field( $_POST['log'] ?? '' );
+        $user_login = sanitize_text_field( wp_unslash( $_POST['log'] ?? '' ) );
         $user_pwd   = $_POST['pwd'] ?? '';
         $remember   = isset( $_POST['rememberme'] );
 
         if ( empty( $user_login ) || empty( $user_pwd ) ) {
             $login_error = __( 'Please provide both your identifier (email/username) and password.', 'evg-platform' );
         } else {
+            // Resolve email to username if an email address was entered
+            if ( is_email( $user_login ) ) {
+                $user_obj = get_user_by( 'email', $user_login );
+                if ( $user_obj ) {
+                    $user_login = $user_obj->user_login;
+                }
+            }
+
             $credentials = array(
                 'user_login'    => $user_login,
                 'user_password' => $user_pwd,
                 'remember'      => $remember,
             );
 
+            // Bypass core captcha filter for frontend form authentication
+            if ( class_exists( 'Elite_Vault_Grading_System' ) ) {
+                $evg_instance = Elite_Vault_Grading_System::get_instance();
+                remove_filter( 'authenticate', array( $evg_instance, 'validate_mathematical_captcha' ), 25 );
+            }
+
             $user = wp_signon( $credentials, is_ssl() );
 
             if ( is_wp_error( $user ) ) {
-                $login_error = __( 'Invalid credentials. Please verify your access parameters.', 'evg-platform' );
+                $login_error = wp_strip_all_tags( $user->get_error_message() );
             } else {
+                // Set authenticated user and authentication cookies explicitly
+                wp_set_current_user( $user->ID );
+                wp_set_auth_cookie( $user->ID, $remember );
+
                 // Audit logging
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
                     Elite_Vault_Grading_System::log_activity( "Collector Signed In: {$user->user_email} (ID #{$user->ID})" );
                 }
 
-                // Dynamic routing: Staff to Management Portal, Collectors to Customer Dashboard
+                // Dynamic Routing
                 $staff_roles = array( 'administrator', 'head_grader', 'grader', 'support_team' );
                 $user_roles  = (array) $user->roles;
 
                 if ( ! empty( array_intersect( $staff_roles, $user_roles ) ) ) {
                     wp_safe_redirect( admin_url( 'admin.php?page=evg_management_system&tab=dashboard' ) );
+                } elseif ( ! empty( $redirect_to ) ) {
+                    wp_safe_redirect( $redirect_to );
                 } else {
-                    wp_safe_redirect( home_url( '/my-account' ) );
+                    wp_safe_redirect( home_url( '/dashboard' ) );
                 }
                 exit;
             }
@@ -54,10 +84,13 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_login_nonce'] )
 if ( is_user_logged_in() && 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
     $current_user = wp_get_current_user();
     $staff_roles  = array( 'administrator', 'head_grader', 'grader', 'support_team' );
+    
     if ( ! empty( array_intersect( $staff_roles, (array) $current_user->roles ) ) ) {
         wp_safe_redirect( admin_url( 'admin.php?page=evg_management_system&tab=dashboard' ) );
+    } elseif ( ! empty( $redirect_to ) ) {
+        wp_safe_redirect( $redirect_to );
     } else {
-        wp_safe_redirect( home_url( '/my-account' ) );
+        wp_safe_redirect( home_url( '/dashboard' ) );
     }
     exit;
 }
@@ -83,7 +116,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -135,7 +167,6 @@ get_header(); ?>
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
-  /* Vault Emblem */
   .evg-auth-emblem {
     width: 64px; 
     height: 64px; 
@@ -149,7 +180,6 @@ get_header(); ?>
     box-shadow: 0 0 20px var(--evg-gold-glow);
   }
 
-  /* Input Container Groups */
   .evg-input-group {
     display: flex;
     align-items: center;
@@ -186,7 +216,22 @@ get_header(); ?>
   }
   .evg-form-control::placeholder { color: #4a4f5c; font-weight: 300; }
 
-  /* Custom Checkbox */
+  /* Password Toggle Eye Button */
+  .evg-eye-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--evg-text-ash);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+  .evg-eye-toggle:hover {
+    color: var(--evg-gold-primary);
+  }
+
   .evg-checkbox {
     appearance: none; 
     -webkit-appearance: none;
@@ -214,7 +259,6 @@ get_header(); ?>
   .evg-checkbox:checked { border-color: var(--evg-gold-primary); }
   .evg-checkbox:checked::before { transform: scale(1); }
 
-  /* Feature Strip Matrix */
   .evg-feature-matrix {
     display: grid; 
     grid-template-columns: repeat(2, 1fr); 
@@ -232,7 +276,6 @@ get_header(); ?>
   }
   .evg-feature-cell:hover { background: var(--evg-obsidian-elevated); }
 
-  /* Buttons */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -272,7 +315,7 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Security Clearance', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Terminal', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Sign In', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 420px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'Access your member dashboard to track live grading stages, review submitted cards, and manage pre-orders.', 'evg-platform' ); ?>
+                <?php esc_html_e( 'Access your member dashboard to track live grading stages, review submitted cards, and manage marketplace purchases.', 'evg-platform' ); ?>
             </p>
         </header>
 
@@ -294,9 +337,13 @@ get_header(); ?>
                 </div>
             <?php endif; ?>
 
-            <form action="<?php echo esc_url( get_permalink() ); ?>" method="post" class="evg-signin-form">
+            <form action="<?php echo esc_url( add_query_arg( array(), get_permalink() ) ); ?>" method="post" class="evg-signin-form">
                 <?php wp_nonce_field( 'evg_user_login_action', 'evg_login_nonce' ); ?>
                 
+                <?php if ( ! empty( $redirect_to ) ) : ?>
+                    <input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>">
+                <?php endif; ?>
+
                 <!-- USERNAME / EMAIL FIELD -->
                 <div style="margin-bottom: 20px;">
                     <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Email Address or Username', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
@@ -306,11 +353,11 @@ get_header(); ?>
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
                         </span>
-                        <input type="text" name="log" class="evg-form-control" placeholder="client@domain.com or username" value="<?php echo esc_attr( $_POST['log'] ?? '' ); ?>" required autocomplete="username">
+                        <input type="text" name="log" class="evg-form-control" placeholder="client@domain.com or username" value="<?php echo esc_attr( wp_unslash( $_POST['log'] ?? '' ) ); ?>" required autocomplete="username">
                     </div>
                 </div>
 
-                <!-- PASSWORD FIELD -->
+                <!-- PASSWORD FIELD WITH EYE TOGGLE -->
                 <div style="margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <label class="evg-label-micro" style="margin: 0;"><?php esc_html_e( 'Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
@@ -324,7 +371,11 @@ get_header(); ?>
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                             </svg>
                         </span>
-                        <input type="password" name="pwd" class="evg-form-control" placeholder="••••••••••••" required autocomplete="current-password">
+                        <input type="password" name="pwd" id="loginPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="current-password">
+                        <button type="button" class="evg-eye-toggle" data-target="loginPassword" aria-label="Toggle password visibility">
+                            <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
                     </div>
                 </div>
 
@@ -350,9 +401,15 @@ get_header(); ?>
                 </div>
 
                 <!-- SIGN UP REDIRECT -->
+                <?php 
+                $register_url = home_url( '/create-account' );
+                if ( ! empty( $redirect_to ) ) {
+                    $register_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $register_url );
+                }
+                ?>
                 <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
                     <span style="color: var(--evg-text-ash); font-size: 0.85rem;"><?php esc_html_e( 'Lacking active credentials?', 'evg-platform' ); ?></span>
-                    <a href="<?php echo esc_url( home_url( '/create-account' ) ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
+                    <a href="<?php echo esc_url( $register_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
                         <?php esc_html_e( 'Establish Account →', 'evg-platform' ); ?>
                     </a>
                 </div>
@@ -382,5 +439,31 @@ get_header(); ?>
 
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const eyeButtons = document.querySelectorAll('.evg-eye-toggle');
+    eyeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const inputField = document.getElementById(targetId);
+            const eyeOpen = this.querySelector('.eye-open');
+            const eyeClosed = this.querySelector('.eye-closed');
+
+            if (!inputField) return;
+
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                eyeOpen.style.display = 'none';
+                eyeClosed.style.display = 'block';
+            } else {
+                inputField.type = 'password';
+                eyeOpen.style.display = 'block';
+                eyeClosed.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
 
 <?php get_footer(); ?>

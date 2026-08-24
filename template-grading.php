@@ -2,9 +2,13 @@
 /**
  * Template Name: Grading Process & Scale - Executive Tier
  * Description: Clean, high-performance grading architecture template for Elite Vault Grading.
- *              Features the 7-step operational pipeline, the 4 diagnostic pillars, the strict 1–10 whole-number scale,
- *              and an ultra-premium dark luxury aesthetic with background grid lines removed.
+ *              Features dynamic turnaround metrics, the 7-step operational pipeline, 
+ *              the 4 diagnostic pillars with interactive calculators, the strict 1–10 whole-number scale,
+ *              and an ultra-premium dark luxury aesthetic.
  */
+
+$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
+$price_standard  = floatval( get_option( 'evg_price_standard', 15.00 ) );
 
 get_header(); ?>
 
@@ -27,7 +31,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -91,9 +94,11 @@ get_header(); ?>
   .evg-grid-cell {
     background: var(--evg-obsidian-panel); 
     padding: 2rem 1.75rem; 
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
   }
-  .evg-grid-cell:hover { background: var(--evg-obsidian-elevated); }
+  .evg-grid-cell:hover { 
+    background: var(--evg-obsidian-elevated); 
+  }
   
   .evg-pipeline-matrix { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
   .evg-pillar-matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
@@ -150,6 +155,43 @@ get_header(); ?>
     color: var(--evg-text-ash); 
   }
 
+  /* Diagnostic Calculator Widget */
+  .evg-calc-card {
+    background: var(--evg-obsidian-panel);
+    border: 1px solid var(--evg-border-gold-faint);
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 50px;
+  }
+  .evg-calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .evg-calc-input {
+    background: var(--evg-obsidian-elevated);
+    border: 1px solid #242428;
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 4px;
+    width: 100%;
+    font-family: monospace;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    outline: none;
+  }
+  .evg-calc-input:focus {
+    border-color: var(--evg-gold-primary);
+  }
+  .evg-calc-result-box {
+    background: var(--evg-obsidian-base);
+    border: 1px solid var(--evg-border-hairline);
+    border-radius: 6px;
+    padding: 15px 20px;
+    text-align: center;
+  }
+
   /* Buttons */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
@@ -196,6 +238,10 @@ get_header(); ?>
     border-color: var(--evg-gold-light); 
   }
 
+  @media (max-width: 992px) {
+    .evg-calc-grid { grid-template-columns: 1fr; }
+  }
+
   @media (max-width: 768px) {
     .evg-scale-row {
       padding: 1.25rem 1rem;
@@ -216,9 +262,14 @@ get_header(); ?>
         <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Architectural Integrity', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Diagnostic', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Standards & Scale', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
                 <?php esc_html_e( 'Every Pokémon card entrusted to Elite Vault Grading receives a rigorous, consistent, and transparent assessment. From intake check-in to tamper-evident sonic encapsulation, precision drives our entire operational architecture.', 'evg-platform' ); ?>
             </p>
+            <div style="display: inline-flex; align-items: center; gap: 12px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 6px 16px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
+                <span><?php printf( esc_html__( 'STANDARD BASE RATE: £%.2f / CARD', 'evg-platform' ), $price_standard ); ?></span>
+                <span style="color: #4a4f5c;">|</span>
+                <span><?php printf( esc_html__( 'TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
+            </div>
         </header>
 
         <!-- 2. 7-STEP OPERATIONAL PIPELINE -->
@@ -325,7 +376,32 @@ get_header(); ?>
             </div>
         </section>
 
-        <!-- 4. ELITE VAULT 1-10 GRADING SCALE -->
+        <!-- 4. INTERACTIVE CENTRING DIAGNOSTIC CALCULATOR -->
+        <section class="evg-calc-card">
+            <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Diagnostic Tool', 'evg-platform' ); ?></span>
+            <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Border Centring Diagnostic Estimator', 'evg-platform' ); ?></h3>
+            <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0 0 20px 0;">
+                <?php esc_html_e( 'Input border measurements (in mm or pixels) to calculate ratio splits and check minimum threshold eligibility for Grade 10 or Grade 9.', 'evg-platform' ); ?>
+            </p>
+
+            <div class="evg-calc-grid">
+                <div>
+                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Left / Top Border (A)', 'evg-platform' ); ?></label>
+                    <input type="number" id="calcBorderA" class="evg-calc-input" placeholder="e.g. 3.2" step="0.1" value="3.0">
+                </div>
+                <div>
+                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Right / Bottom Border (B)', 'evg-platform' ); ?></label>
+                    <input type="number" id="calcBorderB" class="evg-calc-input" placeholder="e.g. 2.8" step="0.1" value="3.0">
+                </div>
+                <div class="evg-calc-result-box">
+                    <span class="evg-label-micro" style="margin-bottom: 4px;"><?php esc_html_e( 'CALCULATED RATIO', 'evg-platform' ); ?></span>
+                    <div id="calcRatioOutput" style="font-family: monospace; font-size: 1.3rem; font-weight: 800; color: var(--evg-gold-primary); margin-bottom: 4px;">50 / 50</div>
+                    <span id="calcGradeVerdict" style="font-size: 0.75rem; color: #34c759; font-weight: 700;">✓ GEM MINT 10 CENTRING ELIGIBLE</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ELITE VAULT 1-10 GRADING SCALE -->
         <section style="margin-bottom: 50px;">
             <div class="evg-module">
                 <div style="padding: 30px; border-bottom: 1px solid var(--evg-border-hairline); background: #08080a;">
@@ -341,14 +417,14 @@ get_header(); ?>
                         <div class="evg-grade-badge evg-grade-10">10</div>
                         <div>
                             <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 4px 0;"><?php esc_html_e( 'Grade 10 — Elite Gem', 'evg-platform' ); ?></h3>
-                            <p style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Virtually flawless; exceptional centring, razor sharp corners, clean edges, and an immaculate surface free of manufacturer defects.', 'evg-platform' ); ?></p>
+                            <p style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Virtually flawless; exceptional centring (55/45 or better), razor sharp corners, clean edges, and an immaculate surface free of print defects.', 'evg-platform' ); ?></p>
                         </div>
                     </li>
                     <li class="evg-scale-row">
                         <div class="evg-grade-badge evg-grade-9">9</div>
                         <div>
                             <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 4px 0;"><?php esc_html_e( 'Grade 9 — Mint', 'evg-platform' ); ?></h3>
-                            <p style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Outstanding presentation with only very minor manufacturing nuances or microscopic handling marks visible under high magnification.', 'evg-platform' ); ?></p>
+                            <p style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Outstanding presentation with centring up to 60/40 and only very minor manufacturing nuances or microscopic handling marks visible under high magnification.', 'evg-platform' ); ?></p>
                         </div>
                     </li>
                     <li class="evg-scale-row">
@@ -411,7 +487,7 @@ get_header(); ?>
             </div>
         </section>
 
-        <!-- 5. CALL TO ACTION -->
+        <!-- 6. CALL TO ACTION -->
         <section class="evg-module" style="padding: 40px; text-align: center;">
             <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 10px;"><?php esc_html_e( 'Initialize Protocol', 'evg-platform' ); ?></span>
             <h2 style="color: #ffffff; font-size: 1.4rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Ready to Preserve Your Collection?', 'evg-platform' ); ?></h2>
@@ -430,5 +506,54 @@ get_header(); ?>
 
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var borderA = document.getElementById('calcBorderA');
+    var borderB = document.getElementById('calcBorderB');
+    var ratioOutput = document.getElementById('calcRatioOutput');
+    var verdictOutput = document.getElementById('calcGradeVerdict');
+
+    function calculateCentering() {
+        var a = parseFloat(borderA.value) || 0;
+        var b = parseFloat(borderB.value) || 0;
+
+        if (a <= 0 || b <= 0) {
+            ratioOutput.textContent = '-- / --';
+            verdictOutput.textContent = 'Enter positive measurements';
+            verdictOutput.style.color = '#8e8e93';
+            return;
+        }
+
+        var total = a + b;
+        var percentA = Math.round((a / total) * 100);
+        var percentB = 100 - percentA;
+
+        var higher = Math.max(percentA, percentB);
+        var lower = Math.min(percentA, percentB);
+
+        ratioOutput.textContent = higher + ' / ' + lower;
+
+        if (higher <= 55) {
+            verdictOutput.textContent = '✓ ELITE GEM 10 CENTRING ELIGIBLE (55/45 or better)';
+            verdictOutput.style.color = '#34c759';
+        } else if (higher <= 60) {
+            verdictOutput.textContent = '✓ MINT 9 CENTRING ELIGIBLE (60/40 or better)';
+            verdictOutput.style.color = '#d4af37';
+        } else if (higher <= 70) {
+            verdictOutput.textContent = '⚠ GRADE 8 OR 7 CENTRING THRESHOLD';
+            verdictOutput.style.color = '#ff9f0a';
+        } else {
+            verdictOutput.textContent = '✕ OFF-CENTER / SUB-7 CENTRING THRESHOLD';
+            verdictOutput.style.color = '#ff453a';
+        }
+    }
+
+    if (borderA && borderB) {
+        borderA.addEventListener('input', calculateCentering);
+        borderB.addEventListener('input', calculateCentering);
+    }
+});
+</script>
 
 <?php get_footer(); ?>

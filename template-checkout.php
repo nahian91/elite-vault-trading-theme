@@ -1,8 +1,9 @@
 <?php
 /**
  * Template Name: Payment & Checkout - Executive Tier
- * Description: Fully dynamic, production-ready checkout and payment authorization engine for Elite Vault Grading.
- *              Handles both grading submission consignments and marketplace certified slab acquisitions.
+ * Description: Stripe-exclusive checkout and payment authorization engine for Elite Vault Grading.
+ *              Handles both grading submission consignments and marketplace certified slab acquisitions
+ *              exclusively through Stripe, with polished executive address badge formatting.
  */
 
 // -------------------------------------------------------------------------
@@ -13,12 +14,13 @@ global $wpdb;
 $table_submissions = $wpdb->prefix . 'evg_submissions';
 $table_cards       = $wpdb->prefix . 'evg_cards';
 $table_marketplace = $wpdb->prefix . 'evg_marketplace';
+$table_orders      = $wpdb->prefix . 'evg_orders';
 
-// Fetch Global Settings
-$price_standard_fee = floatval( get_option( 'evg_price_standard', 15.00 ) );
-$price_upgrade_fee  = floatval( get_option( 'evg_price_premium_upgrade', 5.00 ) );
-$support_email      = get_option( 'evg_support_email', 'elitevaultgrading@gmail.com' );
-$accept_submissions = get_option( 'evg_accept_submissions', 'yes' );
+// Fetch Stripe & Global Settings
+$stripe_publishable_key = get_option( 'evg_stripe_publishable_key', 'pk_test_placeholder_key' );
+$price_standard_fee     = floatval( get_option( 'evg_price_standard', 15.00 ) );
+$price_upgrade_fee      = floatval( get_option( 'evg_price_premium_upgrade', 5.00 ) );
+$accept_submissions     = get_option( 'evg_accept_submissions', 'yes' );
 
 // Resolve User & Context
 $current_user_id = get_current_user_id();
@@ -27,10 +29,10 @@ $checkout_type   = isset( $_GET['item_type'] ) && 'marketplace' === sanitize_key
 $submission_id = isset( $_GET['submission_id'] ) ? absint( $_GET['submission_id'] ) : ( isset( $_POST['submission_id'] ) ? absint( $_POST['submission_id'] ) : 0 );
 $item_id       = isset( $_GET['item_id'] ) ? absint( $_GET['item_id'] ) : ( isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0 );
 
-$submission        = null;
-$marketplace_item  = null;
-$cards             = array();
-$checkout_error    = '';
+$submission       = null;
+$marketplace_item = null;
+$cards            = array();
+$checkout_error   = '';
 
 // 1A. Resolve Grading Submission Data
 if ( 'submission' === $checkout_type && $submission_id > 0 ) {
@@ -61,14 +63,14 @@ if ( 'marketplace' === $checkout_type && $item_id > 0 ) {
 }
 
 // -------------------------------------------------------------------------
-// 2. PAYMENT PROCESSING & WORKFLOW ADVANCEMENT
+// 2. PAYMENT PROCESSING (STRIPE CONFIRMATION POST-BACK)
 // -------------------------------------------------------------------------
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'] ) ) {
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_checkout_nonce'] ), 'evg_process_checkout_action' ) ) {
         
-        $gateway      = isset( $_POST['payment_gateway'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_gateway'] ) ) : 'card';
-        $order_notes  = isset( $_POST['order_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['order_notes'] ) ) : '';
-        $terms_agreed = isset( $_POST['terms_agree'] );
+        $order_notes     = isset( $_POST['order_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['order_notes'] ) ) : '';
+        $stripe_token_id = isset( $_POST['stripe_token_id'] ) ? sanitize_text_field( wp_unslash( $_POST['stripe_token_id'] ) ) : '';
+        $terms_agreed    = isset( $_POST['terms_agree'] );
 
         if ( ! $terms_agreed ) {
             $checkout_error = __( 'You must review and accept the Vault Terms & Conditions to complete authorization.', 'evg-platform' );
@@ -93,7 +95,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
                 }
 
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
-                    Elite_Vault_Grading_System::log_activity( "Payment Authorized via {$gateway} for Order #{$submission->order_number}. Stage set to: Cards Awaiting Arrival." );
+                    Elite_Vault_Grading_System::log_activity( "Payment Authorized via Stripe for Order #{$submission->order_number}. Stage set to: Cards Awaiting Arrival." );
                 }
 
                 wp_safe_redirect( add_query_arg( array( 'order' => $submission->id, 'payment' => 'success' ), home_url( '/my-account' ) ) );
@@ -104,7 +106,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
                 $checkout_error = __( 'This item has just sold out and cannot be purchased.', 'evg-platform' );
             } else {
                 // Decrement stock and toggle sold status if quantity is zero
-                $new_stock = max( 0, intval( $marketplace_item->stock_quantity ) - 1 );
+                $new_stock  = max( 0, intval( $marketplace_item->stock_quantity ) - 1 );
                 $new_status = ( 0 === $new_stock ) ? 'Sold' : 'Available';
 
                 $wpdb->update(
@@ -118,8 +120,25 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
                     array( '%d' )
                 );
 
+                // Insert into marketplace purchases ledger
+                $order_ref = 'MKT-' . date( 'Y' ) . '-' . strtoupper( wp_generate_password( 5, false, false ) );
+                $wpdb->insert(
+                    $table_orders,
+                    array(
+                        'order_number'    => $order_ref,
+                        'customer_id'     => $current_user_id,
+                        'card_id'         => $marketplace_item->card_id,
+                        'amount_paid'     => floatval( $marketplace_item->price ),
+                        'payment_status'  => 'Paid',
+                        'shipping_status' => 'Processing',
+                        'tracking_number' => '',
+                        'purchased_at'    => current_time( 'mysql' ),
+                    ),
+                    array( '%s', '%d', '%d', '%f', '%s', '%s', '%s', '%s' )
+                );
+
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
-                    Elite_Vault_Grading_System::log_activity( "Marketplace item #{$marketplace_item->id} ({$marketplace_item->display_title}) purchased via {$gateway}." );
+                    Elite_Vault_Grading_System::log_activity( "Marketplace item #{$marketplace_item->id} ({$marketplace_item->display_title}) purchased via Stripe by User #{$current_user_id}." );
                 }
 
                 wp_safe_redirect( add_query_arg( array( 'purchase' => 'success', 'item_id' => $marketplace_item->id ), home_url( '/my-account' ) ) );
@@ -163,8 +182,11 @@ $street_address = $target_user_id ? get_user_meta( $target_user_id, 'evg_street_
 $town_city      = $target_user_id ? get_user_meta( $target_user_id, 'evg_town_city', true ) : '';
 $county         = $target_user_id ? get_user_meta( $target_user_id, 'evg_county', true ) : '';
 $postcode       = $target_user_id ? get_user_meta( $target_user_id, 'evg_postcode', true ) : '';
+$mobile_number  = $target_user_id ? get_user_meta( $target_user_id, 'evg_mobile_number', true ) : '';
 
 get_header(); ?>
+
+<script src="https://js.stripe.com/v3/"></script>
 
 <style>
   :root {
@@ -262,28 +284,78 @@ get_header(); ?>
   }
   .evg-form-control::placeholder { color: #4A4F5C; font-weight: 300; }
 
-  .evg-payment-cell {
-    background: var(--evg-obsidian-elevated);
-    border: 1px solid #242428;
+  /* Polished Luxury Address Card */
+  .evg-address-card {
+    background: linear-gradient(145deg, #09090b 0%, #0d0d11 100%);
+    border: 1px solid #222228;
+    border-left: 3px solid var(--evg-gold-primary);
     border-radius: 6px;
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 20px 22px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  }
+  .evg-address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--evg-border-hairline);
+  }
+  .evg-address-name {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    user-select: none;
+    gap: 8px;
   }
-  .evg-payment-cell:hover {
-    background: #18181c;
-    border-color: var(--evg-border-gold-faint);
+  .evg-address-badge {
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid var(--evg-border-gold-faint);
+    color: var(--evg-gold-primary);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-family: monospace;
   }
-  .evg-payment-cell:has(input:checked) {
-    background: rgba(212, 175, 55, 0.08);
-    border-color: var(--evg-gold-primary);
+  .evg-address-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+  .evg-address-line {
+    color: var(--evg-text-ash);
+    margin: 0;
+  }
+  .evg-address-postcode {
+    color: var(--evg-gold-light);
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 0.92rem;
+    letter-spacing: 0.05em;
   }
 
-  .evg-radio, .evg-checkbox {
+  /* Stripe Card Element Box */
+  #evg-stripe-card-element {
+    background: var(--evg-obsidian-base);
+    border: 1px solid var(--evg-border-hairline);
+    border-radius: 6px;
+    padding: 16px 14px;
+    transition: border-color 0.2s ease;
+  }
+  #evg-stripe-card-element.StripeElement--focus {
+    border-color: var(--evg-gold-primary);
+    box-shadow: 0 0 0 1px var(--evg-gold-primary);
+  }
+
+  .evg-checkbox {
     appearance: none;
     -webkit-appearance: none;
     background-color: var(--evg-obsidian-base); 
@@ -293,26 +365,6 @@ get_header(); ?>
     place-content: center; 
     cursor: pointer; 
     transition: all 0.2s ease;
-  }
-  .evg-radio {
-    width: 1.2em; 
-    height: 1.2em; 
-    border: 1px solid #2a2d35; 
-    border-radius: 50%;
-  }
-  .evg-radio::before {
-    content: ""; 
-    width: 0.55em; 
-    height: 0.55em; 
-    transform: scale(0); 
-    transition: 120ms transform ease-in-out;
-    border-radius: 50%; 
-    background-color: var(--evg-gold-primary);
-  }
-  .evg-radio:checked { border-color: var(--evg-gold-primary); }
-  .evg-radio:checked::before { transform: scale(1); }
-
-  .evg-checkbox {
     width: 1.15em; 
     height: 1.15em; 
     border: 1px solid #2a2d35; 
@@ -360,36 +412,18 @@ get_header(); ?>
     text-decoration: none; 
     cursor: pointer;
   }
-  .btn-evg-executive:hover { 
+  .btn-evg-executive:hover:not(:disabled) { 
     background: var(--evg-gold-light); 
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
   }
-  
-  .btn-evg-outline {
-    background: transparent; 
-    color: var(--evg-gold-primary) !important;
-    font-size: 0.75rem; 
-    font-weight: 700; 
-    letter-spacing: 0.1em; 
-    text-transform: uppercase;
-    border: 1px solid var(--evg-gold-primary); 
-    border-radius: 4px; 
-    padding: 0.75rem 1.5rem; 
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: center;
-    transition: all 0.2s ease; 
-    cursor: pointer; 
-    text-decoration: none;
-  }
-  .btn-evg-outline:hover { 
-    background: rgba(212, 175, 55, 0.1); 
-    color: var(--evg-gold-light) !important; 
-    border-color: var(--evg-gold-light); 
+  .btn-evg-executive:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   @media (max-width: 992px) {
     .evg-checkout-grid { grid-template-columns: 1fr; }
+    .evg-address-details { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -398,10 +432,10 @@ get_header(); ?>
 
         <!-- 1. EDITORIAL HEADER -->
         <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
-            <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Stage 03 // Finalization', 'evg-platform' ); ?></span>
-            <h1 class="evg-title-xl"><?php esc_html_e( 'Secure Order', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Authorization', 'evg-platform' ); ?></span></h1>
+            <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Stage 03 // Stripe Checkout', 'evg-platform' ); ?></span>
+            <h1 class="evg-title-xl"><?php esc_html_e( 'Secure Stripe', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Authorization', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'Review your item manifest, confirm your UK return logistics coordinates, and finalize authorization via our secure 256-bit encrypted gateway.', 'evg-platform' ); ?>
+                <?php esc_html_e( 'Review your manifest, verify your UK delivery address, and complete authorization via our Stripe gateway.', 'evg-platform' ); ?>
             </p>
         </header>
 
@@ -411,24 +445,23 @@ get_header(); ?>
                 <span class="evg-label-micro" style="color: #ff453a; margin-bottom: 6px;"><?php esc_html_e( 'INTAKE CAPACITY REACHED', 'evg-platform' ); ?></span>
                 <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'GRADING CURRENTLY SOLD OUT', 'evg-platform' ); ?></h3>
                 <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0;">
-                    <?php esc_html_e( 'We have reached maximum vault capacity for the current drop. Existing submissions can complete payment below.', 'evg-platform' ); ?>
+                    <?php esc_html_e( 'We have reached maximum capacity for the current drop. Active allocations can complete payment below.', 'evg-platform' ); ?>
                 </p>
             </div>
         <?php endif; ?>
 
         <!-- Checkout Error Notice -->
-        <?php if ( ! empty( $checkout_error ) ) : ?>
-            <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 30px;">
-                <span style="color: #ff453a; font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Authorization Error', 'evg-platform' ); ?></span>
-                <p style="color: #e5e5ea; font-size: 0.85rem; margin: 0;"><?php echo esc_html( $checkout_error ); ?></p>
-            </div>
-        <?php endif; ?>
+        <div id="stripe-error-card" style="<?php echo empty( $checkout_error ) ? 'display:none;' : ''; ?> background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 30px;">
+            <span style="color: #ff453a; font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Authorization Error', 'evg-platform' ); ?></span>
+            <p id="stripe-error-message" style="color: #e5e5ea; font-size: 0.85rem; margin: 0;"><?php echo esc_html( $checkout_error ); ?></p>
+        </div>
 
-        <form action="<?php echo esc_url( get_permalink() ); ?>" method="post">
+        <form action="<?php echo esc_url( get_permalink() ); ?>" method="post" id="evg-stripe-payment-form">
             <?php wp_nonce_field( 'evg_process_checkout_action', 'evg_checkout_nonce' ); ?>
             <input type="hidden" name="submission_id" value="<?php echo esc_attr( $submission ? $submission->id : 0 ); ?>">
             <input type="hidden" name="item_id" value="<?php echo esc_attr( $marketplace_item ? $marketplace_item->id : 0 ); ?>">
             <input type="hidden" name="item_type" value="<?php echo esc_attr( $checkout_type ); ?>">
+            <input type="hidden" name="stripe_token_id" id="stripe_token_id" value="">
 
             <!-- 2. CHECKOUT GRID -->
             <div class="evg-checkout-grid">
@@ -503,19 +536,49 @@ get_header(); ?>
                             </div>
                         </div>
 
-                        <!-- Return Logistics Coordinates -->
+                        <!-- Return Logistics Coordinates (Nicely Formatted) -->
                         <div style="margin-bottom: 30px;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
                                 <span class="evg-label-micro" style="color: #ffffff; margin: 0;"><?php esc_html_e( 'UK Logistics Routing (Destination Address)', 'evg-platform' ); ?></span>
                                 <a href="<?php echo esc_url( home_url( '/my-account' ) ); ?>" style="color: var(--evg-gold-primary); text-decoration: none; font-size: 0.68rem; font-family: monospace; font-weight: 700;">
-                                    <?php esc_html_e( 'EDIT ADDRESS', 'evg-platform' ); ?>
+                                    <?php esc_html_e( 'EDIT ADDRESS →', 'evg-platform' ); ?>
                                 </a>
                             </div>
-                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 18px; font-size: 0.85rem; line-height: 1.5;">
-                                <p style="color: #ffffff; font-weight: 700; margin: 0 0 4px 0;"><?php echo esc_html( $customer_name ); ?></p>
-                                <p style="color: var(--evg-text-ash); margin: 0 0 2px 0;"><?php echo esc_html( trim( $house_number . ' ' . $street_address ) ? trim( $house_number . ' ' . $street_address ) : __( 'Street address unverified', 'evg-platform' ) ); ?></p>
-                                <p style="color: var(--evg-text-ash); margin: 0 0 2px 0;"><?php echo esc_html( trim( $town_city . ', ' . $county, ', ' ) ); ?></p>
-                                <p style="color: var(--evg-gold-primary); font-weight: 700; font-family: monospace; margin: 0;"><?php echo esc_html( $postcode ? $postcode . ', United Kingdom' : __( 'UK Postal Code Required', 'evg-platform' ) ); ?></p>
+                            
+                            <div class="evg-address-card">
+                                <div class="evg-address-header">
+                                    <div class="evg-address-name">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                        </svg>
+                                        <span><?php echo esc_html( $customer_name ); ?></span>
+                                    </div>
+                                    <span class="evg-address-badge"><?php esc_html_e( 'UK MAINLAND', 'evg-platform' ); ?></span>
+                                </div>
+                                <div class="evg-address-details">
+                                    <div>
+                                        <p class="evg-address-line" style="color: #ffffff; font-weight: 600;">
+                                            <?php echo esc_html( trim( $house_number . ' ' . $street_address ) ? trim( $house_number . ' ' . $street_address ) : __( 'Street address unverified', 'evg-platform' ) ); ?>
+                                        </p>
+                                        <p class="evg-address-line">
+                                            <?php echo esc_html( trim( $town_city . ( $county ? ', ' . $county : '' ) ) ); ?>
+                                        </p>
+                                        <p class="evg-address-line" style="font-size: 0.76rem; color: #5a5f6e; margin-top: 4px;">
+                                            United Kingdom
+                                        </p>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; text-align: right;">
+                                        <div>
+                                            <span style="font-size: 0.65rem; color: var(--evg-text-ash); text-transform: uppercase; letter-spacing: 0.1em; display: block;"><?php esc_html_e( 'POSTAL CODE', 'evg-platform' ); ?></span>
+                                            <span class="evg-address-postcode"><?php echo esc_html( $postcode ? strtoupper( $postcode ) : 'NOT SET' ); ?></span>
+                                        </div>
+                                        <?php if ( ! empty( $mobile_number ) ) : ?>
+                                            <span style="font-size: 0.75rem; color: var(--evg-text-ash); font-family: monospace;">
+                                                📞 <?php echo esc_html( $mobile_number ); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -528,7 +591,7 @@ get_header(); ?>
                     </div>
                 </div>
 
-                <!-- RIGHT: FINANCIAL LEDGER & CRYPTOGRAPHIC GATEWAY -->
+                <!-- RIGHT: FINANCIAL LEDGER & STRIPE PAYMENT -->
                 <div style="display: flex; flex-direction: column; gap: 24px;">
                     
                     <!-- Financial Ledger -->
@@ -570,46 +633,19 @@ get_header(); ?>
                         </div>
                     </div>
 
-                    <!-- Payment Gateway -->
+                    <!-- Stripe Card Element Module -->
                     <div class="evg-module" style="padding: 35px 30px;">
-                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px;">
-                            <?php esc_html_e( 'Payment Gateway', 'evg-platform' ); ?>
-                        </h2>
-
-                        <!-- Gateway Selector -->
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                            <label class="evg-payment-cell">
-                                <input class="evg-radio" type="radio" name="payment_gateway" value="card" checked>
-                                <div>
-                                    <span style="display: block; color: #ffffff; font-size: 0.9rem; font-weight: 600; margin-bottom: 2px;"><?php esc_html_e( 'Debit / Credit Card', 'evg-platform' ); ?></span>
-                                    <span style="color: var(--evg-text-ash); font-size: 0.75rem;"><?php esc_html_e( 'Visa, Mastercard, Maestro, American Express', 'evg-platform' ); ?></span>
-                                </div>
-                            </label>
-
-                            <label class="evg-payment-cell">
-                                <input class="evg-radio" type="radio" name="payment_gateway" value="apple_pay">
-                                <div>
-                                    <span style="display: block; color: #ffffff; font-size: 0.9rem; font-weight: 600; margin-bottom: 2px;"><?php esc_html_e( 'Apple Pay / Google Pay', 'evg-platform' ); ?></span>
-                                    <span style="color: var(--evg-text-ash); font-size: 0.75rem;"><?php esc_html_e( 'Fast 1-touch biometric checkout', 'evg-platform' ); ?></span>
-                                </div>
-                            </label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px; margin-bottom: 20px;">
+                            <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0;">
+                                <?php esc_html_e( 'Stripe Secure Payment', 'evg-platform' ); ?>
+                            </h2>
+                            <span style="color: var(--evg-gold-primary); font-size: 0.75rem; font-family: monospace; font-weight: 700;">STRIPE VAULT</span>
                         </div>
 
-                        <!-- Card Entry Form -->
-                        <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px; margin-bottom: 25px;">
-                            <div style="margin-bottom: 15px;">
-                                <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Card Number', 'evg-platform' ); ?></label>
-                                <input type="text" class="evg-form-control" placeholder="•••• •••• •••• ••••" autocomplete="cc-number">
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Expiry Date', 'evg-platform' ); ?></label>
-                                    <input type="text" class="evg-form-control" placeholder="MM / YY" autocomplete="cc-exp">
-                                </div>
-                                <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Security Code', 'evg-platform' ); ?></label>
-                                    <input type="password" class="evg-form-control" placeholder="CVC" maxlength="4" autocomplete="cc-csc">
-                                </div>
+                        <div style="margin-bottom: 20px;">
+                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Credit / Debit Card Details', 'evg-platform' ); ?></label>
+                            <div id="evg-stripe-card-element">
+                                <!-- Stripe Elements mounts card input here -->
                             </div>
                         </div>
 
@@ -622,8 +658,8 @@ get_header(); ?>
                         </div>
 
                         <!-- Authorization Button -->
-                        <button type="submit" class="btn-evg-executive" style="margin-bottom: 20px;">
-                            <?php printf( esc_html__( 'Authorize £%.2f', 'evg-platform' ), $total_payable ); ?>
+                        <button type="submit" id="evg-stripe-submit-btn" class="btn-evg-executive" style="margin-bottom: 20px;">
+                            <span id="btn-label-text"><?php printf( esc_html__( 'Authorize £%.2f with Stripe', 'evg-platform' ), $total_payable ); ?></span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;">
                                 <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                             </svg>
@@ -631,7 +667,7 @@ get_header(); ?>
 
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--evg-text-ash); font-size: 0.7rem; font-family: monospace;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            <span><?php esc_html_e( '256-BIT TLS ENCRYPTED VAULT SESSION', 'evg-platform' ); ?></span>
+                            <span><?php esc_html_e( '256-BIT ENCRYPTED STRIPE SSL GATEWAY', 'evg-platform' ); ?></span>
                         </div>
                     </div>
 
@@ -650,7 +686,7 @@ get_header(); ?>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; text-align: center;">
                 <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 25px 20px;">
                     <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 8px;">01</span>
-                    <p style="color: #ffffff; font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Payment is verified via secure 256-bit encrypted gateway handshake.', 'evg-platform' ); ?></p>
+                    <p style="color: #ffffff; font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Payment is verified via secure 256-bit encrypted Stripe handshake.', 'evg-platform' ); ?></p>
                 </div>
                 <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 25px 20px;">
                     <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 8px;">02</span>
@@ -669,5 +705,67 @@ get_header(); ?>
 
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var stripeKey = '<?php echo esc_js( $stripe_publishable_key ); ?>';
+    var stripe = Stripe(stripeKey);
+    var elements = stripe.elements();
+
+    var style = {
+        base: {
+            color: '#ffffff',
+            fontFamily: '"Montserrat", sans-serif',
+            fontSmoothing: 'antialiased',
+            fontSize: '15px',
+            '::placeholder': {
+                color: '#4a4f5c'
+            }
+        },
+        invalid: {
+            color: '#ff453a',
+            iconColor: '#ff453a'
+        }
+    };
+
+    var cardElement = elements.create('card', { style: style });
+    cardElement.mount('#evg-stripe-card-element');
+
+    var form = document.getElementById('evg-stripe-payment-form');
+    var submitBtn = document.getElementById('evg-stripe-submit-btn');
+    var btnLabel = document.getElementById('btn-label-text');
+    var errorCard = document.getElementById('stripe-error-card');
+    var errorMsg = document.getElementById('stripe-error-message');
+
+    cardElement.on('change', function(event) {
+        if (event.error) {
+            errorCard.style.display = 'block';
+            errorMsg.textContent = event.error.message;
+        } else {
+            errorCard.style.display = 'none';
+            errorMsg.textContent = '';
+        }
+    });
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        submitBtn.disabled = true;
+        btnLabel.textContent = 'Authorizing with Stripe...';
+
+        stripe.createToken(cardElement).then(function(result) {
+            if (result.error) {
+                errorCard.style.display = 'block';
+                errorMsg.textContent = result.error.message;
+                submitBtn.disabled = false;
+                btnLabel.textContent = 'Authorize &pound;<?php echo esc_js( number_format( $total_payable, 2 ) ); ?> with Stripe';
+            } else {
+                document.getElementById('stripe_token_id').value = result.token.id;
+                form.submit();
+            }
+        });
+    });
+});
+</script>
 
 <?php get_footer(); ?>
