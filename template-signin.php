@@ -72,7 +72,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_login_nonce'] )
                 } elseif ( ! empty( $redirect_to ) ) {
                     wp_safe_redirect( $redirect_to );
                 } else {
-                    wp_safe_redirect( home_url( '/dashboard' ) );
+                    wp_safe_redirect( home_url( '/my-account' ) );
                 }
                 exit;
             }
@@ -389,7 +389,7 @@ get_header(); ?>
 
                 <!-- SUBMIT BUTTON -->
                 <button type="submit" name="wp-submit" class="btn-evg-executive" style="margin-bottom: 25px;">
-                    <?php esc_html_e( 'Authenticate Session', 'evg-platform' ); ?>
+                    <?php esc_html_e( 'Sign In', 'evg-platform' ); ?>
                 </button>
 
                 <!-- SECURITY BADGE CALLOUT -->
@@ -397,7 +397,6 @@ get_header(); ?>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-muted)" stroke-width="2">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    <span><?php esc_html_e( '256-BIT ENCRYPTED VAULT LOGIN', 'evg-platform' ); ?></span>
                 </div>
 
                 <!-- SIGN UP REDIRECT -->
@@ -408,9 +407,9 @@ get_header(); ?>
                 }
                 ?>
                 <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
-                    <span style="color: var(--evg-text-ash); font-size: 0.85rem;"><?php esc_html_e( 'Lacking active credentials?', 'evg-platform' ); ?></span>
+                    
                     <a href="<?php echo esc_url( $register_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
-                        <?php esc_html_e( 'Establish Account →', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Create Account →', 'evg-platform' ); ?>
                     </a>
                 </div>
 

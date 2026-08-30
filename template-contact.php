@@ -14,7 +14,7 @@ $contact_message = '';
 $form_data       = array();
 
 // Fetch Dynamic Admin Settings Configured in inc/settings.php
-$support_email   = get_option( 'evg_support_email', 'elitevaultgrading@gmail.com' );
+$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 $turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce'] ) ) {
@@ -332,7 +332,7 @@ get_header(); ?>
                     </div>
 
                     <button type="submit" class="btn-evg-executive">
-                        <?php esc_html_e( 'Transmit Secure Enquiry', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Submit Enquiry', 'evg-platform' ); ?>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;">
                             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                         </svg>

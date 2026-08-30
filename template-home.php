@@ -535,8 +535,8 @@ get_header(); ?>
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                         </svg>
                         <div>
-                            <h4 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: #ffffff;"><?php echo esc_html( $turnaround_time ); ?></h4>
-                            <p style="font-size: 0.72rem; margin: 0; color: var(--evg-text-ash); font-weight: 700;"><?php esc_html_e( 'EST. TURNAROUND', 'evg-platform' ); ?></p>
+                            <h4 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: #ffffff;">FAST</h4>
+                            <p style="font-size: 0.72rem; margin: 0; color: var(--evg-text-ash); font-weight: 700;">Turnaround Times</p>
                         </div>
                     </div>
                 </div>

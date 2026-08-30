@@ -50,7 +50,7 @@ if ( strpos( $raw_email, '@' ) !== false ) {
 }
 
 // Fetch Dynamic Admin Settings
-$support_email   = get_option( 'evg_support_email', 'elitevaultgrading@gmail.com' );
+$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 $turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
 
 get_header(); ?>
