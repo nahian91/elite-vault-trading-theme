@@ -2,13 +2,13 @@
 /**
  * Template Name: Grading Process & Scale - Executive Tier
  * Description: Clean, high-performance grading architecture template for Elite Vault Grading.
- *              Features dynamic turnaround metrics, the 7-step operational pipeline, 
+ *              Features dynamic turnaround metrics (5-10 business days), the 7-step operational pipeline, 
  *              the 4 diagnostic pillars with interactive calculators, the strict 1–10 whole-number scale,
- *              and an ultra-premium dark luxury aesthetic.
+ *              updated £9.99 base pricing, and an ultra-premium dark luxury aesthetic.
  */
 
-$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
-$price_standard  = floatval( get_option( 'evg_price_standard', 15.00 ) );
+$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$price_standard  = floatval( get_option( 'evg_price_standard', 9.99 ) );
 
 get_header(); ?>
 
@@ -495,11 +495,11 @@ get_header(); ?>
                 <?php esc_html_e( 'Experience verified assessment standards, tamper-evident sonic encapsulation, and transparent stage tracking.', 'evg-platform' ); ?>
             </p>
             <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
+                <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-executive">
                     <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
                 </a>
-                <a href="<?php echo esc_url( home_url( '/pre-order' ) ); ?>" class="btn-evg-outline">
-                    <?php esc_html_e( 'First Drop Pre-Order', 'evg-platform' ); ?>
+                <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
+                    <?php esc_html_e( 'Explore Marketplace', 'evg-platform' ); ?>
                 </a>
             </div>
         </section>
@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (borderA && borderB) {
         borderA.addEventListener('input', calculateCentering);
-        borderB.addEventListener('input', calculateCentering);
+        borderB.addEventListener('input', calculateCentenering || calculateCentering);
     }
 });
 </script>

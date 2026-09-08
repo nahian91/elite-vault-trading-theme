@@ -3,6 +3,7 @@
  * Template Name: FAQ - Executive Tier
  * Description: Dynamic FAQ & Knowledge Base portal for Elite Vault Grading.
  *              Features category-segmented collapsible accordions, dynamic admin settings routing,
+ *              £9.99 base pricing, 5-10 business day turnaround compliance, £0.99 portfolio unlock FAQ,
  *              accessibility hooks, and a luxury dark UI without background grid lines.
  *
  * @package EliteVaultGrading
@@ -10,7 +11,9 @@
 
 // Fetch Dynamic Admin Settings
 $support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
-$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
+$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$price_standard  = floatval( get_option( 'evg_price_standard', 9.99 ) );
+$unlock_fee      = floatval( get_option( 'evg_portfolio_unlock_fee', 0.99 ) );
 
 get_header(); ?>
 
@@ -179,7 +182,7 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Knowledge Base Dashboard', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Operational', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Intel & FAQs', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'Access standard operating procedures regarding our grading process, submission guidelines, facility turnaround schedules, and protective encapsulation.', 'evg-platform' ); ?>
+                <?php printf( esc_html__( 'Access standard operating procedures regarding our £%.2f base grading process, submission guidelines, %s turnaround schedules, and protective encapsulation.', 'evg-platform' ), $price_standard, esc_html( $turnaround_time ) ); ?>
             </p>
         </header>
 
@@ -196,7 +199,7 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Elite Vault Grading is a professional Pokémon card grading company dedicated to providing accurate, consistent and transparent grading. Every card is carefully inspected by our experienced grading team before being securely encapsulated in a premium protective slab designed to preserve and showcase your collection.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'Elite Vault Grading is a dedicated UK Pokémon card grading service offering professional 1-10 certification starting from £%.2f. Every card is carefully inspected by our experienced grading team across four core diagnostic sub-grades before being securely encapsulated in a premium sonic-sealed protective slab.', 'evg-platform' ), $price_standard ); ?>
                     </div>
                 </div>
 
@@ -206,52 +209,52 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'We currently specialise in grading Pokémon Trading Card Game cards, including both English and Japanese releases.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'We specialise exclusively in Pokémon Trading Card Game cards, supporting both English and Japanese releases spanning vintage Base Set era to modern releases.', 'evg-platform' ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Why should I have my cards graded?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'Why should I have my cards graded with EVG?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Professional grading helps verify authenticity, assess condition, protect your card for years to come and can increase buyer confidence when selling or trading.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'EVG provides accessible £%.2f grading, dependable %s turnaround times, full microscopic defect telemetry, and sonic tamper-evident encapsulation to preserve your cards and provide verifiable secondary-market trust.', 'evg-platform' ), $price_standard, esc_html( $turnaround_time ) ); ?>
                     </div>
                 </div>
             </div>
 
             <!-- 02 // SUBMITTING CARDS -->
             <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '02 // Submission Protocols', 'evg-platform' ); ?></span>
+                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '02 // Submission Protocols & Pricing', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'How do I submit my cards?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'How much does grading cost?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Choose your preferred grading service, complete the online submission form and package your cards securely before posting them to us. Once your submission has been received, we\'ll keep you updated throughout the grading process.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'Standard grading begins at £%.2f per card unit with our Standard Label. Optional custom label editions (such as Custom Gold Foil or Vault Door designs) are available for +£2.99 per card. Insured tracked return shipping is calculated at checkout.', 'evg-platform' ), $price_standard ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Is there a minimum or maximum number of cards I can submit?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'How do I submit cards for grading?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'No. Whether you\'re submitting a single card or an entire collection, we\'d be delighted to grade your cards.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Visit our Submit page, declare each specimen with card name, set, and card number, select your label style, and complete checkout. You will receive an automated packing slip to include inside your parcel when dispatching to our UK facility.', 'evg-platform' ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Can I submit cards for someone else?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'Is there a minimum or maximum card submission limit?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Yes. Collectors, retailers and businesses are all welcome to submit cards on behalf of friends, customers or clients.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'There is no minimum—single-card submissions are welcome. Online order batches support up to 50 cards per submission parcel. For larger bulk submissions (50+ cards), please open a ticket via our Contact portal.', 'evg-platform' ); ?>
                     </div>
                 </div>
 
@@ -261,12 +264,12 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Not at the moment. Elite Vault Grading is currently accepting submissions from customers within the UK only. As we continue to grow, we plan to introduce international submissions in the near future.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Currently, Elite Vault Grading operates exclusively for collectors residing in the United Kingdom. All return logistics are routed via Royal Mail Special Delivery / Tracked 24.', 'evg-platform' ); ?>
                     </div>
                 </div>
             </div>
 
-            <!-- 03 // PACKAGING & SHIPPING -->
+            <!-- 03 // PACKAGING & LOGISTICS -->
             <div style="margin-bottom: 40px;">
                 <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '03 // Packaging & Logistics', 'evg-platform' ); ?></span>
                 
@@ -276,69 +279,59 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'We recommend placing each card in a penny sleeve followed by a semi-rigid card holder. Secure your cards carefully so they cannot move during transit and use a sturdy box with suitable padding to protect your submission. Please avoid sending cards in screw-down holders unless requested.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Place each specimen inside a fresh penny sleeve, then insert into a semi-rigid card saver (e.g. Cardboard Gold / Ultra PRO Semi-Rigid). Sandwich your cards between cardboard pieces secured with elastic bands, and ship in a padded bubble mailer or sturdy cardboard box. Avoid top-loaders taped over the opening or screw-down cases.', 'evg-platform' ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Should I insure my package?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'What courier should I use to send cards?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Yes. We strongly recommend using a tracked and insured postal service that reflects the value of your submission.', 'evg-platform' ); ?>
-                    </div>
-                </div>
-
-                <div class="evg-faq-item">
-                    <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'What happens once my cards arrive?', 'evg-platform' ); ?></span>
-                        <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="evg-faq-body">
-                        <?php esc_html_e( 'Once your submission reaches us, it will be checked into our system and you\'ll receive confirmation that your cards have been safely received and logged into our facility.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'We recommend Royal Mail Special Delivery Guaranteed by 1pm, which provides full end-to-end barcode tracking and up to £500-£2,500 postal insurance coverage.', 'evg-platform' ); ?>
                     </div>
                 </div>
             </div>
 
-            <!-- 04 // GRADING DIAGNOSTICS -->
+            <!-- 04 // DIAGNOSTIC STANDARDS & FAULT PORTFOLIO -->
             <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '04 // Diagnostic Criteria & Standards', 'evg-platform' ); ?></span>
+                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '04 // Diagnostic Criteria & Damage Telemetry', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'How are cards graded?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'How does the EVG 1-10 integer grading scale work?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Every card is carefully assessed using our grading standards, taking into account: Centring, Corners, Edges, Surface, and Overall eye appeal on a strict 1-10 whole-number scale (no half grades or 9.5s). Each of these factors contributes towards the final grade awarded.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'EVG enforces a strict whole-number 1-10 integer grading standard (no confusing 9.5 or half points). Every specimen is evaluated across 4 sub-pillars: Centring, Corners, Edges, and Surface.', 'evg-platform' ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Do you check cards for authenticity?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'What is the Microscopic Damage Portfolio and £0.99 Unlock Fee?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Yes. Every card is inspected for authenticity before grading begins. If we believe a card to be counterfeit or significantly altered, it will not receive a numerical grade.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'When looking up any certified card on our slab verification registry, the public can inspect up to 3 defect preview scans free of charge. For complete transparency, secondary buyers or owners can pay a one-time micro-fee of £%.2f to unlock the entire high-resolution flaw portfolio showing all defect angles, coordinate mapping, and sub-score rationale.', 'evg-platform' ), $unlock_fee ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Can altered or restored cards be graded?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'Do you verify card authenticity?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Cards that have been trimmed, recoloured, pressed, cleaned or otherwise altered may not qualify for a standard numerical grade. Where alterations are identified, an appropriate designation may be applied.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Yes. Our intake includes microscopic rosette pattern verification, card stock core checks, foil reflectivity diagnostics, and light tests to ensure only genuine cards receive numeric encapsulation.', 'evg-platform' ); ?>
                     </div>
                 </div>
             </div>
 
             <!-- 05 // TURNAROUND TIMES -->
             <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '05 // Facility Turnaround Schedules', 'evg-platform' ); ?></span>
+                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '05 // Turnaround & Facility Schedules', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
@@ -346,24 +339,24 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php printf( esc_html__( 'Turnaround times depend on current intake volumes. Our active standard estimate is currently %s, which begins once your submission has been checked into our grading desk.', 'evg-platform' ), esc_html( $turnaround_time ) ); ?>
+                        <?php printf( esc_html__( 'Our standard turnaround is %s, counted from the day your cards are checked into our laboratory desk until they complete final QC encapsulation.', 'evg-platform' ), esc_html( $turnaround_time ) ); ?>
                     </div>
                 </div>
 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Can turnaround times change?', 'evg-platform' ); ?></span>
+                        <span><?php esc_html_e( 'Can I track my submission online?', 'evg-platform' ); ?></span>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Occasionally. During high-volume release drops turnaround times may fluctuate slightly, but we always aim to complete every submission efficiently without compromising grading accuracy.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Yes. Log into your account dashboard anytime to view real-time 9-stage pipeline progression telemetry—from package arrival and authentication to sonic encapsulation and return Royal Mail dispatch.', 'evg-platform' ); ?>
                     </div>
                 </div>
             </div>
 
             <!-- 06 // SLABS & ENCAPSULATION -->
             <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '06 // Encapsulation & Slabs', 'evg-platform' ); ?></span>
+                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '06 // Slabs & Encapsulation', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false">
@@ -371,7 +364,7 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Our slabs are manufactured using high-quality, ultra-clear acoustic sealed polymers designed to provide UV-resistant protection while offering exceptional clarity to showcase your card.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Our slabs are engineered from high-clarity optical-grade polycarbonate with integrated UV inhibitors to protect holo foils against fading while sealing out dust and moisture.', 'evg-platform' ); ?>
                     </div>
                 </div>
 
@@ -381,57 +374,7 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div class="evg-faq-body">
-                        <?php esc_html_e( 'Yes. Every Elite Vault slab is sonically sealed and designed to show irreversible evidence if anyone attempts to open or tamper with it, guaranteeing the integrity of the certificate.', 'evg-platform' ); ?>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 07 // RETURNS & LOGISTICS -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '07 // Return Dispatch & Logistics', 'evg-platform' ); ?></span>
-                
-                <div class="evg-faq-item">
-                    <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'How will my cards be returned?', 'evg-platform' ); ?></span>
-                        <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="evg-faq-body">
-                        <?php esc_html_e( 'Once your order completes encapsulation and final QC, your slabs are packaged in protective sleeves, padded secure boxes, and dispatched via Royal Mail Tracked / Special Delivery.', 'evg-platform' ); ?>
-                    </div>
-                </div>
-
-                <div class="evg-faq-item">
-                    <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Can I collect my order in person?', 'evg-platform' ); ?></span>
-                        <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="evg-faq-body">
-                        <?php esc_html_e( 'Collection may be arranged under special VIP circumstances. Please contact our support team before placing your submission if you wish to discuss in-person handovers.', 'evg-platform' ); ?>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 08 // FINANCIAL & REGRADES -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '08 // Regrades, Reviews & Liability', 'evg-platform' ); ?></span>
-                
-                <div class="evg-faq-item">
-                    <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Can I submit a card that has already been graded?', 'evg-platform' ); ?></span>
-                        <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="evg-faq-body">
-                        <?php esc_html_e( 'Yes. Cards previously graded by third-party companies or by EVG can be submitted for crossover review or re-grading under standard submission terms.', 'evg-platform' ); ?>
-                    </div>
-                </div>
-
-                <div class="evg-faq-item">
-                    <button class="evg-faq-button" type="button" aria-expanded="false">
-                        <span><?php esc_html_e( 'Are my cards insured while in your facility?', 'evg-platform' ); ?></span>
-                        <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="evg-faq-body">
-                        <?php esc_html_e( 'Yes. All cards in our care are housed in monitored, vault-secured facilities. Full liability boundaries and declared value compensation limits are outlined in our Terms & Conditions.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Yes. Every slab undergoes high-frequency ultrasonic welding. Any attempt to force or split the casing causes permanent, visible stress marks, guaranteeing the slab certification cannot be manipulated.', 'evg-platform' ); ?>
                     </div>
                 </div>
             </div>

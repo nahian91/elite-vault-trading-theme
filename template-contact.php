@@ -3,7 +3,7 @@
  * Template Name: Contact Us - Executive Tier
  * Description: Fully dynamic, production-ready contact portal for Elite Vault Grading.
  *              Features server-side enquiry dispatch, database feedback logging, dynamic admin settings routing,
- *              audit logging, and a clean luxury dark UI without background grid lines.
+ *              audit logging, 5-10 business day turnaround compliance, and a clean luxury dark UI.
  */
 
 // -------------------------------------------------------------------------
@@ -15,16 +15,16 @@ $form_data       = array();
 
 // Fetch Dynamic Admin Settings Configured in inc/settings.php
 $support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
-$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
+$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce'] ) ) {
-    if ( wp_verify_nonce( $_POST['evg_contact_nonce'], 'evg_contact_enquiry_action' ) ) {
+    if ( wp_verify_nonce( sanitize_key( $_POST['evg_contact_nonce'] ), 'evg_contact_enquiry_action' ) ) {
         
-        $customer_name   = sanitize_text_field( $_POST['customer_name'] ?? '' );
-        $email_address   = sanitize_email( $_POST['email_address'] ?? '' );
-        $order_number    = sanitize_text_field( $_POST['order_number'] ?? '' );
-        $feedback_type   = sanitize_text_field( $_POST['enquiry_category'] ?? 'General Enquiry' );
-        $message_content = sanitize_textarea_field( $_POST['message'] ?? '' );
+        $customer_name   = sanitize_text_field( wp_unslash( $_POST['customer_name'] ?? '' ) );
+        $email_address   = sanitize_email( wp_unslash( $_POST['email_address'] ?? '' ) );
+        $order_number    = sanitize_text_field( wp_unslash( $_POST['order_number'] ?? '' ) );
+        $feedback_type   = sanitize_text_field( wp_unslash( $_POST['enquiry_category'] ?? 'General Enquiry' ) );
+        $message_content = sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) );
 
         $form_data = compact( 'customer_name', 'email_address', 'order_number', 'feedback_type', 'message_content' );
 
@@ -92,7 +92,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce']
 
 // Prefill data if logged in
 if ( empty( $form_data ) && is_user_logged_in() ) {
-    $current_user              = wp_get_current_user();
+    $current_user               = wp_get_current_user();
     $form_data['customer_name'] = $current_user->display_name;
     $form_data['email_address'] = $current_user->user_email;
 }
@@ -319,7 +319,7 @@ get_header(); ?>
                             <select name="enquiry_category" class="evg-form-control" style="cursor: pointer;">
                                 <option value="General Enquiry"><?php esc_html_e( 'General Enquiry', 'evg-platform' ); ?></option>
                                 <option value="Grading Diagnostics"><?php esc_html_e( 'Grading Diagnostics & Standards', 'evg-platform' ); ?></option>
-                                <option value="Submission Intake"><?php esc_html_e( 'Submission Intake & Pre-Orders', 'evg-platform' ); ?></option>
+                                <option value="Submission Intake"><?php esc_html_e( 'Submission Intake & Allocation', 'evg-platform' ); ?></option>
                                 <option value="Billing & Invoices"><?php esc_html_e( 'Billing & Invoices', 'evg-platform' ); ?></option>
                                 <option value="Collector Feedback"><?php esc_html_e( 'Collector Feedback', 'evg-platform' ); ?></option>
                             </select>
@@ -405,7 +405,7 @@ get_header(); ?>
                 <div class="evg-topic-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Submission Intake', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Declaration formatting, pre-order allocations, and VIP lot limits.', 'evg-platform' ); ?></p>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Declaration formatting, grading intake windows, and bulk consignment allocations.', 'evg-platform' ); ?></p>
                 </div>
                 <div class="evg-topic-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>

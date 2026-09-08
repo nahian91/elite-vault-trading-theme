@@ -3,14 +3,16 @@
  * Template Name: About Us - Executive Tier
  * Description: Ultra-premium company profile for Elite Vault Grading.
  *              Features corporate identity, 8-pillar operational advantages, customer demographic scope,
- *              future transparency roadmap, dynamic system options, and a clean luxury dark UI.
+ *              live transparency portfolio info (£0.99 unlock), 5-10 business day turnaround,
+ *              dynamic system options, and a clean luxury dark UI.
  */
 
 // -------------------------------------------------------------------------
 // 1. DYNAMIC SYSTEM SETTINGS RESOLUTION
 // -------------------------------------------------------------------------
 $support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
-$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
+$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$price_standard  = floatval( get_option( 'evg_price_standard', 9.99 ) );
 
 get_header(); ?>
 
@@ -175,7 +177,7 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Corporate Overview', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'About', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Elite Vault Grading', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'At Elite Vault Grading, we provide collectors with professional, reliable, and consistent card certification. Whether protecting a treasured personal collection, authenticating rare inventory, or preparing cards for market liquidity, our standard is precision you can trust.', 'evg-platform' ); ?>
+                <?php printf( esc_html__( 'At Elite Vault Grading, we provide collectors with professional, reliable, and consistent card certification starting from £%.2f. Whether protecting a treasured personal collection, authenticating rare inventory, or preparing cards for market liquidity, our standard is precision you can trust.', 'evg-platform' ), $price_standard ); ?>
             </p>
             <div style="display: inline-flex; align-items: center; gap: 10px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 5px 16px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
                 <span><?php printf( esc_html__( 'CURRENT UK TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
@@ -192,7 +194,7 @@ get_header(); ?>
                     <?php esc_html_e( 'Elite Vault Grading is a dedicated UK-based trading card certification company. We are committed to helping collectors protect, preserve, and showcase their Pokémon TCG collections with uncompromising integrity.', 'evg-platform' ); ?>
                 </p>
                 <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
-                    <?php esc_html_e( 'Our experienced team inspects every card across 4 diagnostic pillars before sonic encapsulation in high-clarity protective slabs. Whether submitting a single card or bulk submissions, we deliver a grading experience that is transparent, highly responsive, and strictly professional.', 'evg-platform' ); ?>
+                    <?php printf( esc_html__( 'Our experienced team inspects every card across 4 diagnostic pillars before sonic encapsulation in high-clarity protective slabs. With turnaround times from %s, whether submitting a single card or bulk batches, we deliver a grading experience that is transparent, highly responsive, and strictly professional.', 'evg-platform' ), esc_html( $turnaround_time ) ); ?>
                 </p>
             </div>
 
@@ -244,7 +246,7 @@ get_header(); ?>
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Data Transparency', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Open diagnostic criteria and transparent stage-by-stage online order tracking.', 'evg-platform' ); ?></p>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Open diagnostic criteria, free preview flaw evidence, and full portfolio unlock.', 'evg-platform' ); ?></p>
                 </div>
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -259,7 +261,7 @@ get_header(); ?>
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                     <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Inclusive Access', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Scalable grading service for casual collectors to high-volume submitters.', 'evg-platform' ); ?></p>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Scalable grading service from £9.99 for casual collectors to high-volume submitters.', 'evg-platform' ); ?></p>
                 </div>
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
@@ -312,24 +314,24 @@ get_header(); ?>
             </div>
         </section>
 
-        <!-- 5. FUTURE ROADMAP -->
+        <!-- 5. TRANSPARENCY & DAMAGE PORTFOLIO -->
         <section class="evg-module" style="padding: 35px 30px; margin-bottom: 50px;">
             <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: center;">
                 <div>
-                    <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( '05 // Infrastructure Innovation', 'evg-platform' ); ?></span>
-                    <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Looking Ahead: Optical Transparency', 'evg-platform' ); ?></h2>
+                    <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( '05 // Diagnostic Telemetry', 'evg-platform' ); ?></span>
+                    <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Optical Transparency: Microscopic Fault Portfolios', 'evg-platform' ); ?></h2>
                     <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0 0 12px 0;">
-                        <?php esc_html_e( 'As Elite Vault Grading expands operations, we are continuously developing diagnostic tools to enhance the collector verification experience.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Elite Vault Grading provides direct diagnostic evidence for completed assessments. Every certified slab lookup includes up to 3 complimentary defect scans for instant inspection.', 'evg-platform' ); ?>
                     </p>
                     <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
-                        <?php esc_html_e( 'We are actively developing our Grading Transparency Reports feature, allowing collectors to access high-resolution flaw telemetry—highlighting centring measurements, corner whitening, and surface mapping—directly within their account dashboard.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Collectors and secondary-market buyers can unlock the full high-resolution microscopic damage portfolio—complete with all flaw angles, coordinate mapping, and sub-score rationale—for a one-time unlock fee of £0.99.', 'evg-platform' ); ?>
                     </p>
                 </div>
                 <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px; padding: 25px; text-align: center;">
-                    <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'IN DEVELOPMENT', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Defect Evidence Reports', 'evg-platform' ); ?></h3>
+                    <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'ACTIVE PLATFORM FEATURE', 'evg-platform' ); ?></span>
+                    <h3 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Fault Evidence Telemetry', 'evg-platform' ); ?></h3>
                     <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;">
-                        <?php esc_html_e( 'Direct portal access to digital defect mapping, coordinate imagery, and sub-score rationale for completed submissions.', 'evg-platform' ); ?>
+                        <?php esc_html_e( '3 free previews on all verifications, with comprehensive high-res fault scans unlockable for just £0.99.', 'evg-platform' ); ?>
                     </p>
                 </div>
             </div>
@@ -340,13 +342,13 @@ get_header(); ?>
             <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 10px;"><?php esc_html_e( 'Initialize Asset Intake', 'evg-platform' ); ?></span>
             <h2 style="color: #ffffff; font-size: 1.4rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Ready to Protect Your Collection?', 'evg-platform' ); ?></h2>
             <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.9rem; line-height: 1.6;">
-                <?php esc_html_e( 'Create an account today to submit your Pokémon cards for professional grading and secure encapsulation.', 'evg-platform' ); ?>
+                <?php printf( esc_html__( 'Submit your Pokémon cards today from £%.2f per card for professional grading and secure encapsulation with %s turnaround.', 'evg-platform' ), $price_standard, esc_html( $turnaround_time ) ); ?>
             </p>
             <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
                 <a href="<?php echo esc_url( home_url( '/create-account' ) ); ?>" class="btn-evg-executive">
                     <?php esc_html_e( 'Create Account', 'evg-platform' ); ?>
                 </a>
-                <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-outline">
+                <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-outline">
                     <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
                 </a>
             </div>

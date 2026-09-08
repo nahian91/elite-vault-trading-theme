@@ -2,7 +2,7 @@
 /**
  * Template Name: Create Account - UK Registry
  * Description: Fully dynamic UK-exclusive account registration template for Elite Vault Grading.
- *              Includes incoming redirect preservation (e.g. from /marketplace or /grade-now),
+ *              Includes incoming redirect preservation (e.g. from /marketplace, /submit, or /verify),
  *              automatic post-registration authentication, metadata binding, password show/hide eye toggles,
  *              and fixed, non-editable United Kingdom country lock.
  */

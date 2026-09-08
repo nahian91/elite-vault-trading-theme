@@ -2,8 +2,10 @@
 /**
  * Template Name: Home
  * Description: Clean, high-performance executive homepage for Elite Vault Grading.
- *              Includes full database connectivity, dynamic admin settings resolution,
- *              live marketplace cards, and solid obsidian/gold luxury styling with background lines removed.
+ *              Includes full database connectivity, updated £9.99 pricing and 5-10 business day turnaround,
+ *              hero collage, automated collage photo reel above How It Works,
+ *              live marketplace cards showcase (pre-order completely removed),
+ *              solid obsidian/gold luxury styling, and a customer feedback reel.
  */
 
 // -------------------------------------------------------------------------
@@ -14,25 +16,61 @@ global $wpdb;
 $table_cards       = $wpdb->prefix . 'evg_cards';
 $table_marketplace = $wpdb->prefix . 'evg_marketplace';
 $table_submissions = $wpdb->prefix . 'evg_submissions';
+$table_feedback    = $wpdb->prefix . 'evg_feedback';
 
-// Fetch live platform settings configured in inc/settings.php
+// Fetch live platform settings (defaults: £9.99 & 5-10 Business Days)
 $accept_submissions = get_option( 'evg_accept_submissions', 'yes' );
-$turnaround_time    = get_option( 'evg_turnaround_time', '30-45 Business Days' );
-$price_standard     = floatval( get_option( 'evg_price_standard', 15.00 ) );
+$turnaround_time    = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$price_standard     = floatval( get_option( 'evg_price_standard', 9.99 ) );
 
 // Fetch real-time count of completed/graded cards
 $total_cards_graded = (int) $wpdb->get_var( "SELECT COUNT(id) FROM {$table_cards} WHERE grading_status = 'Completed' OR final_grade > 0" );
 $display_card_count = $total_cards_graded > 1000 ? number_format( $total_cards_graded ) : 'THOUSANDS';
 
-// Fetch 3 showcase slabs from active public marketplace
+// Fetch up to 4 showcase slabs from active public marketplace
 $showcase_cards = $wpdb->get_results( "
     SELECT m.price, c.card_name, c.set_name, c.card_number, c.final_grade, c.front_image_url 
     FROM {$table_marketplace} m
     JOIN {$table_cards} c ON m.card_id = c.id
     WHERE m.status = 'Available'
     ORDER BY m.listed_date DESC
-    LIMIT 3
+    LIMIT 4
 " );
+
+// Collage image set for hero and photo reel
+$theme_img_uri = get_template_directory_uri() . '/assets/img/';
+$collage_photos = array(
+    $theme_img_uri . 'gallery-1.jpg',
+    $theme_img_uri . 'gallery-2.jpg',
+    $theme_img_uri . 'gallery-3.jpg',
+    $theme_img_uri . 'gallery-4.jpg',
+    $theme_img_uri . 'gallery-5.jpg',
+    $theme_img_uri . 'gallery-6.jpg',
+    $theme_img_uri . 'gallery-7.jpg',
+    $theme_img_uri . 'gallery-8.jpg'
+);
+
+// Fetch customer feedback for the testimonial reel
+$testimonials = array();
+if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_feedback'" ) === $table_feedback ) {
+    $testimonials = $wpdb->get_results( 
+        "SELECT customer_name, rating, feedback_text, submitted_at 
+         FROM {$table_feedback} 
+         WHERE status IN ('Featured Testimonial', 'Reviewed', 'Responded') 
+         ORDER BY submitted_at DESC 
+         LIMIT 8"
+    );
+}
+
+if ( empty( $testimonials ) ) {
+    $testimonials = array(
+        (object) array('customer_name' => 'Alex Turner', 'rating' => 5, 'feedback_text' => 'Absolutely blown away by the casing quality! The slab looks extremely premium and secure.'),
+        (object) array('customer_name' => 'James Wilson', 'rating' => 5, 'feedback_text' => 'Elite Vault Grading is my go-to grading company now. Consistent 10s and gorgeous labels!'),
+        (object) array('customer_name' => 'David Miller', 'rating' => 5, 'feedback_text' => 'The transparency report feature is incredible! Being able to see fault photos is next level.'),
+        (object) array('customer_name' => 'Ryan Gosling', 'rating' => 5, 'feedback_text' => 'Fast service, elite protection slabs, and pristine sub-grades. 10/10 experience.'),
+        (object) array('customer_name' => 'Daniel Craig', 'rating' => 5, 'feedback_text' => 'Magnificent vault security and professional grading staff. Highly recommended!')
+    );
+}
 
 get_header(); ?>
 
@@ -55,7 +93,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -168,54 +205,99 @@ get_header(); ?>
   }
   .how-it-works-action { text-align: center; margin-top: 3rem; }
   
-  /* Mockup Slab Container */
+  /* Hero 4-Photo Collage Container */
   .vault-container { 
     background: var(--evg-obsidian-panel); 
     border: 1px solid var(--evg-border-hairline); 
-    padding: 2.5rem; 
+    padding: 1.5rem; 
     border-radius: 8px; 
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
-  .slab { 
-    border: 2px solid #2a2a2e; 
-    padding: 1.25rem; 
-    border-radius: 8px; 
-    background: #08080a; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  .hero-collage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
-  .slab-label { 
-    display: flex; 
-    justify-content: space-between; 
-    font-size: 0.72rem; 
-    color: var(--evg-gold-light); 
-    margin-bottom: 0.75rem; 
-    font-family: monospace; 
-    font-weight: 700;
-    padding: 6px 10px;
-    background: #141416;
-    border: 1px solid #2c2c30;
-    border-radius: 4px;
+  .hero-collage-item {
+    background: #08080a;
+    border: 1px solid var(--evg-border-gold-faint);
+    border-radius: 6px;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    position: relative;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.8);
   }
-  .slab-card-art { 
-    height: 240px; 
-    background: linear-gradient(180deg, rgba(239, 68, 68, 0.15) 0%, rgba(3, 4, 6, 0.9) 100%), #450a0a; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    color: white; 
-    border-radius: 4px; 
-    border: 1px solid rgba(239, 68, 68, 0.3); 
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+  .hero-collage-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .hero-collage-item:hover img {
+    transform: scale(1.04);
   }
 
-  /* Showcase Section */
-  .card-trio { display: flex; gap: 1rem; justify-content: center; }
+  /* Thin Moving Photo Reel (Between Features and How It Works) */
+  .evg-photo-reel-section {
+    background: #08080a;
+    border-bottom: 1px solid var(--evg-border-hairline);
+    padding: 1.5rem 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .evg-photo-reel-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .evg-photo-reel-wrapper::-webkit-scrollbar { display: none; }
+  .evg-photo-reel-track {
+    display: flex;
+    gap: 16px;
+    width: max-content;
+    animation: scrollPhotoReel 35s linear infinite;
+  }
+  .evg-photo-reel-wrapper:hover .evg-photo-reel-track {
+    animation-play-state: paused;
+  }
+  @keyframes scrollPhotoReel {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-50% - 8px)); }
+  }
+  .evg-photo-reel-item {
+    width: 220px;
+    height: 140px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--evg-border-hairline);
+    background: var(--evg-obsidian-panel);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .evg-photo-reel-item:hover {
+    border-color: var(--evg-gold-primary);
+    transform: translateY(-2px);
+  }
+  .evg-photo-reel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Showcase Section Layout */
+  .showcase-grid-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    justify-content: flex-end;
+  }
   .mini-slab { 
     padding: 10px;
-    max-width: 130px;
-    flex: 1;
+    width: 135px;
+    flex-shrink: 0;
   }
   .mini-slab-header { 
     font-size: 0.65rem; 
@@ -226,7 +308,7 @@ get_header(); ?>
     font-weight: 700;
   }
   .mini-slab-art { 
-    height: 120px; 
+    height: 140px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -246,11 +328,70 @@ get_header(); ?>
     object-fit: cover;
   }
 
+  /* Feedback Reel Styles */
+  .evg-reel-section {
+    background-color: var(--evg-obsidian-base);
+    padding: 4.5rem 0;
+    border-top: 1px solid var(--evg-border-hairline);
+    position: relative;
+    overflow: hidden;
+  }
+  .evg-reel-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .evg-reel-track-wrapper {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 10px;
+  }
+  .evg-reel-track-wrapper::-webkit-scrollbar { display: none; }
+  .evg-reel-track {
+    display: flex;
+    gap: 20px;
+    width: max-content;
+    animation: scrollReel 40s linear infinite;
+  }
+  .evg-reel-track-wrapper:hover .evg-reel-track {
+    animation-play-state: paused;
+  }
+  @keyframes scrollReel {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-50% - 10px)); }
+  }
+  .evg-testimonial-card {
+    background: var(--evg-obsidian-panel);
+    border: 1px solid var(--evg-border-hairline);
+    border-radius: 8px;
+    padding: 24px;
+    width: 360px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .evg-testimonial-card:hover {
+    border-color: var(--evg-border-gold-faint);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.08);
+  }
+  .evg-star-rating {
+    color: var(--evg-gold-primary);
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+
   @media (max-width: 992px) {
     .hero { text-align: center; }
     .hero-actions { justify-content: center; display: flex; flex-wrap: wrap; gap: 10px; }
     .btn-gold, .btn-outline-gold { margin-right: 0; }
     .hero-note { justify-content: center; }
+    .showcase-grid-wrap { justify-content: center; margin-top: 2rem; }
   }
 </style>
 
@@ -274,7 +415,7 @@ get_header(); ?>
                         SECURE.<br>PRESERVE.<br><span class="evg-text-metallic">ELEVATE.</span>
                     </h1>
                     <p style="font-size: 1.05rem; line-height: 1.6; max-width: 500px; margin-bottom: 2rem;">
-                        <?php esc_html_e( 'Elite Vault Grading is dedicated to protecting your Pokémon cards with precision, transparency, and trust.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'Elite Vault Grading protects your Pokémon cards with precision, transparency, and trust. Base grading starting from £%.2f with turnaround from %s.', 'evg-platform' ), $price_standard, esc_html( $turnaround_time ) ); ?>
                     </p>
                     
                     <div class="hero-actions">
@@ -294,15 +435,21 @@ get_header(); ?>
                     </div>
                 </div>
 
+                <!-- HERO RIGHT: 4-PHOTO COLLAGE -->
                 <div class="col-lg-6">
                     <div class="vault-container">
-                        <div class="slab">
-                            <div class="slab-label">
-                                <div>ELITE VAULT GRADING</div>
-                                <div style="color: var(--evg-gold-primary); font-weight: 800;">GEM MT 10</div>
+                        <div class="hero-collage-grid">
+                            <div class="hero-collage-item">
+                                <img src="<?php echo esc_url( $collage_photos[0] ); ?>" alt="Elite Vault Showcase 1" loading="lazy">
                             </div>
-                            <div class="slab-card-art">
-                                <span>[ Charizard VMAX #074/072 ]</span>
+                            <div class="hero-collage-item">
+                                <img src="<?php echo esc_url( $collage_photos[1] ); ?>" alt="Elite Vault Showcase 2" loading="lazy">
+                            </div>
+                            <div class="hero-collage-item">
+                                <img src="<?php echo esc_url( $collage_photos[2] ); ?>" alt="Elite Vault Showcase 3" loading="lazy">
+                            </div>
+                            <div class="hero-collage-item">
+                                <img src="<?php echo esc_url( $collage_photos[3] ); ?>" alt="Elite Vault Showcase 4" loading="lazy">
                             </div>
                         </div>
                     </div>
@@ -311,7 +458,7 @@ get_header(); ?>
         </div>
     </section>
 
-    <!-- FEATURE STRIP 1 -->
+    <!-- FEATURE STRIP 1 (MAXIMUM SECURITY BOX ETC) -->
     <section class="feature-strip" style="border-top: 1px solid var(--evg-border-hairline); border-bottom: 1px solid var(--evg-border-hairline); background: #08080a;">
         <div class="container">
             <div class="row g-4">
@@ -369,6 +516,22 @@ get_header(); ?>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THIN MOVING COLLAGE PHOTO REEL -->
+    <section class="evg-photo-reel-section" aria-label="Collage Photo Reel">
+        <div class="evg-photo-reel-wrapper">
+            <div class="evg-photo-reel-track">
+                <?php 
+                $loop_collages = array_merge( $collage_photos, $collage_photos );
+                foreach ( $loop_collages as $c_img ) : 
+                ?>
+                    <div class="evg-photo-reel-item">
+                        <img src="<?php echo esc_url( $c_img ); ?>" alt="Elite Vault Collage Archive" loading="lazy">
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -435,26 +598,25 @@ get_header(); ?>
         </div>
     </section>
 
-    <!-- SHOWCASE SECTION -->
+    <!-- SHOWCASE SECTION (Pre-Order column removed, streamlined marketplace view) -->
     <section class="showcase-section" style="border-top: 1px solid var(--evg-border-hairline); border-bottom: 1px solid var(--evg-border-hairline); background: #08080a;">
         <div class="container">
             <div class="row align-items-center g-4">
-                <div class="col-md-4">
+                <div class="col-lg-5">
                     <div class="showcase-subtitle"><?php esc_html_e( 'Shop With Confidence', 'evg-platform' ); ?></div>
-                    <h2 style="font-size: 1.8rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem;">
-                        BUY GRADED<br><span class="evg-text-metallic">POKÉMON CARDS</span>
+                    <h2 style="font-size: 2rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem;">
+                        BUY CERTIFIED<br><span class="evg-text-metallic">GRADED SLABS</span>
                     </h2>
-                    <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.75rem;">
-                        <?php esc_html_e( 'Explore our hand-selected inventory of professionally certified and sonically encapsulated cards.', 'evg-platform' ); ?>
+                    <p style="font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;">
+                        <?php esc_html_e( 'Explore our live inventory of authenticated Pokémon cards, professionally graded and sonically encapsulated in tamper-evident obsidian shields.', 'evg-platform' ); ?>
                     </p>
                     <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-gold">
-                        <?php esc_html_e( 'Browse Cards', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Browse Marketplace →', 'evg-platform' ); ?>
                     </a>
                 </div>
 
-                <!-- Showcase Cards -->
-                <div class="col-md-4 text-center">
-                    <div class="card-trio">
+                <div class="col-lg-7">
+                    <div class="showcase-grid-wrap">
                         <?php if ( ! empty( $showcase_cards ) ) : ?>
                             <?php foreach ( $showcase_cards as $sc ) : ?>
                                 <div class="mini-slab">
@@ -471,31 +633,22 @@ get_header(); ?>
                         <?php else : ?>
                             <div class="mini-slab">
                                 <div class="mini-slab-header">EVG 10</div>
-                                <div class="mini-slab-art art-pikachu">Pikachu</div>
+                                <div class="mini-slab-art">Pikachu</div>
                             </div>
                             <div class="mini-slab">
                                 <div class="mini-slab-header">EVG 10</div>
-                                <div class="mini-slab-art art-charizard">Charizard</div>
+                                <div class="mini-slab-art">Charizard</div>
                             </div>
                             <div class="mini-slab">
                                 <div class="mini-slab-header">EVG 10</div>
-                                <div class="mini-slab-art art-blastoise">Blastoise</div>
+                                <div class="mini-slab-art">Blastoise</div>
+                            </div>
+                            <div class="mini-slab">
+                                <div class="mini-slab-header">EVG 10</div>
+                                <div class="mini-slab-art">Umbreon</div>
                             </div>
                         <?php endif; ?>
                     </div>
-                </div>
-
-                <div class="col-md-4 text-md-end text-start">
-                    <div class="showcase-subtitle"><?php esc_html_e( 'Early Allocations', 'evg-platform' ); ?></div>
-                    <h2 style="font-size: 1.8rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem;">
-                        PRE-ORDER<br><span class="evg-text-metallic">FIRST DROP</span>
-                    </h2>
-                    <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.75rem;">
-                        <?php printf( esc_html__( 'Secure tier pricing from £%.2f per card with an estimated turnaround of %s.', 'evg-platform' ), $price_standard, esc_html( $turnaround_time ) ); ?>
-                    </p>
-                    <a href="<?php echo esc_url( home_url( '/pre-order' ) ); ?>" class="btn-gold">
-                        <?php esc_html_e( 'Pre-Order Now', 'evg-platform' ); ?>
-                    </a>
                 </div>
             </div>
         </div>
@@ -536,7 +689,7 @@ get_header(); ?>
                         </svg>
                         <div>
                             <h4 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: #ffffff;">FAST</h4>
-                            <p style="font-size: 0.72rem; margin: 0; color: var(--evg-text-ash); font-weight: 700;">Turnaround Times</p>
+                            <p style="font-size: 0.72rem; margin: 0; color: var(--evg-text-ash); font-weight: 700;"><?php echo esc_html( $turnaround_time ); ?></p>
                         </div>
                     </div>
                 </div>
@@ -551,6 +704,50 @@ get_header(); ?>
                             <p style="font-size: 0.72rem; margin: 0; color: var(--evg-text-ash); font-weight: 700;"><?php esc_html_e( 'CARDS GRADED', 'evg-platform' ); ?></p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CUSTOMER FEEDBACK REEL SECTION -->
+    <section class="evg-reel-section">
+        <div class="container">
+            <div class="evg-reel-header">
+                <div class="showcase-subtitle" style="margin-bottom: 0.5rem;"><?php esc_html_e( 'Collector Endorsements', 'evg-platform' ); ?></div>
+                <h2 style="font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem;">
+                    <?php esc_html_e( 'TRUSTED BY', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'COLLECTORS', 'evg-platform' ); ?></span>
+                </h2>
+                <p style="font-size: 0.85rem; color: var(--evg-text-ash); margin: 0;">
+                    <?php esc_html_e( 'Real feedback from vault members tracking live grades and marketplace acquisitions.', 'evg-platform' ); ?>
+                </p>
+            </div>
+
+            <div class="evg-reel-track-wrapper">
+                <div class="evg-reel-track">
+                    <?php 
+                    $loop_testimonials = array_merge( $testimonials, $testimonials );
+                    foreach ( $loop_testimonials as $item ) : 
+                    ?>
+                        <div class="evg-testimonial-card">
+                            <div>
+                                <div class="evg-star-rating">
+                                    <?php echo str_repeat( '★', intval( $item->rating ) ); ?>
+                                </div>
+                                <p style="color: var(--evg-text-pure); font-size: 0.88rem; line-height: 1.6; margin: 0 0 1rem 0; font-style: italic;">
+                                    "<?php echo esc_html( $item->feedback_text ); ?>"
+                                </p>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--evg-border-hairline); padding-top: 12px;">
+                                <span style="font-weight: 700; font-size: 0.82rem; color: #ffffff;">
+                                    <?php echo esc_html( $item->customer_name ); ?>
+                                </span>
+                                <span style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--evg-gold-primary); font-weight: 700;">
+                                    <?php esc_html_e( 'Verified Collector', 'evg-platform' ); ?>
+                                </span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

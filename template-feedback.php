@@ -16,15 +16,15 @@ $form_data        = array();
 $support_email = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submission_nonce'] ) ) {
-    if ( wp_verify_nonce( $_POST['evg_feedback_submission_nonce'], 'evg_submit_feedback_action' ) ) {
+    if ( wp_verify_nonce( sanitize_key( $_POST['evg_feedback_submission_nonce'] ), 'evg_submit_feedback_action' ) ) {
         
-        $customer_name     = sanitize_text_field( $_POST['feedback_name'] ?? '' );
-        $email_address     = sanitize_email( $_POST['feedback_email'] ?? '' );
-        $order_number      = sanitize_text_field( $_POST['feedback_order_num'] ?? '' );
-        $feedback_type     = sanitize_text_field( $_POST['feedback_type'] ?? 'General Feedback' );
+        $customer_name     = sanitize_text_field( wp_unslash( $_POST['feedback_name'] ?? '' ) );
+        $email_address     = sanitize_email( wp_unslash( $_POST['feedback_email'] ?? '' ) );
+        $order_number      = sanitize_text_field( wp_unslash( $_POST['feedback_order_num'] ?? '' ) );
+        $feedback_type     = sanitize_text_field( wp_unslash( $_POST['feedback_type'] ?? 'General Feedback' ) );
         $rating            = isset( $_POST['experience_rating'] ) ? intval( $_POST['experience_rating'] ) : 5;
-        $feedback_text     = sanitize_textarea_field( $_POST['feedback_text'] ?? '' );
-        $recommend         = sanitize_text_field( $_POST['recommend'] ?? 'Not sure' );
+        $feedback_text     = sanitize_textarea_field( wp_unslash( $_POST['feedback_text'] ?? '' ) );
+        $recommend         = sanitize_text_field( wp_unslash( $_POST['recommend'] ?? 'Not sure' ) );
         $permission_to_use = isset( $_POST['permission_use'] ) ? 1 : 0;
 
         $form_data = compact( 'customer_name', 'email_address', 'order_number', 'feedback_type', 'rating', 'feedback_text', 'recommend', 'permission_to_use' );
@@ -269,7 +269,7 @@ get_header(); ?>
   .evg-checkbox::before {
     content: ""; 
     width: 0.65em; 
-    height: 0.65em;
+    height: 0.65em; 
     transform: scale(0); 
     transition: 120ms transform ease-in-out;
     background-color: var(--evg-gold-primary);

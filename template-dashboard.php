@@ -3,8 +3,9 @@
  * Template Name: My Account / Customer Dashboard - Executive Tier
  * Description: Production-ready Customer Dashboard for Elite Vault Grading.
  *              Implements distinct portals for Marketplace Purchases, Card Grading Submissions,
- *              live 10-stage pipeline telemetry, declared card ledgers, downloadable invoices,
- *              UK logistics coordinates management, and password update with toggle eye icons.
+ *              live 10-stage pipeline telemetry (5-10 business day standard), declared card ledgers,
+ *              microscopic fault evidence with 3 free previews & £0.99 portfolio unlock triggers,
+ *              downloadable invoices, UK logistics coordinates management, and password update.
  */
 
 // Force authentication
@@ -24,6 +25,8 @@ $user_id_badge   = 'EVG-' . str_pad( (string) $current_user_id, 5, '0', STR_PAD_
 $table_submissions = $wpdb->prefix . 'evg_submissions';
 $table_cards       = $wpdb->prefix . 'evg_cards';
 $table_orders      = $wpdb->prefix . 'evg_orders';
+$table_unlocks     = $wpdb->prefix . 'evg_portfolio_unlocks';
+$table_faults      = $wpdb->prefix . 'evg_fault_images';
 
 // -------------------------------------------------------------------------
 // 1. HANDLE PROFILE & PASSWORD UPDATES
@@ -132,6 +135,12 @@ $all_cards = $wpdb->get_results( $wpdb->prepare( "
     ORDER BY c.id DESC
 ", $current_user_id ) );
 
+// Fetch user's unlocked cards map
+$unlocked_card_ids = $wpdb->get_col( $wpdb->prepare( "
+    SELECT card_id FROM {$table_unlocks} 
+    WHERE user_id = %d AND payment_status = 'Completed'
+", $current_user_id ) );
+
 // Fetch Marketplace Slab Purchases
 $marketplace_orders = $wpdb->get_results( $wpdb->prepare( "
     SELECT o.*, c.card_name, c.set_name, c.card_number, c.final_grade, c.front_image_url
@@ -151,18 +160,17 @@ $town_city      = get_user_meta( $current_user_id, 'evg_town_city', true );
 $county         = get_user_meta( $current_user_id, 'evg_county', true );
 $postcode       = get_user_meta( $current_user_id, 'evg_postcode', true );
 
-// Official EVG 10-Stage Pipeline Sequence
+// Official EVG Standardized Pipeline Stages
 $pipeline_stages = array(
-    '01. Pre-Order Received'      => 'Pre-Order Received',
-    '02. Awaiting Arrival'        => 'Cards Awaiting Arrival',
-    '03. Package Received'        => 'Cards Received',
-    '04. Authentication Check'    => 'Authentication Check',
-    '05. Under Review'            => 'Under Review',
-    '06. Grading In Progress'     => 'Grading In Progress',
-    '07. Quality Control'         => 'Quality Control',
-    '08. Encapsulation'           => 'Encapsulation',
-    '09. Completed'               => 'Completed',
-    '10. Dispatched'              => 'Returned To Customer'
+    '01. Cards Awaiting Arrival' => 'Cards Awaiting Arrival',
+    '02. Cards Received'         => 'Cards Received',
+    '03. Authentication Check'   => 'Authentication Check',
+    '04. Under Review'           => 'Under Review',
+    '05. Grading In Progress'    => 'Grading In Progress',
+    '06. Quality Control'        => 'Quality Control',
+    '07. Encapsulation'          => 'Encapsulation',
+    '08. Completed'              => 'Completed',
+    '09. Returned To Customer'   => 'Returned To Customer'
 );
 
 get_header(); ?>
@@ -472,7 +480,7 @@ get_header(); ?>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
+                    <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-executive">
                         + <?php esc_html_e( 'Submit Cards for Grading', 'evg-platform' ); ?>
                     </a>
                     <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
@@ -593,8 +601,8 @@ get_header(); ?>
                                 </div>
                             <?php endif; ?>
 
-                            <!-- 10-Stage Visual Telemetry Matrix -->
-                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Official 10-Stage Progression Telemetry', 'evg-platform' ); ?></span>
+                            <!-- 9-Stage Visual Telemetry Matrix -->
+                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Standard 5-10 Day Pipeline Telemetry', 'evg-platform' ); ?></span>
                             <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px;">
                                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                     <?php 
@@ -623,7 +631,7 @@ get_header(); ?>
                                 <p style="color: var(--evg-text-ash); font-size: 0.9rem; max-width: 480px; margin: 0 auto 20px auto;">
                                     <?php esc_html_e( 'You do not have any active grading submissions currently progressing through our laboratory queue.', 'evg-platform' ); ?>
                                 </p>
-                                <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
+                                <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-executive">
                                     <?php esc_html_e( 'Initialize Your First Submission', 'evg-platform' ); ?>
                                 </a>
                             </div>
@@ -693,11 +701,11 @@ get_header(); ?>
                     </div>
                 </section>
 
-                <!-- TAB 03: ALL DECLARED GRADING CARDS -->
+                <!-- TAB 03: ALL DECLARED GRADING CARDS & DAMAGE PORTFOLIO -->
                 <section class="evg-tab-panel <?php echo ( 'tab-cards' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-cards">
                     <div class="evg-module" style="padding: 35px 30px;">
                         <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Certified Holdings', 'evg-platform' ); ?></span>
-                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 25px 0;"><?php esc_html_e( 'Declared Asset Registry (Grading)', 'evg-platform' ); ?></h2>
+                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 25px 0;"><?php esc_html_e( 'Declared Asset Registry & Scans', 'evg-platform' ); ?></h2>
 
                         <?php if ( ! empty( $all_cards ) ) : ?>
                             <div class="evg-table-wrapper">
@@ -709,11 +717,15 @@ get_header(); ?>
                                             <th><?php esc_html_e( 'Language', 'evg-platform' ); ?></th>
                                             <th><?php esc_html_e( 'Order Ref', 'evg-platform' ); ?></th>
                                             <th><?php esc_html_e( 'Stage', 'evg-platform' ); ?></th>
-                                            <th style="text-align: right;"><?php esc_html_e( 'Final Grade', 'evg-platform' ); ?></th>
+                                            <th><?php esc_html_e( 'Grade', 'evg-platform' ); ?></th>
+                                            <th style="text-align: right;"><?php esc_html_e( 'Inspection Portfolio', 'evg-platform' ); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ( $all_cards as $c ) : ?>
+                                        <?php foreach ( $all_cards as $c ) : 
+                                            $is_card_unlocked = in_array( (int) $c->id, array_map( 'intval', $unlocked_card_ids ), true );
+                                            $fault_count      = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(id) FROM {$table_faults} WHERE card_id = %d", $c->id ) );
+                                        ?>
                                             <tr>
                                                 <td><strong style="color: #ffffff; font-size: 0.9rem;"><?php echo esc_html( $c->card_name ); ?></strong></td>
                                                 <td>
@@ -725,13 +737,28 @@ get_header(); ?>
                                                 <td><span style="background: #141416; border: 1px solid #2c2c30; color: var(--evg-gold-primary); font-size: 0.65rem; font-family: monospace; padding: 2px 6px; border-radius: 4px;"><?php echo esc_html( strtoupper( substr( $c->language, 0, 3 ) ) ); ?></span></td>
                                                 <td><span style="font-family: monospace; color: var(--evg-gold-light);">#<?php echo esc_html( $c->order_number ); ?></span></td>
                                                 <td><span style="font-size: 0.75rem; color: var(--evg-text-ash);"><?php echo esc_html( $c->grading_status ); ?></span></td>
-                                                <td style="text-align: right;">
+                                                <td>
                                                     <?php if ( ! empty( $c->final_grade ) ) : ?>
                                                         <span style="background: var(--evg-gold-primary); color: #0a0a0a; font-weight: 900; font-size: 0.85rem; padding: 3px 8px; border-radius: 4px; display: inline-block;">
                                                             EVG <?php echo esc_html( $c->final_grade ); ?>
                                                         </span>
                                                     <?php else : ?>
                                                         <span style="color: var(--evg-text-ash); font-size: 0.75rem; font-family: monospace;">PENDING</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    <?php if ( $is_card_unlocked ) : ?>
+                                                        <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.75rem; font-size: 0.65rem; border-color: #34c759; color: #34c759 !important;">
+                                                            ✓ <?php esc_html_e( 'Full Unlocked', 'evg-platform' ); ?>
+                                                        </a>
+                                                    <?php elseif ( $fault_count > 3 ) : ?>
+                                                        <a href="<?php echo esc_url( home_url( '/checkout?action=unlock_portfolio&card_id=' . $c->id ) ); ?>" class="btn-evg-executive" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
+                                                            🔒 <?php esc_html_e( 'Unlock Full (£0.99)', 'evg-platform' ); ?>
+                                                        </a>
+                                                    <?php else : ?>
+                                                        <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
+                                                            👁 <?php esc_html_e( 'View (3 Free)', 'evg-platform' ); ?>
+                                                        </a>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -848,8 +875,8 @@ get_header(); ?>
                                     <input type="text" name="town_city" class="evg-form-control" value="<?php echo esc_attr( $town_city ); ?>" required>
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'County', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
-                                    <input type="text" name="county" class="evg-form-control" value="<?php echo esc_attr( $county ); ?>" required>
+                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'County', 'evg-platform' ); ?></label>
+                                    <input type="text" name="county" class="evg-form-control" value="<?php echo esc_attr( $county ); ?>">
                                 </div>
                                 <div>
                                     <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Postcode', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>

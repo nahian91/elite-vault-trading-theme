@@ -46,7 +46,7 @@ if ( ! empty( $selected_category ) && 'all' !== $selected_category ) {
     $query_params[]  = $selected_category;
 }
 
-// Grade Filter
+// Grade Filter (Strict 1-10 whole-number or raw)
 if ( ! empty( $selected_grade ) ) {
     if ( 'raw' === strtolower( $selected_grade ) ) {
         $where_clauses[] = "(COALESCE(m.assigned_grade, c.final_grade) IS NULL OR COALESCE(m.assigned_grade, c.final_grade) = 0)";
@@ -500,9 +500,12 @@ get_header(); ?>
                         <?php if ( ! empty( $selected_lang ) ) : ?>
                             <input type="hidden" name="lang" value="<?php echo esc_attr( $selected_lang ); ?>">
                         <?php endif; ?>
+                        <?php if ( ! empty( $selected_sort ) ) : ?>
+                            <input type="hidden" name="sort" value="<?php echo esc_attr( $selected_sort ); ?>">
+                        <?php endif; ?>
                         
                         <input type="text" name="sq" class="evg-form-control" placeholder="<?php esc_attr_e( 'Search card or set...', 'evg-platform' ); ?>" value="<?php echo esc_attr( $search_keyword ); ?>">
-                        <button type="submit" class="evg-search-btn" aria-label="Search">
+                        <button type="submit" class="evg-search-btn" aria-label="<?php esc_attr_e( 'Search', 'evg-platform' ); ?>">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         </button>
                     </form>
@@ -521,30 +524,23 @@ get_header(); ?>
                                     </a>
                                 <?php endforeach; ?>
                             <?php else : ?>
-                                <a href="<?php echo esc_url( add_query_arg( 'cat', 'Elite Vault Graded Cards' ) ); ?>" class="evg-filter-link">
+                                <a href="<?php echo esc_url( add_query_arg( array( 'cat' => 'Elite Vault Graded Cards', 'pg' => 1 ) ) ); ?>" class="evg-filter-link">
                                     <?php esc_html_e( 'Elite Vault Graded Cards', 'evg-platform' ); ?>
                                 </a>
                             <?php endif; ?>
                         </div>
                     </div>
 
-                    <!-- GRADE FILTER (Control Matrix) -->
+                    <!-- GRADE FILTER (1-10 Whole-Number Standard Scale) -->
                     <div style="margin-bottom: 30px;">
-                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Certified Grade', 'evg-platform' ); ?></span>
+                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Certified Grade (1-10)', 'evg-platform' ); ?></span>
                         <div class="evg-control-matrix">
-                            <a href="<?php echo esc_url( add_query_arg( array( 'grade' => '10', 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo '10' === $selected_grade ? 'active' : ''; ?>">
-                                <span>EVG 10</span>
-                            </a>
-                            <a href="<?php echo esc_url( add_query_arg( array( 'grade' => '9', 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo '9' === $selected_grade ? 'active' : ''; ?>">
-                                <span>EVG 9</span>
-                            </a>
-                            <a href="<?php echo esc_url( add_query_arg( array( 'grade' => '8', 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo '8' === $selected_grade ? 'active' : ''; ?>">
-                                <span>EVG 8</span>
-                            </a>
-                            <a href="<?php echo esc_url( add_query_arg( array( 'grade' => '7', 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo '7' === $selected_grade ? 'active' : ''; ?>">
-                                <span>EVG 7</span>
-                            </a>
-                            <a href="<?php echo esc_url( add_query_arg( array( 'grade' => 'raw', 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo 'raw' === $selected_grade ? 'active' : ''; ?>" style="grid-column: span 2;">
+                            <?php for ( $g = 10; $g >= 6; $g-- ) : ?>
+                                <a href="<?php echo esc_url( add_query_arg( array( 'grade' => (string)$g, 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo (string)$g === $selected_grade ? 'active' : ''; ?>">
+                                    <span>EVG <?php echo esc_html( $g ); ?></span>
+                                </a>
+                            <?php endfor; ?>
+                            <a href="<?php echo esc_url( add_query_arg( array( 'grade' => 'raw', 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo 'raw' === $selected_grade ? 'active' : ''; ?>">
                                 <span>RAW / UNGRADED</span>
                             </a>
                         </div>
@@ -564,7 +560,7 @@ get_header(); ?>
                     </div>
 
                     <!-- RESET FILTERS -->
-                    <?php if ( ! empty( $selected_category ) || ! empty( $selected_grade ) || ! empty( $selected_lang ) || ! empty( $selected_sort ) || ! empty( $search_keyword ) ) : ?>
+                    <?php if ( ! empty( $selected_category ) || ! empty( $selected_grade ) || ! empty( $selected_lang ) || ! empty( $search_keyword ) || ( ! empty( $selected_sort ) && 'newest' !== $selected_sort ) ) : ?>
                         <div style="padding-top: 15px; border-top: 1px solid var(--evg-border-hairline);">
                             <a href="<?php echo esc_url( get_permalink() ); ?>" style="color: #ff453a; font-size: 0.78rem; text-decoration: none; font-weight: 700;">
                                 ✕ <?php esc_html_e( 'Reset All Filters', 'evg-platform' ); ?>
@@ -616,7 +612,7 @@ get_header(); ?>
                             $stock_count = intval( $card->stock_quantity );
                             $is_in_stock = ( $stock_count > 0 );
                             
-                            // Target Checkout Routing
+                            // Direct Target Checkout Routing
                             $target_checkout_url = add_query_arg(
                                 array(
                                     'item_id'   => $card->id,
@@ -625,7 +621,7 @@ get_header(); ?>
                                 home_url( '/checkout' )
                             );
 
-                            // Intercept guest to sign-in then auto redirect to checkout
+                            // Intercept guest to sign-in then auto-redirect to checkout
                             if ( is_user_logged_in() ) {
                                 $action_button_url = $target_checkout_url;
                             } else {
@@ -690,7 +686,7 @@ get_header(); ?>
 
                                 <?php if ( $is_in_stock ) : ?>
                                     <a href="<?php echo esc_url( $action_button_url ); ?>" class="btn-evg-executive">
-                                        <?php esc_html_e( 'Buy It Now &bull; Checkout', 'evg-platform' ); ?>
+                                        <?php esc_html_e( 'Buy It Now • Checkout', 'evg-platform' ); ?>
                                     </a>
                                 <?php else : ?>
                                     <button type="button" class="btn-evg-executive btn-evg-soldout" disabled>
