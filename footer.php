@@ -23,7 +23,7 @@
                             <img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/img/logo.png" alt="Elite Vault Grading" style="max-height: 45px;" />
                         </div>
                     </div>
-                    <p class="text-muted text-center text-md-start mb-0">The premier grading service for Pokémon cards.</p>
+                    <p class="text-center text-md-start mb-0">The premier grading service for Pokémon cards.</p>
                 </div>
 
                 <!-- FOOTER 1: SERVICES -->
@@ -140,7 +140,7 @@
             <!-- COPYRIGHT BAR -->
             <div class="row mt-4 pt-4 border-top border-secondary">
                 <div class="col-12 text-center">
-                    <p class="footer-copyright mb-0 text-muted" style="font-size: 11px;">
+                    <p class="footer-copyright mb-0" style="font-size: 11px;">
                         &copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>. All rights reserved. | Created By <a href="https://www.social-splash.com" target="_blank" rel="noopener noreferrer" class="text-gold">Social Splash</a>
                     </p>
                 </div>
