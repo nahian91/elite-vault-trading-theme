@@ -193,20 +193,20 @@ get_header(); ?>
     min-height: 100vh;
     font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--evg-text-pure);
-    padding-bottom: 5rem;
     position: relative;
     z-index: 1;
+    overflow-x: hidden;
   }
 
   .evg-container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 3rem 20px 2rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl {
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.2rem, 3.8vw, 3rem);
+    font-size: clamp(2rem, 3.8vw, 3rem);
     font-weight: 600;
     line-height: 1.15;
     margin: 0 0 10px 0;
@@ -233,20 +233,20 @@ get_header(); ?>
     background: var(--evg-obsidian-panel);
     border: 1px solid var(--evg-border-hairline);
     border-radius: 8px;
-    padding: 2rem;
-    margin-bottom: 2rem;
+    padding: 30px 20px;
+    margin-bottom: 25px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   }
 
   .evg-form-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
-    gap: 28px;
+    gap: 24px;
     align-items: start;
   }
 
   .evg-field-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.15rem;
   }
   .evg-field-group label {
     display: block;
@@ -278,8 +278,8 @@ get_header(); ?>
     background: var(--evg-obsidian-elevated);
     border: 1px solid #222226;
     border-radius: 6px;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
+    padding: 20px 15px;
+    margin-bottom: 20px;
     position: relative;
     transition: border-color 0.2s ease;
   }
@@ -290,12 +290,14 @@ get_header(); ?>
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--evg-border-hairline);
+    flex-wrap: wrap;
+    gap: 6px;
   }
   .evg-card-item-title {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 700;
     color: var(--evg-gold-light);
     text-transform: uppercase;
@@ -305,7 +307,7 @@ get_header(); ?>
     background: transparent;
     border: none;
     color: #ff453a;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
     text-transform: uppercase;
@@ -317,16 +319,16 @@ get_header(); ?>
   .evg-card-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 12px;
   }
 
   .btn-evg-gold {
     background: var(--evg-gold-primary);
     color: var(--evg-text-charcoal) !important;
-    padding: 1rem 2rem;
-    font-size: 0.85rem;
+    padding: 1.1rem 1.5rem;
+    font-size: 0.82rem;
     font-weight: 800;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     border: none;
     border-radius: 4px;
@@ -337,6 +339,8 @@ get_header(); ?>
     width: 100%;
     transition: all 0.2s ease;
     text-decoration: none;
+    box-sizing: border-box;
+    text-align: center;
   }
   .btn-evg-gold:hover {
     background: var(--evg-gold-light);
@@ -349,7 +353,7 @@ get_header(); ?>
     color: var(--evg-gold-primary);
     padding: 12px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -369,33 +373,43 @@ get_header(); ?>
   /* Sticky Cost Summary Box */
   .evg-summary-card {
     position: sticky;
-    top: 30px;
+    top: 20px;
     background: var(--evg-obsidian-panel);
     border: 1px solid var(--evg-border-hairline);
     border-radius: 8px;
-    padding: 1.75rem;
+    padding: 25px 20px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
   }
   .evg-summary-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 1.5rem 0;
+    margin: 0 0 20px 0;
   }
   .evg-summary-list li {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
-    padding: 10px 0;
+    align-items: flex-start;
+    font-size: 0.82rem;
+    padding: 9px 0;
     border-bottom: 1px solid var(--evg-border-hairline);
     color: var(--evg-text-ash);
+    gap: 10px;
   }
   .evg-summary-list li strong {
     color: #ffffff;
+    text-align: right;
   }
 
-  @media (max-width: 992px) {
+  /* Responsive Media Queries */
+  @media (max-width: 991.98px) {
     .evg-form-grid { grid-template-columns: 1fr; }
-    .evg-card-row { grid-template-columns: 1fr; }
+    .evg-summary-card { position: static; margin-top: 10px; }
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-panel { padding: 25px 15px; }
+    .evg-card-row { grid-template-columns: 1fr; gap: 0; }
   }
 </style>
 
@@ -403,27 +417,27 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- HEADER -->
-        <header style="text-align: center; margin-bottom: 40px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro"><?php esc_html_e( 'Official Certification & Authentication', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Submit Cards For', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Grading', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto 15px auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php printf( esc_html__( 'Standard grading starting from £%s per card. Declare your Pokémon TCG assets, configure custom labels, and secure your allocation in our UK vault registry.', 'evg-platform' ), number_format( $price_standard, 2 ) ); ?>
             </p>
-            <div style="display: inline-flex; align-items: center; gap: 8px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 4px 14px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
+            <div style="display: inline-flex; align-items: center; gap: 8px; font-family: monospace; font-size: 0.72rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 5px 14px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint); flex-wrap: wrap; justify-content: center;">
                 <span><?php printf( esc_html__( 'ESTIMATED TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
             </div>
         </header>
 
         <?php if ( ! empty( $error_message ) ) : ?>
-            <div style="background: rgba(255, 69, 58, 0.1); border-left: 4px solid #ff453a; color: #ffffff; padding: 14px 18px; border-radius: 4px; margin-bottom: 25px; font-size: 0.88rem;">
+            <div style="background: rgba(255, 69, 58, 0.1); border-left: 4px solid #ff453a; color: #ffffff; padding: 14px 18px; border-radius: 4px; margin-bottom: 25px; font-size: 0.85rem;">
                 <?php echo esc_html( $error_message ); ?>
             </div>
         <?php endif; ?>
 
         <?php if ( 'yes' !== $accept_submissions ) : ?>
-            <div class="evg-panel" style="text-align: center; padding: 60px 20px;">
-                <h3 style="color: #ff453a; font-size: 1.3rem; font-weight: 700; margin-bottom: 10px;"><?php esc_html_e( 'Grading Queue Sold Out', 'evg-platform' ); ?></h3>
-                <p style="color: var(--evg-text-ash); max-width: 500px; margin: 0 auto 20px auto; font-size: 0.9rem;">
+            <div class="evg-panel" style="text-align: center; padding: 50px 15px;">
+                <h3 style="color: #ff453a; font-size: 1.25rem; font-weight: 700; margin-bottom: 10px;"><?php esc_html_e( 'Grading Queue Sold Out', 'evg-platform' ); ?></h3>
+                <p style="color: var(--evg-text-ash); max-width: 500px; margin: 0 auto 20px auto; font-size: 0.88rem; line-height: 1.5;">
                     <?php esc_html_e( 'Our laboratory capacity for this drop has been fully allocated to preserve our 5-10 business day turnaround standard. Please check back shortly or explore certified slabs on our public marketplace.', 'evg-platform' ); ?>
                 </p>
                 <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-gold" style="width: auto; display: inline-flex;">
@@ -443,7 +457,7 @@ get_header(); ?>
                         <!-- 1. Service Parameters -->
                         <div class="evg-panel">
                             <span class="evg-label-micro"><?php esc_html_e( '01 // Service Specification', 'evg-platform' ); ?></span>
-                            <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'Grading Tier & Slab Architecture', 'evg-platform' ); ?></h2>
+                            <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 18px 0;"><?php esc_html_e( 'Grading Tier & Slab Architecture', 'evg-platform' ); ?></h2>
 
                             <div class="evg-field-group">
                                 <label><?php esc_html_e( 'Grading Service Level', 'evg-platform' ); ?></label>
@@ -472,12 +486,12 @@ get_header(); ?>
 
                         <!-- 2. Declared Card Manifest -->
                         <div class="evg-panel">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 8px;">
                                 <div>
                                     <span class="evg-label-micro"><?php esc_html_e( '02 // Asset Ledger', 'evg-platform' ); ?></span>
-                                    <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Declared Pokémon Cards', 'evg-platform' ); ?></h2>
+                                    <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Declared Pokémon Cards', 'evg-platform' ); ?></h2>
                                 </div>
-                                <span id="evg-card-counter-badge" style="font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-primary); font-weight: 700;">
+                                <span id="evg-card-counter-badge" style="font-family: monospace; font-size: 0.72rem; color: var(--evg-gold-primary); font-weight: 700;">
                                     1 CARD IN ROSTER
                                 </span>
                             </div>
@@ -537,7 +551,7 @@ get_header(); ?>
                     <div>
                         <div class="evg-summary-card">
                             <span class="evg-label-micro"><?php esc_html_e( 'Billing Ledger', 'evg-platform' ); ?></span>
-                            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 15px 0;"><?php esc_html_e( 'Summary of Fees', 'evg-platform' ); ?></h3>
+                            <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Summary of Fees', 'evg-platform' ); ?></h3>
 
                             <ul class="evg-summary-list">
                                 <li>
@@ -554,9 +568,9 @@ get_header(); ?>
                                 </li>
                                 <li>
                                     <span>UK Return Delivery</span>
-                                    <strong style="color: #34c759; font-family: monospace; font-size: 0.75rem;">&pound;<?php echo esc_html( number_format( (float) $shipping_fee, 2 ) ); ?> (TRACKED)</strong>
+                                    <strong style="color: #34c759; font-family: monospace; font-size: 0.72rem;">&pound;<?php echo esc_html( number_format( (float) $shipping_fee, 2 ) ); ?> (TRACKED)</strong>
                                 </li>
-                                <li style="border-bottom: none; padding-top: 15px; font-size: 1.1rem; color: #ffffff;">
+                                <li style="border-bottom: none; padding-top: 12px; font-size: 1.05rem; color: #ffffff;">
                                     <strong>Total Authorized</strong>
                                     <strong id="summary-total-amount" style="color: var(--evg-gold-primary); font-family: monospace;">
                                         &pound;<?php echo esc_html( number_format( (float) ($price_standard + $shipping_fee), 2 ) ); ?>
@@ -572,7 +586,7 @@ get_header(); ?>
                                 <a href="<?php echo esc_url( add_query_arg( 'redirect_to', home_url( '/grade-now' ), home_url( '/sign-in' ) ) ); ?>" class="btn-evg-gold">
                                     <?php esc_html_e( 'Log In To Complete Order', 'evg-platform' ); ?> &rarr;
                                 </a>
-                                <p style="color: var(--evg-text-ash); font-size: 0.75rem; text-align: center; margin-top: 10px;">
+                                <p style="color: var(--evg-text-ash); font-size: 0.72rem; text-align: center; margin-top: 10px;">
                                     <?php esc_html_e( 'You will be redirected straight back after sign-in.', 'evg-platform' ); ?>
                                 </p>
                             <?php endif; ?>

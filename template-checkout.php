@@ -294,17 +294,18 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.4rem, 4vw, 3.2rem); 
+    font-size: clamp(2rem, 4vw, 3.2rem); 
     font-weight: 600; 
     letter-spacing: -0.02em; 
     line-height: 1.1; 
@@ -339,7 +340,7 @@ get_header(); ?>
   .evg-checkout-grid {
     display: grid;
     grid-template-columns: 1.15fr 1fr;
-    gap: 28px;
+    gap: 24px;
     align-items: start;
   }
 
@@ -368,7 +369,7 @@ get_header(); ?>
     border: 1px solid #222228;
     border-left: 3px solid var(--evg-gold-primary);
     border-radius: 6px;
-    padding: 20px 22px;
+    padding: 18px 20px;
     position: relative;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   }
@@ -376,13 +377,13 @@ get_header(); ?>
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
     border-bottom: 1px solid var(--evg-border-hairline);
   }
   .evg-address-name {
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     display: flex;
@@ -393,11 +394,11 @@ get_header(); ?>
     background: rgba(212, 175, 55, 0.12);
     border: 1px solid var(--evg-border-gold-faint);
     color: var(--evg-gold-primary);
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    padding: 3px 8px;
+    padding: 2px 6px;
     border-radius: 3px;
     font-family: monospace;
   }
@@ -405,7 +406,7 @@ get_header(); ?>
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     line-height: 1.6;
   }
   .evg-address-line {
@@ -416,7 +417,7 @@ get_header(); ?>
     color: var(--evg-gold-light);
     font-weight: 700;
     font-family: monospace;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     letter-spacing: 0.05em;
   }
 
@@ -466,22 +467,23 @@ get_header(); ?>
     display: flex; 
     justify-content: space-between; 
     align-items: flex-start;
-    padding: 0.9rem 0; 
+    padding: 0.8rem 0; 
     border-bottom: 1px solid var(--evg-border-hairline);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
+    gap: 10px;
   }
   .evg-meta-list li:last-child { border-bottom: none; }
 
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2rem; 
+    padding: 1.1rem 1.5rem; 
     display: flex; 
     align-items: center; 
     justify-content: center;
@@ -489,6 +491,7 @@ get_header(); ?>
     transition: all 0.3s ease; 
     text-decoration: none; 
     cursor: pointer;
+    box-sizing: border-box;
   }
   .btn-evg-executive:hover:not(:disabled) { 
     background: var(--evg-gold-light); 
@@ -499,9 +502,16 @@ get_header(); ?>
     cursor: not-allowed;
   }
 
-  @media (max-width: 992px) {
+  /* Responsive Media Queries */
+  @media (max-width: 991.98px) {
     .evg-checkout-grid { grid-template-columns: 1fr; }
-    .evg-address-details { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-address-details { grid-template-columns: 1fr; gap: 8px; }
+    .evg-address-details > div:last-child { align-items: flex-start !important; text-align: left !important; }
+    .evg-module { padding: 25px 15px !important; }
   }
 </style>
 
@@ -509,29 +519,29 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Stage 03 // Stripe Checkout', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Secure Stripe', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Authorization', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php esc_html_e( 'Review your manifest, verify your UK delivery address, and complete authorization via our Stripe gateway.', 'evg-platform' ); ?>
             </p>
         </header>
 
         <!-- Sold Out Notice if Disabled for Submissions -->
         <?php if ( 'submission' === $checkout_type && 'yes' !== $accept_submissions ) : ?>
-            <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 30px;">
+            <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 25px;">
                 <span class="evg-label-micro" style="color: #ff453a; margin-bottom: 6px;"><?php esc_html_e( 'INTAKE CAPACITY REACHED', 'evg-platform' ); ?></span>
-                <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'GRADING CURRENTLY SOLD OUT', 'evg-platform' ); ?></h3>
-                <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0;">
+                <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'GRADING CURRENTLY SOLD OUT', 'evg-platform' ); ?></h3>
+                <p style="color: var(--evg-text-ash); font-size: 0.82rem; margin: 0;">
                     <?php esc_html_e( 'We have reached maximum capacity for the current intake window. Existing consignments can finalize payment below.', 'evg-platform' ); ?>
                 </p>
             </div>
         <?php endif; ?>
 
         <!-- Checkout Error Notice -->
-        <div id="stripe-error-card" style="<?php echo empty( $checkout_error ) ? 'display:none;' : ''; ?> background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 30px;">
-            <span style="color: #ff453a; font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Authorization Error', 'evg-platform' ); ?></span>
-            <p id="stripe-error-message" style="color: #e5e5ea; font-size: 0.85rem; margin: 0;"><?php echo esc_html( $checkout_error ); ?></p>
+        <div id="stripe-error-card" style="<?php echo empty( $checkout_error ) ? 'display:none;' : ''; ?> background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px; margin-bottom: 25px;">
+            <span style="color: #ff453a; font-weight: 700; font-size: 0.82rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Authorization Error', 'evg-platform' ); ?></span>
+            <p id="stripe-error-message" style="color: #e5e5ea; font-size: 0.82rem; margin: 0;"><?php echo esc_html( $checkout_error ); ?></p>
         </div>
 
         <form action="<?php echo esc_url( add_query_arg( array() ) ); ?>" method="post" id="evg-stripe-payment-form">
@@ -547,11 +557,11 @@ get_header(); ?>
 
                 <!-- LEFT: CONSIGNMENT / ITEM MANIFEST & UK LOGISTICS -->
                 <div>
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         
                         <!-- Header -->
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px; margin-bottom: 25px;">
-                            <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
+                            <h2 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0;">
                                 <?php 
                                 if ( 'marketplace' === $checkout_type ) {
                                     esc_html_e( 'Item Acquisition Manifest', 'evg-platform' );
@@ -562,20 +572,20 @@ get_header(); ?>
                                 }
                                 ?>
                             </h2>
-                            <span style="color: var(--evg-gold-primary); font-size: 0.75rem; font-family: monospace; font-weight: 700;">
+                            <span style="color: var(--evg-gold-primary); font-size: 0.72rem; font-family: monospace; font-weight: 700;">
                                 REF: #<?php echo esc_html( $order_number ); ?>
                             </span>
                         </div>
 
                         <!-- Metadata -->
-                        <ul class="evg-meta-list" style="margin-bottom: 30px;">
+                        <ul class="evg-meta-list" style="margin-bottom: 25px;">
                             <li>
                                 <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Service / Acquisition Tier', 'evg-platform' ); ?></span>
-                                <span style="color: #ffffff; font-weight: 600;"><?php echo esc_html( $service_type ); ?></span>
+                                <span style="color: #ffffff; font-weight: 600; text-align: right;"><?php echo esc_html( $service_type ); ?></span>
                             </li>
                             <li>
                                 <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Slab Specification / Access', 'evg-platform' ); ?></span>
-                                <span style="color: var(--evg-gold-light); font-weight: 600;"><?php echo esc_html( $label_option ); ?></span>
+                                <span style="color: var(--evg-gold-light); font-weight: 600; text-align: right;"><?php echo esc_html( $label_option ); ?></span>
                             </li>
                             <?php if ( 'submission' === $checkout_type ) : ?>
                                 <li>
@@ -585,18 +595,18 @@ get_header(); ?>
                             <?php endif; ?>
                             <li>
                                 <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Client Account', 'evg-platform' ); ?></span>
-                                <span style="text-align: right; color: #ffffff; font-weight: 600;">
+                                <span style="text-align: right; color: #ffffff; font-weight: 600; word-break: break-all;">
                                     <?php echo esc_html( $customer_name ); ?><br>
                                     <?php if ( ! empty( $customer_mail ) ) : ?>
-                                        <span style="color: var(--evg-text-ash); font-size: 0.78rem; font-weight: normal;"><?php echo esc_html( $customer_mail ); ?></span>
+                                        <span style="color: var(--evg-text-ash); font-size: 0.75rem; font-weight: normal;"><?php echo esc_html( $customer_mail ); ?></span>
                                     <?php endif; ?>
                                 </span>
                             </li>
                         </ul>
 
                         <!-- Declared Cards / Marketplace Item Breakdown -->
-                        <div style="margin-bottom: 30px;">
-                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;">
+                        <div style="margin-bottom: 25px;">
+                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;">
                                 <?php 
                                 if ( 'marketplace' === $checkout_type ) {
                                     esc_html_e( 'Certified Item Specification', 'evg-platform' );
@@ -607,8 +617,8 @@ get_header(); ?>
                                 }
                                 ?>
                             </span>
-                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 18px; max-height: 220px; overflow-y: auto;">
-                                <ul class="evg-meta-list" style="font-size: 0.8rem; font-family: monospace;">
+                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 15px; max-height: 200px; overflow-y: auto;">
+                                <ul class="evg-meta-list" style="font-size: 0.78rem; font-family: monospace;">
                                     <?php if ( 'marketplace' === $checkout_type && $marketplace_item ) : ?>
                                         <li style="border-bottom: none; padding-bottom: 0;">
                                             <span style="color: #ffffff;">
@@ -648,8 +658,8 @@ get_header(); ?>
 
                         <!-- Return Logistics Coordinates -->
                         <?php if ( 'unlock_portfolio' !== $checkout_type ) : ?>
-                            <div style="margin-bottom: 30px;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
+                            <div style="margin-bottom: 25px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; flex-wrap: wrap; gap: 4px;">
                                     <span class="evg-label-micro" style="color: #ffffff; margin: 0;"><?php esc_html_e( 'UK Logistics Routing (Destination Address)', 'evg-platform' ); ?></span>
                                     <a href="<?php echo esc_url( home_url( '/my-account' ) ); ?>" style="color: var(--evg-gold-primary); text-decoration: none; font-size: 0.68rem; font-family: monospace; font-weight: 700;">
                                         <?php esc_html_e( 'EDIT ADDRESS →', 'evg-platform' ); ?>
@@ -674,17 +684,17 @@ get_header(); ?>
                                             <p class="evg-address-line">
                                                 <?php echo esc_html( trim( $town_city . ( $county ? ', ' . $county : '' ) ) ); ?>
                                             </p>
-                                            <p class="evg-address-line" style="font-size: 0.76rem; color: #5a5f6e; margin-top: 4px;">
+                                            <p class="evg-address-line" style="font-size: 0.74rem; color: #5a5f6e; margin-top: 4px;">
                                                 United Kingdom
                                             </p>
                                         </div>
                                         <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; text-align: right;">
                                             <div>
-                                                <span style="font-size: 0.65rem; color: var(--evg-text-ash); text-transform: uppercase; letter-spacing: 0.1em; display: block;"><?php esc_html_e( 'POSTAL CODE', 'evg-platform' ); ?></span>
+                                                <span style="font-size: 0.62rem; color: var(--evg-text-ash); text-transform: uppercase; letter-spacing: 0.1em; display: block;"><?php esc_html_e( 'POSTAL CODE', 'evg-platform' ); ?></span>
                                                 <span class="evg-address-postcode"><?php echo esc_html( $postcode ? strtoupper( $postcode ) : 'NOT SET' ); ?></span>
                                             </div>
                                             <?php if ( ! empty( $mobile_number ) ) : ?>
-                                                <span style="font-size: 0.75rem; color: var(--evg-text-ash); font-family: monospace;">
+                                                <span style="font-size: 0.72rem; color: var(--evg-text-ash); font-family: monospace; margin-top: 4px;">
                                                     📞 <?php echo esc_html( $mobile_number ); ?>
                                                 </span>
                                             <?php endif; ?>
@@ -696,7 +706,7 @@ get_header(); ?>
 
                         <!-- Special Directives -->
                         <div>
-                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( 'Special Handling Directives (Optional)', 'evg-platform' ); ?></span>
+                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 8px;"><?php esc_html_e( 'Special Handling Directives (Optional)', 'evg-platform' ); ?></span>
                             <textarea name="order_notes" rows="3" class="evg-form-control" placeholder="<?php esc_attr_e( 'Enter specific handling instructions or consignment notes for our grading desk...', 'evg-platform' ); ?>"></textarea>
                         </div>
 
@@ -704,15 +714,15 @@ get_header(); ?>
                 </div>
 
                 <!-- RIGHT: FINANCIAL LEDGER & STRIPE PAYMENT -->
-                <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div style="display: flex; flex-direction: column; gap: 20px;">
                     
                     <!-- Financial Ledger -->
-                    <div class="evg-module" style="padding: 35px 30px;">
-                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
+                        <h2 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 16px 0; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px;">
                             <?php esc_html_e( 'Financial Ledger', 'evg-platform' ); ?>
                         </h2>
                         
-                        <ul class="evg-meta-list" style="margin-bottom: 25px;">
+                        <ul class="evg-meta-list" style="margin-bottom: 20px;">
                             <?php if ( 'marketplace' === $checkout_type ) : ?>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Marketplace Certified Item', 'evg-platform' ); ?></span>
@@ -720,7 +730,7 @@ get_header(); ?>
                                 </li>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Insured UK Delivery & Tracking', 'evg-platform' ); ?></span>
-                                    <span style="color: #34c759; font-family: monospace; font-size: 0.78rem; font-weight: 700;"><?php esc_html_e( 'INCLUDED', 'evg-platform' ); ?></span>
+                                    <span style="color: #34c759; font-family: monospace; font-size: 0.75rem; font-weight: 700;"><?php esc_html_e( 'INCLUDED', 'evg-platform' ); ?></span>
                                 </li>
                             <?php elseif ( 'unlock_portfolio' === $checkout_type ) : ?>
                                 <li>
@@ -729,7 +739,7 @@ get_header(); ?>
                                 </li>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Access Fulfillment', 'evg-platform' ); ?></span>
-                                    <span style="color: #34c759; font-family: monospace; font-size: 0.78rem; font-weight: 700;"><?php esc_html_e( 'INSTANT UNLOCK', 'evg-platform' ); ?></span>
+                                    <span style="color: #34c759; font-family: monospace; font-size: 0.75rem; font-weight: 700;"><?php esc_html_e( 'INSTANT UNLOCK', 'evg-platform' ); ?></span>
                                 </li>
                             <?php else : ?>
                                 <li>
@@ -749,24 +759,24 @@ get_header(); ?>
                             <?php endif; ?>
                         </ul>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--evg-obsidian-elevated); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px;">
-                            <span style="color: #ffffff; font-weight: 600; font-size: 1rem;"><?php esc_html_e( 'Total Amount Payable', 'evg-platform' ); ?></span>
-                            <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.6rem; font-weight: 800;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--evg-obsidian-elevated); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px; flex-wrap: wrap; gap: 8px;">
+                            <span style="color: #ffffff; font-weight: 600; font-size: 0.95rem;"><?php esc_html_e( 'Total Amount Payable', 'evg-platform' ); ?></span>
+                            <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800;">
                                 &pound;<?php echo esc_html( number_format( (float) $total_payable, 2 ) ); ?>
                             </span>
                         </div>
                     </div>
 
                     <!-- Stripe Card Element Module -->
-                    <div class="evg-module" style="padding: 35px 30px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px; margin-bottom: 20px;">
-                            <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0;">
+                    <div class="evg-module" style="padding: 30px 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 12px; margin-bottom: 18px; flex-wrap: wrap; gap: 8px;">
+                            <h2 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0;">
                                 <?php esc_html_e( 'Stripe Secure Payment', 'evg-platform' ); ?>
                             </h2>
-                            <span style="color: var(--evg-gold-primary); font-size: 0.75rem; font-family: monospace; font-weight: 700;">STRIPE VAULT</span>
+                            <span style="color: var(--evg-gold-primary); font-size: 0.72rem; font-family: monospace; font-weight: 700;">STRIPE VAULT</span>
                         </div>
 
-                        <div style="margin-bottom: 20px;">
+                        <div style="margin-bottom: 18px;">
                             <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Credit / Debit Card Details', 'evg-platform' ); ?></label>
                             <div id="evg-stripe-card-element">
                                 <!-- Stripe Elements mounts card input here -->
@@ -774,22 +784,22 @@ get_header(); ?>
                         </div>
 
                         <!-- Terms Agreement -->
-                        <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 25px;">
+                        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 22px;">
                             <input class="evg-checkbox" type="checkbox" name="terms_agree" id="termsAgree" required>
-                            <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer; margin: 0;" for="termsAgree">
+                            <label style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; cursor: pointer; margin: 0;" for="termsAgree">
                                 <?php esc_html_e( 'I have reviewed the manifest and agree to the', 'evg-platform' ); ?> <a href="<?php echo esc_url( home_url( '/terms' ) ); ?>" style="color: #ffffff; text-decoration: underline;"><?php esc_html_e( 'Vault Terms & Conditions', 'evg-platform' ); ?></a>. <span style="color: var(--evg-gold-primary);">*</span>
                             </label>
                         </div>
 
                         <!-- Authorization Button -->
-                        <button type="submit" id="evg-stripe-submit-btn" class="btn-evg-executive" style="margin-bottom: 20px;" <?php disabled( ! empty( $checkout_error ) ); ?>>
+                        <button type="submit" id="evg-stripe-submit-btn" class="btn-evg-executive" style="margin-bottom: 16px;" <?php disabled( ! empty( $checkout_error ) ); ?>>
                             <span id="btn-label-text"><?php printf( esc_html__( 'Authorize £%s with Stripe', 'evg-platform' ), number_format( (float) $total_payable, 2 ) ); ?></span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;">
                                 <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                             </svg>
                         </button>
 
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--evg-text-ash); font-size: 0.7rem; font-family: monospace;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--evg-text-ash); font-size: 0.68rem; font-family: monospace; text-align: center;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                             <span><?php esc_html_e( '256-BIT ENCRYPTED STRIPE SSL GATEWAY', 'evg-platform' ); ?></span>
                         </div>
@@ -801,28 +811,28 @@ get_header(); ?>
         </form>
 
         <!-- 3. POST-AUTHORIZATION PROTOCOL -->
-        <div style="margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--evg-border-hairline);">
-            <div style="text-align: center; margin-bottom: 30px;">
+        <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--evg-border-hairline);">
+            <div style="text-align: center; margin-bottom: 25px;">
                 <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Next Steps', 'evg-platform' ); ?></span>
-                <h3 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Post-Authorization Protocol', 'evg-platform' ); ?></h3>
+                <h3 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Post-Authorization Protocol', 'evg-platform' ); ?></h3>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; text-align: center;">
-                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 25px 20px;">
-                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 8px;">01</span>
-                    <p style="color: #ffffff; font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Payment is verified via secure 256-bit encrypted Stripe handshake.', 'evg-platform' ); ?></p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; text-align: center;">
+                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px 15px;">
+                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.3rem; font-weight: 800; display: block; margin-bottom: 6px;">01</span>
+                    <p style="color: #ffffff; font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Payment is verified via secure 256-bit encrypted Stripe handshake.', 'evg-platform' ); ?></p>
                 </div>
-                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 25px 20px;">
-                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 8px;">02</span>
-                    <p style="color: #ffffff; font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'System generates your PDF manifest invoice and packaging packing slip.', 'evg-platform' ); ?></p>
+                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px 15px;">
+                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.3rem; font-weight: 800; display: block; margin-bottom: 6px;">02</span>
+                    <p style="color: #ffffff; font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'System generates your PDF manifest invoice and packaging packing slip.', 'evg-platform' ); ?></p>
                 </div>
-                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 25px 20px;">
-                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 8px;">03</span>
-                    <p style="color: #ffffff; font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'You securely package and dispatch your cards to our UK facility.', 'evg-platform' ); ?></p>
+                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px 15px;">
+                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.3rem; font-weight: 800; display: block; margin-bottom: 6px;">03</span>
+                    <p style="color: #ffffff; font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'You securely package and dispatch your cards to our UK facility.', 'evg-platform' ); ?></p>
                 </div>
-                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 25px 20px;">
-                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 8px;">04</span>
-                    <p style="color: #ffffff; font-size: 0.85rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Live stage tracking telemetry activates upon our barcode scan check-in.', 'evg-platform' ); ?></p>
+                <div style="background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px 15px;">
+                    <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.3rem; font-weight: 800; display: block; margin-bottom: 6px;">04</span>
+                    <p style="color: #ffffff; font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Live stage tracking telemetry activates upon our barcode scan check-in.', 'evg-platform' ); ?></p>
                 </div>
             </div>
         </div>

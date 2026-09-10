@@ -147,17 +147,18 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.2rem, 4vw, 3.2rem); 
+    font-size: clamp(2rem, 4vw, 3.2rem); 
     font-weight: 600; 
     letter-spacing: -0.02em; 
     line-height: 1.1; 
@@ -192,7 +193,7 @@ get_header(); ?>
   .evg-marketplace-layout {
     display: grid;
     grid-template-columns: 280px 1fr;
-    gap: 28px;
+    gap: 24px;
     align-items: start;
   }
 
@@ -206,6 +207,7 @@ get_header(); ?>
     outline: none;
     transition: all 0.2s ease;
     box-sizing: border-box;
+    width: 100%;
   }
   .evg-form-control:focus {
     border-color: var(--evg-gold-primary);
@@ -280,7 +282,7 @@ get_header(); ?>
 
   .evg-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
   }
 
@@ -403,7 +405,7 @@ get_header(); ?>
   }
   .evg-trust-cell {
     background: var(--evg-obsidian-panel); 
-    padding: 2rem 1.5rem; 
+    padding: 1.75rem 1.25rem; 
     text-align: center;
   }
   
@@ -413,13 +415,15 @@ get_header(); ?>
     list-style: none;
     padding: 0;
     margin: 0;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   .evg-pagination a, .evg-pagination span {
     background: var(--evg-obsidian-elevated); 
     border: 1px solid var(--evg-border-hairline); 
     color: var(--evg-text-ash);
-    font-size: 0.85rem; 
-    padding: 0.6rem 1.1rem; 
+    font-size: 0.82rem; 
+    padding: 0.5rem 0.9rem; 
     text-decoration: none;
     border-radius: 4px;
     font-family: monospace;
@@ -462,16 +466,22 @@ get_header(); ?>
   }
   .evg-lightbox-close {
     position: absolute;
-    top: 25px;
-    right: 30px;
+    top: 20px;
+    right: 25px;
     color: #ffffff;
     font-size: 2rem;
     cursor: pointer;
     font-weight: 700;
   }
 
-  @media (max-width: 992px) {
+  /* Responsive Media Queries */
+  @media (max-width: 991.98px) {
     .evg-marketplace-layout { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-cards-grid { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -479,20 +489,20 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Verified Inventory Access', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Public Slabs', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Marketplace', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php esc_html_e( 'Explore our live inventory of certified Pokémon cards, permanently secured in tamper-evident Elite Vault encapsulation.', 'evg-platform' ); ?>
             </p>
         </header>
 
         <!-- 2. MARKETPLACE CATALOGUE & FILTERS -->
-        <div class="evg-marketplace-layout" style="margin-bottom: 50px;">
+        <div class="evg-marketplace-layout" style="margin-bottom: 40px;">
 
             <!-- SIDEBAR FILTERS -->
             <aside>
-                <div class="evg-module" style="padding: 25px; position: sticky; top: 2rem;">
+                <div class="evg-module" style="padding: 20px;">
                     
                     <!-- SEARCH BOX -->
                     <form method="get" action="<?php echo esc_url( get_permalink() ); ?>" class="evg-search-box">
@@ -516,8 +526,8 @@ get_header(); ?>
                     </form>
 
                     <!-- CATEGORIES -->
-                    <div style="margin-bottom: 30px;">
-                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Category Index', 'evg-platform' ); ?></span>
+                    <div style="margin-bottom: 25px;">
+                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( 'Category Index', 'evg-platform' ); ?></span>
                         <div>
                             <a href="<?php echo esc_url( remove_query_arg( array( 'cat', 'pg' ) ) ); ?>" class="evg-filter-link <?php echo empty( $selected_category ) || 'all' === $selected_category ? 'active' : ''; ?>">
                                 <?php esc_html_e( 'All Inventory', 'evg-platform' ); ?>
@@ -537,8 +547,8 @@ get_header(); ?>
                     </div>
 
                     <!-- GRADE FILTER (1-10 Whole-Number Standard Scale) -->
-                    <div style="margin-bottom: 30px;">
-                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Certified Grade (1-10)', 'evg-platform' ); ?></span>
+                    <div style="margin-bottom: 25px;">
+                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( 'Certified Grade (1-10)', 'evg-platform' ); ?></span>
                         <div class="evg-control-matrix">
                             <?php for ( $g = 10; $g >= 6; $g-- ) : ?>
                                 <a href="<?php echo esc_url( add_query_arg( array( 'grade' => (string)$g, 'pg' => 1 ) ) ); ?>" class="evg-control-cell <?php echo (string)$g === $selected_grade ? 'active' : ''; ?>">
@@ -553,8 +563,8 @@ get_header(); ?>
 
                     <!-- LANGUAGE FILTER -->
                     <div style="margin-bottom: 20px;">
-                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Card Language', 'evg-platform' ); ?></span>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( 'Card Language', 'evg-platform' ); ?></span>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <a href="<?php echo esc_url( add_query_arg( array( 'lang' => 'English', 'pg' => 1 ) ) ); ?>" class="evg-filter-link <?php echo 'English' === $selected_lang ? 'active' : ''; ?>" style="padding: 4px 0;">
                                 <?php esc_html_e( 'English Releases', 'evg-platform' ); ?>
                             </a>
@@ -580,13 +590,13 @@ get_header(); ?>
             <div>
 
                 <!-- TOOLBAR -->
-                <div class="evg-module" style="padding: 14px 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div style="font-size: 0.85rem; font-family: monospace; color: var(--evg-text-ash);">
+                <div class="evg-module" style="padding: 12px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div style="font-size: 0.82rem; font-family: monospace; color: var(--evg-text-ash);">
                         <span style="color: #ffffff; font-weight: 700;"><?php esc_html_e( 'ACTIVE INVENTORY:', 'evg-platform' ); ?></span> 
                         <?php printf( esc_html__( '%d Certified Items Logged', 'evg-platform' ), $total_items ); ?>
                     </div>
                     
-                    <form method="get" action="<?php echo esc_url( get_permalink() ); ?>" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                    <form method="get" action="<?php echo esc_url( get_permalink() ); ?>" style="display: flex; align-items: center; gap: 8px; margin: 0;">
                         <?php if ( ! empty( $search_keyword ) ) : ?>
                             <input type="hidden" name="sq" value="<?php echo esc_attr( $search_keyword ); ?>">
                         <?php endif; ?>
@@ -601,7 +611,7 @@ get_header(); ?>
                         <?php endif; ?>
 
                         <label for="sortBy" class="evg-label-micro" style="margin: 0; color: var(--evg-text-ash);"><?php esc_html_e( 'Sort Order', 'evg-platform' ); ?></label>
-                        <select id="sortBy" name="sort" class="evg-form-control" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;" onchange="this.form.submit()">
+                        <select id="sortBy" name="sort" class="evg-form-control" style="padding: 6px 10px; font-size: 0.78rem; cursor: pointer; width: auto;" onchange="this.form.submit()">
                             <option value="newest" <?php selected( $selected_sort, 'newest' ); ?>><?php esc_html_e( 'Newest Additions', 'evg-platform' ); ?></option>
                             <option value="price-low" <?php selected( $selected_sort, 'price-low' ); ?>><?php esc_html_e( 'Price: Low to High', 'evg-platform' ); ?></option>
                             <option value="price-high" <?php selected( $selected_sort, 'price-high' ); ?>><?php esc_html_e( 'Price: High to Low', 'evg-platform' ); ?></option>
@@ -663,15 +673,15 @@ get_header(); ?>
                                     </div>
 
                                     <!-- CARD SPECIFICATION -->
-                                    <div style="margin-bottom: 20px;">
-                                        <h2 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; line-height: 1.3;">
+                                    <div style="margin-bottom: 16px;">
+                                        <h2 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 4px 0; line-height: 1.3;">
                                             <?php echo esc_html( $card->display_name ); ?>
                                         </h2>
                                         <p style="color: var(--evg-text-ash); font-size: 0.78rem; margin: 0 0 10px 0;">
                                             <?php echo esc_html( $card->display_set ); ?> &bull; #<?php echo esc_html( $card->display_number ); ?>
                                         </p>
                                         
-                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                                             <span style="background: #141416; border: 1px solid #2c2c30; color: var(--evg-gold-primary); font-size: 0.65rem; font-family: monospace; padding: 2px 6px; border-radius: 4px;">
                                                 <?php echo esc_html( strtoupper( substr( $card->display_lang, 0, 3 ) ) ); ?>
                                             </span>
@@ -682,7 +692,7 @@ get_header(); ?>
                                         
                                         <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 10px; border-top: 1px solid var(--evg-border-hairline);">
                                             <span class="evg-label-micro" style="margin: 0;"><?php esc_html_e( 'Valuation', 'evg-platform' ); ?></span>
-                                            <div style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: #ffffff;">
+                                            <div style="font-family: monospace; font-size: 1.15rem; font-weight: 800; color: #ffffff;">
                                                 &pound;<?php echo esc_html( number_format( (float) $card->price, 2 ) ); ?>
                                             </div>
                                         </div>
@@ -704,7 +714,7 @@ get_header(); ?>
 
                     <!-- PAGINATION CONTROLS -->
                     <?php if ( $total_pages > 1 ) : ?>
-                        <div style="display: flex; justify-content: center; margin-top: 40px;">
+                        <div style="display: flex; justify-content: center; margin-top: 35px;">
                             <div class="evg-pagination">
                                 <?php
                                 echo paginate_links( array(
@@ -721,9 +731,9 @@ get_header(); ?>
                     <?php endif; ?>
 
                 <?php else : ?>
-                    <div class="evg-module" style="padding: 60px 20px; text-align: center;">
-                        <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'No Certified Inventory Matched', 'evg-platform' ); ?></h3>
-                        <p style="color: var(--evg-text-ash); font-size: 0.9rem; max-width: 500px; margin: 0 auto 20px auto;">
+                    <div class="evg-module" style="padding: 50px 20px; text-align: center;">
+                        <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'No Certified Inventory Matched', 'evg-platform' ); ?></h3>
+                        <p style="color: var(--evg-text-ash); font-size: 0.88rem; max-width: 500px; margin: 0 auto 20px auto; line-height: 1.5;">
                             <?php esc_html_e( 'No certified slabs match your active search or filter matrix. Try resetting your query to explore available vault stock.', 'evg-platform' ); ?>
                         </p>
                         <a href="<?php echo esc_url( get_permalink() ); ?>" class="btn-evg-executive" style="display: inline-flex; width: auto; padding: 0.75rem 2rem;">
@@ -738,19 +748,19 @@ get_header(); ?>
         <!-- 3. TRUST MATRIX STRIP -->
         <div class="evg-trust-matrix">
             <div class="evg-trust-cell">
-                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( '100% AUTHENTIC', 'evg-platform' ); ?></span>
+                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.82rem; margin-bottom: 4px;"><?php esc_html_e( '100% AUTHENTIC', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Precision Verified', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-trust-cell">
-                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( 'SECURE VAULT', 'evg-platform' ); ?></span>
+                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.82rem; margin-bottom: 4px;"><?php esc_html_e( 'SECURE VAULT', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Tamper-Evident Slabs', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-trust-cell">
-                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( 'TRACKED POST', 'evg-platform' ); ?></span>
+                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.82rem; margin-bottom: 4px;"><?php esc_html_e( 'TRACKED POST', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'UK Insured Delivery', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-trust-cell">
-                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.85rem; margin-bottom: 4px;"><?php esc_html_e( 'REGISTRY MATCHED', 'evg-platform' ); ?></span>
+                <span style="display: block; font-weight: 700; color: #ffffff; font-size: 0.82rem; margin-bottom: 4px;"><?php esc_html_e( 'REGISTRY MATCHED', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Database Logged', 'evg-platform' ); ?></span>
             </div>
         </div>

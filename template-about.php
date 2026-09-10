@@ -50,17 +50,18 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 1140px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.4rem, 4vw, 3.2rem); 
+    font-size: clamp(2rem, 4vw, 3.2rem); 
     font-weight: 600; 
     letter-spacing: -0.02em; 
     line-height: 1.1; 
@@ -117,7 +118,7 @@ get_header(); ?>
   .evg-grid-cell:hover { background: var(--evg-obsidian-elevated); }
   
   .evg-feature-matrix { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-  .evg-audience-matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .evg-audience-matrix { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 
   /* Icons */
   .evg-icon { color: var(--evg-text-ash); margin-bottom: 1.25rem; transition: all 0.3s ease; }
@@ -134,19 +135,20 @@ get_header(); ?>
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2.5rem; 
+    padding: 1.1rem 2rem; 
     display: inline-flex; 
     align-items: center; 
     justify-content: center;
     transition: all 0.3s ease; 
     cursor: pointer; 
     text-decoration: none;
+    text-align: center;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
@@ -162,19 +164,20 @@ get_header(); ?>
   .btn-evg-outline {
     background: transparent; 
     color: var(--evg-gold-primary) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: 1px solid var(--evg-gold-primary); 
     border-radius: 4px; 
-    padding: 1.25rem 2.5rem; 
+    padding: 1.1rem 2rem; 
     display: inline-flex; 
     align-items: center; 
     justify-content: center;
     transition: all 0.3s ease; 
     cursor: pointer; 
     text-decoration: none;
+    text-align: center;
   }
   .btn-evg-outline:hover { 
     background: rgba(212, 175, 55, 0.1); 
@@ -182,9 +185,16 @@ get_header(); ?>
     border-color: var(--evg-gold-light); 
   }
 
-  @media (max-width: 992px) {
+  /* Responsive Media Queries */
+  @media (max-width: 991.98px) {
     .evg-identity-grid,
     .evg-telemetry-split { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-module { padding: 25px 20px !important; }
+    .btn-evg-executive, .btn-evg-outline { width: 100%; max-width: 320px; }
   }
 </style>
 
@@ -192,10 +202,10 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Corporate Overview', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'About', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Elite Vault Grading', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php printf( esc_html__( 'At Elite Vault Grading, we provide collectors with professional, reliable, and consistent card certification starting from £%s. Whether protecting a treasured personal collection, authenticating rare inventory, or preparing cards for market liquidity, our standard is precision you can trust.', 'evg-platform' ), number_format( $price_standard, 2 ) ); ?>
             </p>
             <div style="display: inline-flex; align-items: center; gap: 10px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 5px 16px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
@@ -204,35 +214,35 @@ get_header(); ?>
         </header>
 
         <!-- 2. WHO WE ARE & MISSION MODULES -->
-        <section class="evg-identity-grid" style="margin-bottom: 50px;">
+        <section class="evg-identity-grid" style="margin-bottom: 40px;">
             <!-- Column 1: Identity -->
-            <div class="evg-module" style="padding: 35px 30px;">
+            <div class="evg-module" style="padding: 30px 25px;">
                 <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( '01 // Identity', 'evg-platform' ); ?></span>
-                <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 16px 0;"><?php esc_html_e( 'Infrastructure & Heritage', 'evg-platform' ); ?></h2>
-                <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0 0 14px 0;">
+                <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Infrastructure & Heritage', 'evg-platform' ); ?></h2>
+                <p style="color: var(--evg-text-ash); font-size: 0.86rem; line-height: 1.65; margin: 0 0 14px 0;">
                     <?php esc_html_e( 'Elite Vault Grading is a dedicated UK-based trading card certification company. We are committed to helping collectors protect, preserve, and showcase their Pokémon TCG collections with uncompromising integrity.', 'evg-platform' ); ?>
                 </p>
-                <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
+                <p style="color: var(--evg-text-ash); font-size: 0.86rem; line-height: 1.65; margin: 0;">
                     <?php printf( esc_html__( 'Our experienced team inspects every card across 4 diagnostic pillars before sonic encapsulation in high-clarity protective slabs. With turnaround times from %s, whether submitting a single card or bulk batches, we deliver a grading experience that is transparent, highly responsive, and strictly professional.', 'evg-platform' ), esc_html( $turnaround_time ) ); ?>
                 </p>
             </div>
 
             <!-- Column 2: Mission & Philosophy -->
-            <div class="evg-module" style="padding: 35px 30px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="evg-module" style="padding: 30px 25px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( '02 // Philosophy', 'evg-platform' ); ?></span>
-                    <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 16px 0;"><?php esc_html_e( 'Core Mission Directive', 'evg-platform' ); ?></h2>
-                    <blockquote style="margin: 0 0 16px 0; padding-left: 18px; border-left: 2px solid var(--evg-gold-primary); color: var(--evg-gold-light); font-style: italic; font-size: 0.95rem; line-height: 1.6;">
+                    <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Core Mission Directive', 'evg-platform' ); ?></h2>
+                    <blockquote style="margin: 0 0 14px 0; padding-left: 15px; border-left: 2px solid var(--evg-gold-primary); color: var(--evg-gold-light); font-style: italic; font-size: 0.92rem; line-height: 1.6;">
                         "<?php esc_html_e( 'To engineer a trusted grading service offering premium protection and outstanding customer service, rendering professional card certification accessible and transparent for all collectors.', 'evg-platform' ); ?>"
                     </blockquote>
-                    <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
+                    <p style="color: var(--evg-text-ash); font-size: 0.86rem; line-height: 1.65; margin: 0;">
                         <?php esc_html_e( 'We are passionate about safeguarding the physical condition, verifiable authenticity, and long-term collectible value of your collection.', 'evg-platform' ); ?>
                     </p>
                 </div>
 
-                <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 16px; margin-top: 20px;">
+                <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 14px; margin-top: 20px;">
                     <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 6px;"><?php esc_html_e( 'UK Operations & Support Hub', 'evg-platform' ); ?></span>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;">
+                    <p style="color: var(--evg-text-ash); font-size: 0.78rem; line-height: 1.5; margin: 0;">
                         <?php printf( esc_html__( 'Processing English and Japanese TCG submissions via Royal Mail Special Delivery. Contact our desk at %s.', 'evg-platform' ), '<strong style="color: var(--evg-gold-primary);">' . esc_html( $support_email ) . '</strong>' ); ?>
                     </p>
                 </div>
@@ -240,8 +250,8 @@ get_header(); ?>
         </section>
 
         <!-- 3. WHY CHOOSE ELITE VAULT (8 PILLAR MATRIX) -->
-        <section style="margin-bottom: 50px;">
-            <div style="text-align: center; margin-bottom: 25px;">
+        <section style="margin-bottom: 40px;">
+            <div style="text-align: center; margin-bottom: 20px;">
                 <span class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( '03 // Standard of Excellence', 'evg-platform' ); ?></span>
                 <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Why Choose Elite Vault Grading?', 'evg-platform' ); ?></h2>
             </div>
@@ -291,8 +301,8 @@ get_header(); ?>
         </section>
 
         <!-- 4. WHO WE GRADE FOR -->
-        <section style="margin-bottom: 50px;">
-            <div style="text-align: center; margin-bottom: 25px;">
+        <section style="margin-bottom: 40px;">
+            <div style="text-align: center; margin-bottom: 20px;">
                 <span class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( '04 // Service Scope', 'evg-platform' ); ?></span>
                 <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Who We Grade For', 'evg-platform' ); ?></h2>
             </div>
@@ -334,22 +344,22 @@ get_header(); ?>
         </section>
 
         <!-- 5. TRANSPARENCY & DAMAGE PORTFOLIO -->
-        <section class="evg-module" style="padding: 35px 30px; margin-bottom: 50px;">
+        <section class="evg-module" style="padding: 30px 25px; margin-bottom: 40px;">
             <div class="evg-telemetry-split">
                 <div>
                     <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( '05 // Diagnostic Telemetry', 'evg-platform' ); ?></span>
-                    <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Optical Transparency: Microscopic Fault Portfolios', 'evg-platform' ); ?></h2>
-                    <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0 0 12px 0;">
+                    <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Optical Transparency: Microscopic Fault Portfolios', 'evg-platform' ); ?></h2>
+                    <p style="color: var(--evg-text-ash); font-size: 0.86rem; line-height: 1.65; margin: 0 0 12px 0;">
                         <?php esc_html_e( 'Elite Vault Grading provides direct diagnostic evidence for completed assessments. Every certified slab lookup includes up to 3 complimentary defect scans for instant inspection.', 'evg-platform' ); ?>
                     </p>
-                    <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
+                    <p style="color: var(--evg-text-ash); font-size: 0.86rem; line-height: 1.65; margin: 0;">
                         <?php printf( esc_html__( 'Collectors and secondary-market buyers can unlock the full high-resolution microscopic damage portfolio—complete with all flaw angles, coordinate mapping, and sub-score rationale—for a one-time unlock fee of £%s.', 'evg-platform' ), number_format( $unlock_fee, 2 ) ); ?>
                     </p>
                 </div>
-                <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px; padding: 25px; text-align: center;">
+                <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px; padding: 20px; text-align: center; margin-top: 15px;">
                     <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'ACTIVE PLATFORM FEATURE', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Fault Evidence Telemetry', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;">
+                    <h3 style="color: #ffffff; font-size: 1.05rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Fault Evidence Telemetry', 'evg-platform' ); ?></h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.78rem; line-height: 1.5; margin: 0;">
                         <?php printf( esc_html__( '3 free previews on all verifications, with comprehensive high-res fault scans unlockable for just £%s.', 'evg-platform' ), number_format( $unlock_fee, 2 ) ); ?>
                     </p>
                 </div>
@@ -357,13 +367,13 @@ get_header(); ?>
         </section>
 
         <!-- 6. FINAL CTA -->
-        <section class="evg-module" style="padding: 40px; text-align: center;">
+        <section class="evg-module" style="padding: 35px 20px; text-align: center;">
             <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 10px;"><?php esc_html_e( 'Initialize Asset Intake', 'evg-platform' ); ?></span>
-            <h2 style="color: #ffffff; font-size: 1.4rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Ready to Protect Your Collection?', 'evg-platform' ); ?></h2>
-            <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.9rem; line-height: 1.6;">
+            <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Ready to Protect Your Collection?', 'evg-platform' ); ?></h2>
+            <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.88rem; line-height: 1.6;">
                 <?php printf( esc_html__( 'Submit your Pokémon cards today from £%s per card for professional grading and secure encapsulation with %s turnaround.', 'evg-platform' ), number_format( $price_standard, 2 ), esc_html( $turnaround_time ) ); ?>
             </p>
-            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                 <?php if ( 'yes' === $accept_submissions ) : ?>
                     <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
                         <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>

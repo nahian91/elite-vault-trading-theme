@@ -124,7 +124,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submis
 
 // Prefill collector information if logged in
 if ( empty( $form_data ) && is_user_logged_in() ) {
-    $current_user               = wp_get_current_user();
+    $current_user                 = wp_get_current_user();
     $form_data['customer_name'] = $current_user->display_name;
     $form_data['email_address'] = $current_user->user_email;
 }
@@ -159,17 +159,18 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 860px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.2rem, 4vw, 3rem); 
+    font-size: clamp(2rem, 3.5vw, 2.8rem); 
     font-weight: 600; 
     letter-spacing: -0.02em; 
     line-height: 1.1; 
@@ -197,7 +198,7 @@ get_header(); ?>
     background: var(--evg-obsidian-panel);
     border: 1px solid var(--evg-border-hairline);
     border-radius: 8px;
-    padding: 40px;
+    padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
@@ -232,9 +233,9 @@ get_header(); ?>
   
   .evg-control-cell {
     flex: 1;
-    min-width: 80px;
+    min-width: 60px;
     background: var(--evg-obsidian-panel);
-    padding: 1.1rem 0;
+    padding: 1rem 0.5rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -242,12 +243,12 @@ get_header(); ?>
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     user-select: none;
   }
   
   .evg-control-cell span {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--evg-text-ash);
     font-family: monospace;
     font-weight: 700;
@@ -304,13 +305,13 @@ get_header(); ?>
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2rem; 
+    padding: 1.1rem 2rem; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -318,14 +319,20 @@ get_header(); ?>
     transition: all 0.3s ease; 
     cursor: pointer;
     text-decoration: none;
+    box-sizing: border-box;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
   }
 
-  @media (max-width: 768px) {
-    .evg-module { padding: 25px; }
+  /* Responsive Media Queries */
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-module { padding: 25px 15px; }
+    .evg-control-matrix { flex-direction: column; }
+    .evg-control-cell { flex-direction: row; justify-content: flex-start; padding: 0.8rem 1rem; gap: 10px; }
+    div[style*="grid-template-columns: repeat(auto-fit"] { grid-template-columns: 1fr !important; gap: 12px !important; }
   }
 </style>
 
@@ -333,30 +340,30 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 40px;">
+        <header style="text-align: center; margin-bottom: 35px;">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '01 // Quality Assurance', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Collector', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Experience & Reviews', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 620px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 620px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php esc_html_e( 'Your feedback directly guides our certification standards. We review all submissions to continuously optimize our grading workflows and UK facilities.', 'evg-platform' ); ?>
             </p>
         </header>
 
         <!-- 2. FEEDBACK MODULE -->
-        <div class="evg-module" style="margin-bottom: 30px;">
+        <div class="evg-module" style="margin-bottom: 25px;">
             
             <!-- STATUS NOTIFICATION BANNER -->
             <?php if ( 'success' === $feedback_status ) : ?>
-                <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 4px; padding: 25px; text-align: center; margin-bottom: 30px;">
-                    <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(52, 199, 89, 0.1); border: 1px solid rgba(52, 199, 89, 0.4); color: #34c759; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 4px; padding: 20px; text-align: center; margin-bottom: 25px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(52, 199, 89, 0.1); border: 1px solid rgba(52, 199, 89, 0.4); color: #34c759; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Report Registered Successfully', 'evg-platform' ); ?></h3>
-                    <p style="color: #e5e5ea; font-size: 0.85rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $feedback_message ); ?></p>
+                    <h3 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin: 0 0 4px 0;"><?php esc_html_e( 'Report Registered Successfully', 'evg-platform' ); ?></h3>
+                    <p style="color: #e5e5ea; font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $feedback_message ); ?></p>
                 </div>
             <?php elseif ( 'error' === $feedback_status ) : ?>
-                <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 25px;">
-                    <span style="color: #ff453a; font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Submission Error', 'evg-platform' ); ?></span>
-                    <p style="color: #e5e5ea; font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $feedback_message ); ?></p>
+                <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px; margin-bottom: 20px;">
+                    <span style="color: #ff453a; font-weight: 700; font-size: 0.82rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Submission Error', 'evg-platform' ); ?></span>
+                    <p style="color: #e5e5ea; font-size: 0.8rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $feedback_message ); ?></p>
                 </div>
             <?php endif; ?>
 
@@ -364,26 +371,26 @@ get_header(); ?>
                 <?php wp_nonce_field( 'evg_submit_feedback_action', 'evg_feedback_submission_nonce' ); ?>
                 
                 <!-- IDENTIFICATION SECTION -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-bottom: 20px;">
                     <div>
-                        <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Registered Name (Optional)', 'evg-platform' ); ?></label>
+                        <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Registered Name (Optional)', 'evg-platform' ); ?></label>
                         <input type="text" name="feedback_name" class="evg-form-control" placeholder="e.g. John Doe" value="<?php echo esc_attr( $form_data['customer_name'] ?? '' ); ?>">
                     </div>
                     <div>
-                        <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Account Email (Optional)', 'evg-platform' ); ?></label>
+                        <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Account Email (Optional)', 'evg-platform' ); ?></label>
                         <input type="email" name="feedback_email" class="evg-form-control" placeholder="client@example.com" value="<?php echo esc_attr( $form_data['email_address'] ?? '' ); ?>">
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Order Reference Number (Optional)', 'evg-platform' ); ?></label>
+                        <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Order Reference Number (Optional)', 'evg-platform' ); ?></label>
                         <input type="text" name="feedback_order_num" class="evg-form-control" placeholder="e.g. EVG-84920" value="<?php echo esc_attr( $form_data['order_number'] ?? '' ); ?>">
                     </div>
                 </div>
 
-                <div style="height: 1px; background: var(--evg-border-hairline); margin: 30px 0;"></div>
+                <div style="height: 1px; background: var(--evg-border-hairline); margin: 25px 0;"></div>
 
                 <!-- CATEGORY -->
-                <div style="margin-bottom: 30px;">
-                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Feedback Scope / Category', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                <div style="margin-bottom: 25px;">
+                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Feedback Scope / Category', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                     <select name="feedback_type" class="evg-form-control" style="cursor: pointer;" required>
                         <option value="General Feedback" <?php selected( ( $form_data['feedback_type'] ?? '' ), 'General Feedback' ); ?>><?php esc_html_e( 'General Feedback', 'evg-platform' ); ?></option>
                         <option value="Grading Experience" <?php selected( ( $form_data['feedback_type'] ?? '' ), 'Grading Experience' ); ?>><?php esc_html_e( 'Grading Quality & Accuracy', 'evg-platform' ); ?></option>
@@ -395,8 +402,8 @@ get_header(); ?>
                 </div>
 
                 <!-- STAR RATING (Control Matrix) -->
-                <div style="margin-bottom: 30px;">
-                    <label class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Overall Rating', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                <div style="margin-bottom: 25px;">
+                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Overall Rating', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                     <div class="evg-control-matrix">
                         <?php 
                         $current_rating = max( 1, min( 5, intval( $form_data['rating'] ?? 5 ) ) );
@@ -404,7 +411,7 @@ get_header(); ?>
                         ?>
                             <label class="evg-control-cell">
                                 <input type="radio" name="experience_rating" value="<?php echo esc_attr( $i ); ?>" <?php checked( $current_rating, $i ); ?> required>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                                 <span><?php echo esc_html( number_format( $i, 1 ) ); ?></span>
                             </label>
                         <?php endfor; ?>
@@ -412,14 +419,14 @@ get_header(); ?>
                 </div>
 
                 <!-- FEEDBACK DETAILS -->
-                <div style="margin-bottom: 30px;">
-                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Your Feedback Message', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                <div style="margin-bottom: 25px;">
+                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Your Feedback Message', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                     <textarea name="feedback_text" rows="5" class="evg-form-control" placeholder="<?php esc_attr_e( 'Please provide detailed impressions regarding your card grading, packaging, or customer service experience...', 'evg-platform' ); ?>" required><?php echo esc_textarea( $form_data['feedback_text'] ?? '' ); ?></textarea>
                 </div>
 
                 <!-- RECOMMENDATION OPTIONS -->
-                <div style="margin-bottom: 30px;">
-                    <label class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Would you recommend Elite Vault Grading?', 'evg-platform' ); ?></label>
+                <div style="margin-bottom: 25px;">
+                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Would you recommend Elite Vault Grading?', 'evg-platform' ); ?></label>
                     <div class="evg-control-matrix" style="max-width: 440px;">
                         <?php 
                         $current_rec = $form_data['recommend'] ?? 'Yes';
@@ -435,10 +442,10 @@ get_header(); ?>
                 </div>
 
                 <!-- TESTIMONIAL PERMISSION CONSENT -->
-                <div style="background: var(--evg-obsidian-base); border: 1px solid #1a1c22; border-radius: 4px; padding: 20px; margin-bottom: 30px;">
-                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="background: var(--evg-obsidian-base); border: 1px solid #1a1c22; border-radius: 4px; padding: 16px; margin-bottom: 25px;">
+                    <div style="display: flex; align-items: flex-start; gap: 10px;">
                         <input class="evg-checkbox" type="checkbox" name="permission_use" id="permUse" value="1" <?php checked( ( $form_data['permission_to_use'] ?? 1 ), 1 ); ?>>
-                        <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer; margin: 0;" for="permUse">
+                        <label style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; cursor: pointer; margin: 0;" for="permUse">
                             <?php esc_html_e( 'I grant Elite Vault Grading permission to feature this feedback as a public verified testimonial on the website.', 'evg-platform' ); ?>
                         </label>
                     </div>
@@ -459,7 +466,7 @@ get_header(); ?>
         <div style="text-align: center;">
             <p style="color: var(--evg-text-ash); font-size: 0.78rem; line-height: 1.6; margin: 0;">
                 <?php esc_html_e( 'For immediate technical support regarding active submissions, please contact our dispatch team at', 'evg-platform' ); ?><br>
-                <a href="mailto:<?php echo esc_attr( $support_email ); ?>" style="color: #ffffff; text-decoration: underline; margin-top: 4px; display: inline-block;">
+                <a href="mailto:<?php echo esc_attr( $support_email ); ?>" style="color: #ffffff; text-decoration: underline; margin-top: 4px; display: inline-block; word-break: break-all;">
                     <?php echo esc_html( $support_email ); ?>
                 </a>
             </p>

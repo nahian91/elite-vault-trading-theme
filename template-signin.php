@@ -132,12 +132,13 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 520px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
@@ -170,13 +171,13 @@ get_header(); ?>
     background: var(--evg-obsidian-panel);
     border: 1px solid var(--evg-border-hairline);
     border-radius: 8px;
-    padding: 40px;
+    padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
   .evg-auth-emblem {
-    width: 64px; 
-    height: 64px; 
+    width: 60px; 
+    height: 60px; 
     border-radius: 50%;
     background: var(--evg-obsidian-elevated);
     border: 1px solid var(--evg-border-gold-faint);
@@ -204,8 +205,8 @@ get_header(); ?>
     background: transparent; 
     border: none; 
     color: var(--evg-text-ash);
-    padding-left: 1rem; 
-    padding-right: 0.25rem; 
+    padding-left: 0.85rem; 
+    padding-right: 0.2rem; 
     display: flex; 
     align-items: center;
   }
@@ -216,10 +217,11 @@ get_header(); ?>
     border: none !important;
     color: var(--evg-text-pure) !important; 
     font-size: 0.9rem;
-    padding: 0.85rem 1rem 0.85rem 0.5rem; 
+    padding: 0.85rem 0.85rem 0.85rem 0.4rem; 
     box-shadow: none !important; 
     width: 100%;
     outline: none;
+    box-sizing: border-box;
   }
   .evg-form-control::placeholder { color: #4a4f5c; font-weight: 300; }
 
@@ -229,7 +231,7 @@ get_header(); ?>
     border: none;
     cursor: pointer;
     color: var(--evg-text-ash);
-    padding: 0 1rem;
+    padding: 0 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -277,7 +279,7 @@ get_header(); ?>
   }
   .evg-feature-cell {
     background: var(--evg-obsidian-panel); 
-    padding: 1.25rem 1rem; 
+    padding: 1.1rem 0.85rem; 
     text-align: center; 
     transition: background 0.3s ease;
   }
@@ -286,13 +288,13 @@ get_header(); ?>
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2rem; 
+    padding: 1.1rem 1.5rem; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -300,10 +302,17 @@ get_header(); ?>
     transition: all 0.3s ease; 
     text-decoration: none; 
     cursor: pointer;
+    box-sizing: border-box;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-module { padding: 25px 15px; }
+    .evg-feature-matrix { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -311,9 +320,9 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. AUTHENTICATION HEADER -->
-        <header style="text-align: center; margin-bottom: 35px;">
-            <div class="evg-auth-emblem" style="margin-bottom: 20px;">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <header style="text-align: center; margin-bottom: 30px;">
+            <div class="evg-auth-emblem" style="margin-bottom: 16px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
@@ -321,24 +330,24 @@ get_header(); ?>
             
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Security Clearance', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Terminal', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Sign In', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 420px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 420px; margin: 0 auto; font-size: 0.9rem; line-height: 1.6;">
                 <?php esc_html_e( 'Access your member dashboard to track live grading stages, review submitted cards, and manage marketplace purchases.', 'evg-platform' ); ?>
             </p>
         </header>
 
         <!-- 2. LOGIN FORM MODULE -->
-        <div class="evg-module" style="margin-bottom: 25px;">
+        <div class="evg-module" style="margin-bottom: 20px;">
             
             <!-- NOTIFICATION / ERROR MESSAGES -->
             <?php if ( ! empty( $login_error ) ) : ?>
-                <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px 18px; margin-bottom: 25px;" role="alert">
-                    <div style="display: flex; align-items: center; gap: 8px; color: #ff453a; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px;">
+                <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px; margin-bottom: 20px;" role="alert">
+                    <div style="display: flex; align-items: center; gap: 8px; color: #ff453a; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                         </svg>
                         <span><?php esc_html_e( 'Authorization Error', 'evg-platform' ); ?></span>
                     </div>
-                    <p style="color: #e5e5ea; margin: 0; font-size: 0.8rem;">
+                    <p style="color: #e5e5ea; margin: 0; font-size: 0.78rem;">
                         <?php echo esc_html( $login_error ); ?>
                     </p>
                 </div>
@@ -352,8 +361,8 @@ get_header(); ?>
                 <?php endif; ?>
 
                 <!-- USERNAME / EMAIL FIELD -->
-                <div style="margin-bottom: 20px;">
-                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Email Address or Username', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                <div style="margin-bottom: 18px;">
+                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Email Address or Username', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                     <div class="evg-input-group">
                         <span class="evg-input-addon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -365,10 +374,10 @@ get_header(); ?>
                 </div>
 
                 <!-- PASSWORD FIELD WITH EYE TOGGLE -->
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="margin-bottom: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
                         <label class="evg-label-micro" style="margin: 0;"><?php esc_html_e( 'Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
-                        <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" style="color: var(--evg-gold-light); text-decoration: none; font-size: 0.75rem;">
+                        <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" style="color: var(--evg-gold-light); text-decoration: none; font-size: 0.72rem;">
                             <?php esc_html_e( 'Reset Credentials?', 'evg-platform' ); ?>
                         </a>
                     </div>
@@ -387,20 +396,20 @@ get_header(); ?>
                 </div>
 
                 <!-- REMEMBER ME -->
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
                     <input class="evg-checkbox" type="checkbox" name="rememberme" id="rememberMe" value="forever">
-                    <label style="color: var(--evg-text-ash); font-size: 0.85rem; cursor: pointer; margin: 0;" for="rememberMe">
+                    <label style="color: var(--evg-text-ash); font-size: 0.82rem; cursor: pointer; margin: 0;" for="rememberMe">
                         <?php esc_html_e( 'Preserve authorization token on this device', 'evg-platform' ); ?>
                     </label>
                 </div>
 
                 <!-- SUBMIT BUTTON -->
-                <button type="submit" name="wp-submit" class="btn-evg-executive" style="margin-bottom: 25px;">
+                <button type="submit" name="wp-submit" class="btn-evg-executive" style="margin-bottom: 20px;">
                     <?php esc_html_e( 'Sign In', 'evg-platform' ); ?>
                 </button>
 
                 <!-- SECURITY BADGE CALLOUT -->
-                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--evg-text-ash); font-size: 0.7rem; font-family: monospace; margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--evg-text-ash); font-size: 0.68rem; font-family: monospace; margin-bottom: 20px; text-align: center;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-muted)" stroke-width="2">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
@@ -414,8 +423,8 @@ get_header(); ?>
                     $register_url = add_query_arg( 'redirect_to', $redirect_to, $register_url );
                 }
                 ?>
-                <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
-                    <a href="<?php echo esc_url( $register_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
+                <div style="text-align: center; padding-top: 16px; border-top: 1px solid var(--evg-border-hairline);">
+                    <a href="<?php echo esc_url( $register_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 6px;">
                         <?php esc_html_e( 'Create Account →', 'evg-platform' ); ?>
                     </a>
                 </div>
@@ -426,19 +435,19 @@ get_header(); ?>
         <!-- 3. CAPABILITIES PREVIEW MATRIX -->
         <section class="evg-feature-matrix" aria-label="<?php esc_attr_e( 'Portal Capabilities', 'evg-platform' ); ?>">
             <div class="evg-feature-cell">
-                <span style="display: block; color: #ffffff; font-size: 0.8rem; margin-bottom: 4px;"><?php esc_html_e( 'Live Telemetry', 'evg-platform' ); ?></span>
+                <span style="display: block; color: #ffffff; font-size: 0.78rem; margin-bottom: 3px;"><?php esc_html_e( 'Live Telemetry', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Order Tracking', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-feature-cell">
-                <span style="display: block; color: #ffffff; font-size: 0.8rem; margin-bottom: 4px;"><?php esc_html_e( 'Asset Registry', 'evg-platform' ); ?></span>
+                <span style="display: block; color: #ffffff; font-size: 0.78rem; margin-bottom: 3px;"><?php esc_html_e( 'Asset Registry', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Intake Records', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-feature-cell">
-                <span style="display: block; color: #ffffff; font-size: 0.8rem; margin-bottom: 4px;"><?php esc_html_e( 'Secure Data', 'evg-platform' ); ?></span>
+                <span style="display: block; color: #ffffff; font-size: 0.78rem; margin-bottom: 3px;"><?php esc_html_e( 'Secure Data', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Encrypted Slots', 'evg-platform' ); ?></span>
             </div>
             <div class="evg-feature-cell">
-                <span style="display: block; color: #ffffff; font-size: 0.8rem; margin-bottom: 4px;"><?php esc_html_e( 'UK Support', 'evg-platform' ); ?></span>
+                <span style="display: block; color: #ffffff; font-size: 0.78rem; margin-bottom: 3px;"><?php esc_html_e( 'UK Support', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Direct Desk', 'evg-platform' ); ?></span>
             </div>
         </section>

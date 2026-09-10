@@ -47,15 +47,15 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_update_profile_
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_update_profile_nonce'] ), 'evg_update_profile_action' ) ) {
         $active_tab_slug = 'tab-profile';
         
-        $first_name     = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
-        $last_name      = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
-        $mobile_number  = sanitize_text_field( wp_unslash( $_POST['mobile_number'] ?? '' ) );
-        $house_number   = sanitize_text_field( wp_unslash( $_POST['house_number'] ?? '' ) );
+        $first_name    = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
+        $last_name     = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
+        $mobile_number = sanitize_text_field( wp_unslash( $_POST['mobile_number'] ?? '' ) );
+        $house_number  = sanitize_text_field( wp_unslash( $_POST['house_number'] ?? '' ) );
         $street_address = sanitize_text_field( wp_unslash( $_POST['street_address'] ?? '' ) );
-        $town_city      = sanitize_text_field( wp_unslash( $_POST['town_city'] ?? '' ) );
-        $county         = sanitize_text_field( wp_unslash( $_POST['county'] ?? '' ) );
-        $raw_postcode   = sanitize_text_field( wp_unslash( $_POST['postcode'] ?? '' ) );
-        $postcode       = strtoupper( trim( preg_replace( '/\s+/', ' ', $raw_postcode ) ) );
+        $town_city     = sanitize_text_field( wp_unslash( $_POST['town_city'] ?? '' ) );
+        $county        = sanitize_text_field( wp_unslash( $_POST['county'] ?? '' ) );
+        $raw_postcode  = sanitize_text_field( wp_unslash( $_POST['postcode'] ?? '' ) );
+        $postcode      = strtoupper( trim( preg_replace( '/\s+/', ' ', $raw_postcode ) ) );
 
         wp_update_user( array(
             'ID'           => $current_user_id,
@@ -219,12 +219,13 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
@@ -264,7 +265,7 @@ get_header(); ?>
   .evg-dashboard-layout {
     display: grid;
     grid-template-columns: 280px 1fr;
-    gap: 28px;
+    gap: 24px;
     align-items: start;
   }
 
@@ -282,8 +283,8 @@ get_header(); ?>
     color: var(--evg-text-ash);
     border: none;
     border-left: 2px solid transparent;
-    padding: 1.1rem 1.25rem;
-    font-size: 0.82rem;
+    padding: 1rem 1.1rem;
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -377,7 +378,7 @@ get_header(); ?>
     font-size: 0.68rem; 
     text-transform: uppercase; 
     letter-spacing: 0.12em;
-    padding: 1.1rem 1rem; 
+    padding: 1rem; 
     border-bottom: 1px solid var(--evg-border-hairline); 
     font-weight: 700; 
     text-align: left;
@@ -386,7 +387,7 @@ get_header(); ?>
   .evg-table td {
     background: transparent; 
     color: var(--evg-text-pure); 
-    padding: 1.1rem 1rem;
+    padding: 1rem;
     border-bottom: 1px solid var(--evg-border-hairline); 
     vertical-align: middle;
   }
@@ -394,16 +395,17 @@ get_header(); ?>
   .evg-table tr:last-child td { border-bottom: none; }
 
   .evg-track-badge {
-    font-size: 0.68rem; 
+    font-size: 0.65rem; 
     font-family: monospace; 
     letter-spacing: 0.08em;
-    padding: 0.45rem 0.85rem; 
+    padding: 0.4rem 0.75rem; 
     border-radius: 4px; 
     font-weight: 700;
     display: inline-flex; 
     align-items: center; 
-    gap: 0.4rem; 
+    gap: 0.35rem; 
     text-transform: uppercase;
+    white-space: nowrap;
   }
   .evg-track-completed { 
     background: rgba(52, 199, 89, 0.08); 
@@ -431,13 +433,14 @@ get_header(); ?>
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 0.85rem 1.6rem; 
+    padding: 0.85rem 1.5rem; 
     display: inline-flex; 
     align-items: center; 
     justify-content: center;
     transition: all 0.2s ease; 
     text-decoration: none; 
     cursor: pointer;
+    text-align: center;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
@@ -453,13 +456,14 @@ get_header(); ?>
     text-transform: uppercase;
     border: 1px solid var(--evg-gold-primary); 
     border-radius: 4px; 
-    padding: 0.75rem 1.4rem; 
+    padding: 0.75rem 1.25rem; 
     display: inline-flex; 
     align-items: center; 
     justify-content: center;
     transition: all 0.2s ease; 
     cursor: pointer; 
     text-decoration: none;
+    text-align: center;
   }
   .btn-evg-outline:hover { 
     background: rgba(212, 175, 55, 0.1); 
@@ -471,8 +475,22 @@ get_header(); ?>
   .evg-data-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--evg-text-ash); font-weight: 700; }
   .evg-data-value { font-size: 0.9rem; color: var(--evg-text-pure); font-weight: 600; }
 
-  @media (max-width: 992px) {
+  /* Responsive Media Queries */
+  @media (max-width: 991.98px) {
     .evg-dashboard-layout { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-module { padding: 25px 15px !important; }
+    header.evg-module > div { flex-direction: column; align-items: stretch !important; }
+    header.evg-module > div > div:last-child { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    header.evg-module > div > div:last-child a { width: 100%; }
+    .evg-nav-pills { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 4px; }
+    .evg-nav-pills .nav-btn { border-left: none; border-bottom: 2px solid transparent; justify-content: center; text-align: center; padding: 0.8rem; font-size: 0.72rem; }
+    .evg-nav-pills .nav-btn.active { border-left-color: transparent; border-bottom-color: var(--evg-gold-primary); }
+    div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; gap: 12px !important; }
+    div[style*="grid-template-columns: repeat(3"] { grid-template-columns: 1fr !important; gap: 12px !important; }
   }
 </style>
 
@@ -480,21 +498,21 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. DASHBOARD HEADER / BANNER -->
-        <header class="evg-module" style="padding: 35px 30px; margin-bottom: 35px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+        <header class="evg-module" style="padding: 30px 20px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
                 <div>
-                    <span class="evg-label-micro" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <span class="evg-label-micro" style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
                         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--evg-gold-primary); display: inline-block; box-shadow: 0 0 10px var(--evg-gold-primary);"></span>
                         <?php esc_html_e( 'Authenticated Collector Terminal', 'evg-platform' ); ?>
                     </span>
                     <h1 class="evg-title-xl"><?php esc_html_e( 'Welcome back,', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php echo $display_name; ?></span></h1>
-                    <div style="display: flex; align-items: center; gap: 14px; font-size: 0.85rem; color: var(--evg-text-ash);">
+                    <div style="display: flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--evg-text-ash); flex-wrap: wrap;">
                         <span><?php echo $user_email; ?></span>
                         <span style="color: var(--evg-border-hairline);">|</span>
                         <span>Client ID: <strong style="color: var(--evg-gold-primary); font-family: monospace;"><?php echo esc_html( $user_id_badge ); ?></strong></span>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
                         + <?php esc_html_e( 'Submit Cards for Grading', 'evg-platform' ); ?>
                     </a>
@@ -517,37 +535,37 @@ get_header(); ?>
                     <ul class="evg-nav-pills">
                         <li>
                             <button class="nav-btn <?php echo ( 'tab-telemetry' === $active_tab_slug ) ? 'active' : ''; ?>" data-target="tab-telemetry">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                                 <span><?php esc_html_e( 'Grading Telemetry', 'evg-platform' ); ?></span>
                             </button>
                         </li>
                         <li>
                             <button class="nav-btn <?php echo ( 'tab-purchases' === $active_tab_slug ) ? 'active' : ''; ?>" data-target="tab-purchases">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                                 <span><?php esc_html_e( 'My Purchases', 'evg-platform' ); ?> (<?php echo count( $marketplace_orders ); ?>)</span>
                             </button>
                         </li>
                         <li>
                             <button class="nav-btn <?php echo ( 'tab-cards' === $active_tab_slug ) ? 'active' : ''; ?>" data-target="tab-cards">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 <span><?php esc_html_e( 'Declared Cards', 'evg-platform' ); ?> (<?php echo count( $all_cards ); ?>)</span>
                             </button>
                         </li>
                         <li>
                             <button class="nav-btn <?php echo ( 'tab-history' === $active_tab_slug ) ? 'active' : ''; ?>" data-target="tab-history">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                 <span><?php esc_html_e( 'Grading Invoices', 'evg-platform' ); ?> (<?php echo count( $submissions ); ?>)</span>
                             </button>
                         </li>
                         <li>
                             <button class="nav-btn <?php echo ( 'tab-profile' === $active_tab_slug ) ? 'active' : ''; ?>" data-target="tab-profile">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 <span><?php esc_html_e( 'UK Shipping Coordinates', 'evg-platform' ); ?></span>
                             </button>
                         </li>
                         <li>
                             <button class="nav-btn <?php echo ( 'tab-security' === $active_tab_slug ) ? 'active' : ''; ?>" data-target="tab-security">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 <span><?php esc_html_e( 'Security & Password', 'evg-platform' ); ?></span>
                             </button>
                         </li>
@@ -559,7 +577,7 @@ get_header(); ?>
             <div>
                 <!-- TAB 01: LIVE TELEMETRY & SUBMISSIONS TRACKER -->
                 <section class="evg-tab-panel <?php echo ( 'tab-telemetry' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-telemetry">
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         
                         <?php if ( $active_submission ) : 
                             $stage_keys  = array_keys( $pipeline_stages );
@@ -568,10 +586,10 @@ get_header(); ?>
                                 $current_idx = 0;
                             }
                         ?>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--evg-border-hairline);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--evg-border-hairline); flex-wrap: wrap; gap: 8px;">
                                 <div>
                                     <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Active Grading Consignment', 'evg-platform' ); ?></span>
-                                    <h2 style="color: #ffffff; font-size: 1.25rem; font-family: monospace; font-weight: 700; margin: 0;">
+                                    <h2 style="color: #ffffff; font-size: 1.15rem; font-family: monospace; font-weight: 700; margin: 0;">
                                         #<?php echo esc_html( $active_submission->order_number ); ?>
                                     </h2>
                                 </div>
@@ -581,7 +599,7 @@ get_header(); ?>
                             </div>
 
                             <!-- Consignment Quick Data Row -->
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 18px; margin-bottom: 30px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 25px;">
                                 <div class="evg-data-point">
                                     <span class="evg-data-label"><?php esc_html_e( 'Intake Date', 'evg-platform' ); ?></span>
                                     <span class="evg-data-value" style="font-family: monospace;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $active_submission->submission_date ) ) ); ?></span>
@@ -606,20 +624,20 @@ get_header(); ?>
 
                             <!-- Return Tracking if Dispatched -->
                             <?php if ( ! empty( $active_submission->return_tracking ) ) : ?>
-                                <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 6px; padding: 16px; margin-bottom: 30px;">
-                                    <span style="color: #34c759; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">
+                                <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 6px; padding: 14px; margin-bottom: 25px;">
+                                    <span style="color: #34c759; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">
                                         <?php esc_html_e( 'Dispatched Tracking Reference (Royal Mail)', 'evg-platform' ); ?>
                                     </span>
-                                    <span style="color: #ffffff; font-family: monospace; font-size: 1rem; font-weight: 700;">
+                                    <span style="color: #ffffff; font-family: monospace; font-size: 0.95rem; font-weight: 700;">
                                         <?php echo esc_html( $active_submission->return_tracking ); ?>
                                     </span>
                                 </div>
                             <?php endif; ?>
 
                             <!-- Visual Telemetry Matrix -->
-                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Standard 5-10 Day Pipeline Telemetry', 'evg-platform' ); ?></span>
-                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px;">
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( 'Standard 5-10 Day Pipeline Telemetry', 'evg-platform' ); ?></span>
+                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 16px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                                     <?php 
                                     $step_count = 0;
                                     foreach ( $pipeline_stages as $stage_key => $stage_name ) : 
@@ -641,9 +659,9 @@ get_header(); ?>
                             </div>
 
                         <?php else : ?>
-                            <div style="text-align: center; padding: 40px 20px;">
-                                <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'No Active Grading Consignments', 'evg-platform' ); ?></h3>
-                                <p style="color: var(--evg-text-ash); font-size: 0.9rem; max-width: 480px; margin: 0 auto 20px auto;">
+                            <div style="text-align: center; padding: 40px 15px;">
+                                <h3 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'No Active Grading Consignments', 'evg-platform' ); ?></h3>
+                                <p style="color: var(--evg-text-ash); font-size: 0.88rem; max-width: 480px; margin: 0 auto 20px auto; line-height: 1.5;">
                                     <?php esc_html_e( 'You do not have any active grading submissions currently progressing through our laboratory queue.', 'evg-platform' ); ?>
                                 </p>
                                 <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
@@ -657,9 +675,9 @@ get_header(); ?>
 
                 <!-- TAB 02: MARKETPLACE PURCHASES -->
                 <section class="evg-tab-panel <?php echo ( 'tab-purchases' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-purchases">
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Acquisition Vault', 'evg-platform' ); ?></span>
-                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 25px 0;"><?php esc_html_e( 'Marketplace Slab Purchases', 'evg-platform' ); ?></h2>
+                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'Marketplace Slab Purchases', 'evg-platform' ); ?></h2>
 
                         <?php if ( ! empty( $marketplace_orders ) ) : ?>
                             <div class="evg-table-wrapper">
@@ -688,9 +706,9 @@ get_header(); ?>
                                                     <?php endif; ?>
                                                     <br><small style="color: var(--evg-text-ash);"><?php echo esc_html( $mo->display_set ); ?> <?php echo ! empty( $mo->display_number ) ? '#' . esc_html( $mo->display_number ) : ''; ?></small>
                                                 </td>
-                                                <td style="color: var(--evg-text-ash); font-size: 0.8rem;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $mo->purchased_at ) ) ); ?></td>
+                                                <td style="color: var(--evg-text-ash); font-size: 0.78rem;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $mo->purchased_at ) ) ); ?></td>
                                                 <td><strong style="color: #ffffff; font-family: monospace;">&pound;<?php echo esc_html( number_format( (float) $mo->amount_paid, 2 ) ); ?></strong></td>
-                                                <td><span style="color: #34c759; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;">● <?php echo esc_html( $mo->payment_status ); ?></span></td>
+                                                <td><span style="color: #34c759; font-weight: 700; font-size: 0.72rem; text-transform: uppercase;">● <?php echo esc_html( $mo->payment_status ); ?></span></td>
                                                 <td>
                                                     <span class="evg-track-badge evg-track-<?php echo ( 'Dispatched' === $mo->shipping_status || 'Delivered' === $mo->shipping_status ) ? 'completed' : 'active'; ?>">
                                                         <?php echo esc_html( $mo->shipping_status ); ?>
@@ -705,9 +723,9 @@ get_header(); ?>
                                 </table>
                             </div>
                         <?php else : ?>
-                            <div style="text-align: center; padding: 40px 20px;">
+                            <div style="text-align: center; padding: 40px 15px;">
                                 <h3 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'No Marketplace Purchases Yet', 'evg-platform' ); ?></h3>
-                                <p style="color: var(--evg-text-ash); font-size: 0.85rem; max-width: 450px; margin: 0 auto 20px auto;">
+                                <p style="color: var(--evg-text-ash); font-size: 0.88rem; max-width: 450px; margin: 0 auto 20px auto; line-height: 1.5;">
                                     <?php esc_html_e( 'Explore our live inventory of certified Pokémon slabs permanently encapsulated in tamper-evident cases.', 'evg-platform' ); ?>
                                 </p>
                                 <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-executive">
@@ -720,9 +738,9 @@ get_header(); ?>
 
                 <!-- TAB 03: ALL DECLARED GRADING CARDS & DAMAGE PORTFOLIO -->
                 <section class="evg-tab-panel <?php echo ( 'tab-cards' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-cards">
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Certified Holdings', 'evg-platform' ); ?></span>
-                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 25px 0;"><?php esc_html_e( 'Declared Asset Registry & Scans', 'evg-platform' ); ?></h2>
+                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'Declared Asset Registry & Scans', 'evg-platform' ); ?></h2>
 
                         <?php if ( ! empty( $all_cards ) ) : ?>
                             <div class="evg-table-wrapper">
@@ -744,7 +762,7 @@ get_header(); ?>
                                             $fault_count      = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(id) FROM {$table_faults} WHERE card_id = %d", $c->id ) );
                                         ?>
                                             <tr>
-                                                <td><strong style="color: #ffffff; font-size: 0.9rem;"><?php echo esc_html( $c->card_name ); ?></strong></td>
+                                                <td><strong style="color: #ffffff; font-size: 0.88rem;"><?php echo esc_html( $c->card_name ); ?></strong></td>
                                                 <td>
                                                     <span style="color: #ffffff;"><?php echo esc_html( $c->set_name ); ?></span>
                                                     <?php if ( ! empty( $c->card_number ) ) : ?>
@@ -753,27 +771,27 @@ get_header(); ?>
                                                 </td>
                                                 <td><span style="background: #141416; border: 1px solid #2c2c30; color: var(--evg-gold-primary); font-size: 0.65rem; font-family: monospace; padding: 2px 6px; border-radius: 4px;"><?php echo esc_html( strtoupper( substr( $c->language, 0, 3 ) ) ); ?></span></td>
                                                 <td><span style="font-family: monospace; color: var(--evg-gold-light);">#<?php echo esc_html( $c->order_number ); ?></span></td>
-                                                <td><span style="font-size: 0.75rem; color: var(--evg-text-ash);"><?php echo esc_html( $c->grading_status ); ?></span></td>
+                                                <td><span style="font-size: 0.72rem; color: var(--evg-text-ash);"><?php echo esc_html( $c->grading_status ); ?></span></td>
                                                 <td>
                                                     <?php if ( ! empty( $c->final_grade ) ) : ?>
-                                                        <span style="background: var(--evg-gold-primary); color: #0a0a0a; font-weight: 900; font-size: 0.85rem; padding: 3px 8px; border-radius: 4px; display: inline-block;">
+                                                        <span style="background: var(--evg-gold-primary); color: #0a0a0a; font-weight: 900; font-size: 0.82rem; padding: 2px 6px; border-radius: 4px; display: inline-block;">
                                                             EVG <?php echo esc_html( $c->final_grade ); ?>
                                                         </span>
                                                     <?php else : ?>
-                                                        <span style="color: var(--evg-text-ash); font-size: 0.75rem; font-family: monospace;">PENDING</span>
+                                                        <span style="color: var(--evg-text-ash); font-size: 0.72rem; font-family: monospace;">PENDING</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td style="text-align: right;">
                                                     <?php if ( $is_card_unlocked ) : ?>
-                                                        <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.75rem; font-size: 0.65rem; border-color: #34c759; color: #34c759 !important;">
+                                                        <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.65rem; font-size: 0.62rem; border-color: #34c759; color: #34c759 !important;">
                                                             ✓ <?php esc_html_e( 'Full Unlocked', 'evg-platform' ); ?>
                                                         </a>
                                                     <?php elseif ( $fault_count > 3 ) : ?>
-                                                        <a href="<?php echo esc_url( home_url( '/checkout?action=unlock_portfolio&card_id=' . $c->id ) ); ?>" class="btn-evg-executive" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
+                                                        <a href="<?php echo esc_url( home_url( '/checkout?action=unlock_portfolio&card_id=' . $c->id ) ); ?>" class="btn-evg-executive" style="padding: 0.35rem 0.65rem; font-size: 0.62rem;">
                                                             🔒 <?php printf( esc_html__( 'Unlock Full (£%s)', 'evg-platform' ), number_format( $portfolio_unlock_fee, 2 ) ); ?>
                                                         </a>
                                                     <?php else : ?>
-                                                        <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
+                                                        <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.65rem; font-size: 0.62rem;">
                                                             👁 <?php esc_html_e( 'View (3 Free)', 'evg-platform' ); ?>
                                                         </a>
                                                     <?php endif; ?>
@@ -784,16 +802,16 @@ get_header(); ?>
                                 </table>
                             </div>
                         <?php else : ?>
-                            <p style="color: var(--evg-text-ash); font-size: 0.9rem; margin: 0;"><?php esc_html_e( 'No cards currently logged under your grading submissions.', 'evg-platform' ); ?></p>
+                            <p style="color: var(--evg-text-ash); font-size: 0.88rem; margin: 0;"><?php esc_html_e( 'No cards currently logged under your grading submissions.', 'evg-platform' ); ?></p>
                         <?php endif; ?>
                     </div>
                 </section>
 
                 <!-- TAB 04: FINANCIAL INVOICES & LEDGER -->
                 <section class="evg-tab-panel <?php echo ( 'tab-history' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-history">
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Billing & Invoices', 'evg-platform' ); ?></span>
-                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 25px 0;"><?php esc_html_e( 'Grading Financial Ledgers', 'evg-platform' ); ?></h2>
+                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'Grading Financial Ledgers', 'evg-platform' ); ?></h2>
 
                         <?php if ( ! empty( $submissions ) ) : ?>
                             <div class="evg-table-wrapper">
@@ -813,17 +831,17 @@ get_header(); ?>
                                         <?php foreach ( $submissions as $s ) : ?>
                                             <tr>
                                                 <td><strong style="color: var(--evg-gold-primary); font-family: monospace;">#<?php echo esc_html( $s->order_number ); ?></strong></td>
-                                                <td style="color: var(--evg-text-ash); font-size: 0.8rem;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $s->submission_date ) ) ); ?></td>
+                                                <td style="color: var(--evg-text-ash); font-size: 0.78rem;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $s->submission_date ) ) ); ?></td>
                                                 <td><?php echo esc_html( $s->service_type ); ?></td>
                                                 <td><?php echo esc_html( $s->total_cards ); ?></td>
                                                 <td><strong style="color: #ffffff; font-family: monospace;">&pound;<?php echo esc_html( number_format( (float) $s->total_amount, 2 ) ); ?></strong></td>
                                                 <td>
-                                                    <span style="color: <?php echo ( 'Paid' === $s->payment_status ) ? '#34c759' : '#ff9f0a'; ?>; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;">
+                                                    <span style="color: <?php echo ( 'Paid' === $s->payment_status ) ? '#34c759' : '#ff9f0a'; ?>; font-weight: 700; font-size: 0.72rem; text-transform: uppercase;">
                                                         ● <?php echo esc_html( $s->payment_status ); ?>
                                                     </span>
                                                 </td>
                                                 <td style="text-align: right;">
-                                                    <a href="<?php echo esc_url( admin_url( 'admin-post.php?action=evg_download_invoice&submission_id=' . $s->id ) ); ?>" target="_blank" class="btn-evg-outline" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
+                                                    <a href="<?php echo esc_url( admin_url( 'admin-post.php?action=evg_download_invoice&submission_id=' . $s->id ) ); ?>" target="_blank" class="btn-evg-outline" style="padding: 0.35rem 0.65rem; font-size: 0.62rem;">
                                                         📄 <?php esc_html_e( 'PDF Slip', 'evg-platform' ); ?>
                                                     </a>
                                                 </td>
@@ -833,70 +851,70 @@ get_header(); ?>
                                 </table>
                             </div>
                         <?php else : ?>
-                            <p style="color: var(--evg-text-ash); font-size: 0.9rem; margin: 0;"><?php esc_html_e( 'No financial records cataloged.', 'evg-platform' ); ?></p>
+                            <p style="color: var(--evg-text-ash); font-size: 0.88rem; margin: 0;"><?php esc_html_e( 'No financial records cataloged.', 'evg-platform' ); ?></p>
                         <?php endif; ?>
                     </div>
                 </section>
 
                 <!-- TAB 05: UK SHIPPING ADDRESS & PROFILE -->
                 <section class="evg-tab-panel <?php echo ( 'tab-profile' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-profile">
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Logistics Registry', 'evg-platform' ); ?></span>
-                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'UK Return Shipping Coordinates', 'evg-platform' ); ?></h2>
+                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 16px 0;"><?php esc_html_e( 'UK Return Shipping Coordinates', 'evg-platform' ); ?></h2>
 
                         <?php echo $profile_notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
                         <form action="<?php echo esc_url( get_permalink() ); ?>" method="post">
                             <?php wp_nonce_field( 'evg_update_profile_action', 'evg_update_profile_nonce' ); ?>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'First Name', 'evg-platform' ); ?></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'First Name', 'evg-platform' ); ?></label>
                                     <input type="text" name="first_name" class="evg-form-control" value="<?php echo esc_attr( $first_name ); ?>" required>
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Last Name', 'evg-platform' ); ?></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Last Name', 'evg-platform' ); ?></label>
                                     <input type="text" name="last_name" class="evg-form-control" value="<?php echo esc_attr( $last_name ); ?>">
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 25px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Registered Email', 'evg-platform' ); ?></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Registered Email', 'evg-platform' ); ?></label>
                                     <input type="email" class="evg-form-control" value="<?php echo esc_attr( $user_email ); ?>" readonly>
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Contact Mobile Number', 'evg-platform' ); ?></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Contact Mobile Number', 'evg-platform' ); ?></label>
                                     <input type="tel" name="mobile_number" class="evg-form-control" value="<?php echo esc_attr( $mobile_number ); ?>">
                                 </div>
                             </div>
 
-                            <div style="border-top: 1px solid var(--evg-border-hairline); padding-top: 20px; margin-bottom: 18px;">
-                                <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 15px 0;"><?php esc_html_e( 'UK Dispatch Address', 'evg-platform' ); ?></h3>
+                            <div style="border-top: 1px solid var(--evg-border-hairline); padding-top: 18px; margin-bottom: 15px;">
+                                <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 12px 0;"><?php esc_html_e( 'UK Dispatch Address', 'evg-platform' ); ?></h3>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'House Number / Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'House Number / Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                     <input type="text" name="house_number" class="evg-form-control" value="<?php echo esc_attr( $house_number ); ?>" required>
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Street Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Street Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                     <input type="text" name="street_address" class="evg-form-control" value="<?php echo esc_attr( $street_address ); ?>" required>
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 25px;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Town / City', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Town / City', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                     <input type="text" name="town_city" class="evg-form-control" value="<?php echo esc_attr( $town_city ); ?>" required>
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'County', 'evg-platform' ); ?></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'County', 'evg-platform' ); ?></label>
                                     <input type="text" name="county" class="evg-form-control" value="<?php echo esc_attr( $county ); ?>">
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Postcode', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Postcode', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                     <input type="text" name="postcode" class="evg-form-control" value="<?php echo esc_attr( $postcode ); ?>" required>
                                 </div>
                             </div>
@@ -910,17 +928,17 @@ get_header(); ?>
 
                 <!-- TAB 06: SECURITY & PASSWORD UPDATE -->
                 <section class="evg-tab-panel <?php echo ( 'tab-security' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-security">
-                    <div class="evg-module" style="padding: 35px 30px;">
+                    <div class="evg-module" style="padding: 30px 20px;">
                         <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Authentication Clearance', 'evg-platform' ); ?></span>
-                        <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'Update Account Password', 'evg-platform' ); ?></h2>
+                        <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 16px 0;"><?php esc_html_e( 'Update Account Password', 'evg-platform' ); ?></h2>
 
                         <?php echo $password_notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
                         <form action="<?php echo esc_url( get_permalink() ); ?>" method="post">
                             <?php wp_nonce_field( 'evg_update_password_action', 'evg_update_password_nonce' ); ?>
 
-                            <div style="margin-bottom: 20px;">
-                                <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Current Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <div style="margin-bottom: 16px;">
+                                <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Current Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                 <div class="evg-password-wrapper">
                                     <input type="password" name="current_password" id="curPwd" class="evg-form-control" placeholder="••••••••••••" required autocomplete="current-password">
                                     <button type="button" class="evg-eye-toggle" data-target="curPwd" aria-label="Toggle password visibility">
@@ -930,9 +948,9 @@ get_header(); ?>
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 25px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'New Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'New Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                     <div class="evg-password-wrapper">
                                         <input type="password" name="new_password" id="newPwd" class="evg-form-control" placeholder="Minimum 8 characters" required autocomplete="new-password">
                                         <button type="button" class="evg-eye-toggle" data-target="newPwd" aria-label="Toggle password visibility">
@@ -942,7 +960,7 @@ get_header(); ?>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Confirm New Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                                    <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Confirm New Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                                     <div class="evg-password-wrapper">
                                         <input type="password" name="confirm_password" id="confPwd" class="evg-form-control" placeholder="Confirm new password" required autocomplete="new-password">
                                         <button type="button" class="evg-eye-toggle" data-target="confPwd" aria-label="Toggle password visibility">
@@ -953,9 +971,9 @@ get_header(); ?>
                                 </div>
                             </div>
 
-                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 4px; padding: 15px 20px; margin-bottom: 25px;">
+                            <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px;">
                                 <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 6px;"><?php esc_html_e( 'Password Complexity Guidelines', 'evg-platform' ); ?></span>
-                                <ul style="color: var(--evg-text-ash); font-size: 0.78rem; font-family: monospace; line-height: 1.6; margin: 0; padding-left: 18px;">
+                                <ul style="color: var(--evg-text-ash); font-size: 0.75rem; font-family: monospace; line-height: 1.6; margin: 0; padding-left: 16px;">
                                     <li><?php esc_html_e( 'Minimum 8 characters in length', 'evg-platform' ); ?></li>
                                     <li><?php esc_html_e( 'Must contain uppercase and lowercase letters', 'evg-platform' ); ?></li>
                                     <li><?php esc_html_e( 'Must include at least one numeral (0-9)', 'evg-platform' ); ?></li>

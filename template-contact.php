@@ -115,7 +115,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce']
 
 // Prefill data if logged in
 if ( empty( $form_data ) && is_user_logged_in() ) {
-    $current_user               = wp_get_current_user();
+    $current_user                 = wp_get_current_user();
     $form_data['customer_name'] = $current_user->display_name;
     $form_data['email_address'] = $current_user->user_email;
 }
@@ -150,17 +150,18 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 1140px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.4rem, 4vw, 3.2rem); 
+    font-size: clamp(2rem, 4vw, 3.2rem); 
     font-weight: 600; 
     letter-spacing: -0.02em; 
     line-height: 1.1; 
@@ -195,7 +196,7 @@ get_header(); ?>
   .evg-contact-layout {
     display: grid;
     grid-template-columns: 1.35fr 1fr;
-    gap: 28px;
+    gap: 24px;
     align-items: start;
   }
 
@@ -223,15 +224,16 @@ get_header(); ?>
     display: flex; 
     justify-content: space-between; 
     align-items: center;
-    padding: 1rem 0; 
+    padding: 0.85rem 0; 
     border-bottom: 1px solid var(--evg-border-hairline);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
+    gap: 10px;
   }
   .evg-meta-list li:last-child { border-bottom: none; }
 
   .evg-topic-matrix {
     display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
     gap: 1px;
     background: var(--evg-border-hairline); 
     border: 1px solid var(--evg-border-hairline); 
@@ -240,23 +242,23 @@ get_header(); ?>
   }
   .evg-topic-cell {
     background: var(--evg-obsidian-panel); 
-    padding: 1.8rem 1.5rem; 
+    padding: 1.5rem 1.25rem; 
     transition: background 0.3s ease; 
   }
   .evg-topic-cell:hover { background: var(--evg-obsidian-elevated); }
   .evg-topic-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
-  .evg-icon { color: var(--evg-text-ash); margin-bottom: 0.85rem; transition: all 0.3s ease; }
+  .evg-icon { color: var(--evg-text-ash); margin-bottom: 0.75rem; transition: all 0.3s ease; }
 
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2rem; 
+    padding: 1.1rem 2rem; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -264,14 +266,25 @@ get_header(); ?>
     transition: all 0.3s ease; 
     cursor: pointer; 
     text-decoration: none;
+    box-sizing: border-box;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
   }
 
-  @media (max-width: 992px) {
+  /* Responsive Media Queries */
+  @media (max-width: 991.98px) {
     .evg-contact-layout { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-module { padding: 25px 15px !important; }
+    .evg-contact-layout > div > form > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
   }
 </style>
 
@@ -279,60 +292,60 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '01 // Secure Communications', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Contact', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Elite Vault Grading', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php esc_html_e( 'Direct communications portal for lot allocations, submission package queries, and active grading consignment verification.', 'evg-platform' ); ?>
             </p>
         </header>
 
         <!-- 2. TWO-COLUMN COMMAND LAYOUT -->
-        <div class="evg-contact-layout" style="margin-bottom: 50px;">
+        <div class="evg-contact-layout" style="margin-bottom: 40px;">
             
             <!-- Left: Secure Ticket Form -->
-            <div class="evg-module" style="padding: 35px 30px;">
-                <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--evg-border-hairline);">
-                    <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Open Secure Ticket', 'evg-platform' ); ?></h2>
-                    <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0;">
+            <div class="evg-module" style="padding: 30px 20px;">
+                <div style="margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--evg-border-hairline);">
+                    <h2 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Open Secure Ticket', 'evg-platform' ); ?></h2>
+                    <p style="color: var(--evg-text-ash); font-size: 0.82rem; margin: 0;">
                         <?php esc_html_e( 'For active consignments, please include your Order Reference Number to expedite routing.', 'evg-platform' ); ?>
                     </p>
                 </div>
 
                 <!-- Status Feedback Notification -->
                 <?php if ( 'success' === $contact_status ) : ?>
-                    <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 25px;">
-                        <span style="color: #34c759; font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">✓ <?php esc_html_e( 'Transmission Delivered', 'evg-platform' ); ?></span>
-                        <p style="color: #e5e5ea; font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $contact_message ); ?></p>
+                    <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 4px; padding: 14px; margin-bottom: 20px;">
+                        <span style="color: #34c759; font-weight: 700; font-size: 0.82rem; display: block; margin-bottom: 4px;">✓ <?php esc_html_e( 'Transmission Delivered', 'evg-platform' ); ?></span>
+                        <p style="color: #e5e5ea; font-size: 0.8rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $contact_message ); ?></p>
                     </div>
                 <?php elseif ( 'error' === $contact_status ) : ?>
-                    <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 25px;">
-                        <span style="color: #ff453a; font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Transmission Error', 'evg-platform' ); ?></span>
-                        <p style="color: #e5e5ea; font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $contact_message ); ?></p>
+                    <div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px; margin-bottom: 20px;">
+                        <span style="color: #ff453a; font-weight: 700; font-size: 0.82rem; display: block; margin-bottom: 4px;">✕ <?php esc_html_e( 'Transmission Error', 'evg-platform' ); ?></span>
+                        <p style="color: #e5e5ea; font-size: 0.8rem; margin: 0; line-height: 1.5;"><?php echo esc_html( $contact_message ); ?></p>
                     </div>
                 <?php endif; ?>
 
                 <form action="<?php echo esc_url( get_permalink() ); ?>" method="POST">
                     <?php wp_nonce_field( 'evg_contact_enquiry_action', 'evg_contact_nonce' ); ?>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                         <div>
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Registered Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Registered Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="customer_name" class="evg-form-control" placeholder="e.g. John Doe" value="<?php echo esc_attr( $form_data['customer_name'] ?? '' ); ?>" required>
                         </div>
                         <div>
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Account Email', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Account Email', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="email" name="email_address" class="evg-form-control" placeholder="client@example.com" value="<?php echo esc_attr( $form_data['email_address'] ?? '' ); ?>" required>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                         <div>
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Order Ref (Optional)', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Order Ref (Optional)', 'evg-platform' ); ?></label>
                             <input type="text" name="order_number" class="evg-form-control" placeholder="e.g. EVG-84920" value="<?php echo esc_attr( $form_data['order_number'] ?? '' ); ?>">
                         </div>
                         <div>
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Enquiry Category', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Enquiry Category', 'evg-platform' ); ?></label>
                             <?php $current_cat = $form_data['feedback_type'] ?? 'General Enquiry'; ?>
                             <select name="enquiry_category" class="evg-form-control" style="cursor: pointer;">
                                 <option value="General Enquiry" <?php selected( $current_cat, 'General Enquiry' ); ?>><?php esc_html_e( 'General Enquiry', 'evg-platform' ); ?></option>
@@ -344,8 +357,8 @@ get_header(); ?>
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 24px;">
-                        <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Transmission Message', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                    <div style="margin-bottom: 20px;">
+                        <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Transmission Message', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                         <textarea name="message" class="evg-form-control" rows="5" placeholder="<?php esc_attr_e( 'Detail your operational query or consignment questions...', 'evg-platform' ); ?>" required><?php echo esc_textarea( $form_data['message_content'] ?? '' ); ?></textarea>
                     </div>
 
@@ -359,11 +372,11 @@ get_header(); ?>
             </div>
 
             <!-- Right: Operational Meta & SLAs -->
-            <div class="evg-module" style="padding: 35px 30px; display: flex; flex-direction: column;">
+            <div class="evg-module" style="padding: 30px 20px; display: flex; flex-direction: column;">
                 <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Service Level Agreements', 'evg-platform' ); ?></span>
-                <h2 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 20px 0;"><?php esc_html_e( 'Operational Meta', 'evg-platform' ); ?></h2>
+                <h2 style="color: #ffffff; font-size: 1.15rem; font-weight: 700; margin: 0 0 16px 0;"><?php esc_html_e( 'Operational Meta', 'evg-platform' ); ?></h2>
                 
-                <ul class="evg-meta-list" style="margin-bottom: 25px;">
+                <ul class="evg-meta-list" style="margin-bottom: 20px;">
                     <li>
                         <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Jurisdiction / Hub', 'evg-platform' ); ?></span>
                         <span style="color: #ffffff; font-weight: 600;"><?php esc_html_e( 'United Kingdom', 'evg-platform' ); ?></span>
@@ -379,22 +392,22 @@ get_header(); ?>
                 </ul>
 
                 <!-- Facility Schedule -->
-                <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px; margin-bottom: 25px;">
-                    <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( 'Facility Operating Hours (GMT)', 'evg-platform' ); ?></span>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px; color: #ffffff;">
+                <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+                    <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Facility Operating Hours (GMT)', 'evg-platform' ); ?></span>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px; color: #ffffff;">
                         <span><?php esc_html_e( 'Mon - Fri:', 'evg-platform' ); ?></span>
                         <span style="font-family: monospace; font-weight: 600;">09:00 - 17:30</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--evg-text-ash);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--evg-text-ash);">
                         <span><?php esc_html_e( 'Sat - Sun:', 'evg-platform' ); ?></span>
                         <span><?php esc_html_e( 'Closed (Vault Intake Only)', 'evg-platform' ); ?></span>
                     </div>
                 </div>
 
                 <!-- Support Email Routing -->
-                <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
+                <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--evg-border-hairline);">
                     <span class="evg-label-micro" style="margin-bottom: 6px; color: var(--evg-gold-light);"><?php esc_html_e( 'Direct Dispatch Routing', 'evg-platform' ); ?></span>
-                    <a href="mailto:<?php echo esc_attr( $support_email ); ?>" style="color: #ffffff; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; transition: color 0.2s;">
+                    <a href="mailto:<?php echo esc_attr( $support_email ); ?>" style="color: #ffffff; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; transition: color 0.2s; word-break: break-all;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         <?php echo esc_html( $support_email ); ?>
                     </a>
@@ -404,9 +417,9 @@ get_header(); ?>
 
         <!-- 3. TRIAGE / SUPPORT MATRIX -->
         <div>
-            <div style="text-align: center; margin-bottom: 25px;">
+            <div style="text-align: center; margin-bottom: 20px;">
                 <span class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( '02 // Support Infrastructure', 'evg-platform' ); ?></span>
-                <h2 style="color: #ffffff; font-size: 1.4rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Diagnostic Support Matrix', 'evg-platform' ); ?></h2>
+                <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;"><?php esc_html_e( 'Diagnostic Support Matrix', 'evg-platform' ); ?></h2>
             </div>
             
             <div class="evg-topic-matrix">

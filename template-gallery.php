@@ -56,7 +56,8 @@ get_header(); ?>
         position: relative;
         z-index: 1;
         color: var(--evg-text-pure);
-        padding: 4rem 20px 6rem 20px;
+        padding: 3rem 15px 5rem 15px;
+        overflow-x: hidden;
     }
     
     .evg-container {
@@ -66,7 +67,7 @@ get_header(); ?>
 
     .evg-title-xl { 
         font-family: "Playfair Display", Georgia, serif;
-        font-size: clamp(2.2rem, 4vw, 3rem); 
+        font-size: clamp(2rem, 4vw, 3rem); 
         font-weight: 600; 
         letter-spacing: -0.02em; 
         line-height: 1.1; 
@@ -94,15 +95,15 @@ get_header(); ?>
     .evg-gallery-grid-4 {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        margin-top: 40px;
+        gap: 20px;
+        margin-top: 30px;
     }
 
     @media (max-width: 1024px) {
-        .evg-gallery-grid-4 { grid-template-columns: repeat(2, 1fr); }
+        .evg-gallery-grid-4 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     }
-    @media (max-width: 640px) {
-        .evg-gallery-grid-4 { grid-template-columns: 1fr; }
+    @media (max-width: 575.98px) {
+        .evg-gallery-grid-4 { grid-template-columns: 1fr; gap: 14px; }
     }
 
     .evg-slab-thumb {
@@ -140,20 +141,22 @@ get_header(); ?>
     /* Load More Button Wrapper */
     .evg-load-more-wrap {
         text-align: center;
-        margin-top: 50px;
+        margin-top: 40px;
     }
     .evg-btn-load-more {
         background: var(--evg-obsidian-panel);
         border: 1px solid var(--evg-border-gold-faint);
         color: var(--evg-gold-light);
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.15em;
-        padding: 1rem 2.5rem;
+        padding: 1rem 2rem;
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.3s ease;
+        width: 100%;
+        max-width: 320px;
     }
     .evg-btn-load-more:hover {
         background: var(--evg-gold-primary);
@@ -174,14 +177,14 @@ get_header(); ?>
         display: none;
         align-items: center;
         justify-content: center;
-        padding: 30px;
+        padding: 15px;
         box-sizing: border-box;
     }
     .evg-modal-overlay.active { display: flex; }
 
     .evg-modal-content-wrap {
         position: relative;
-        max-width: 90vw;
+        max-width: 95vw;
         max-height: 90vh;
         display: flex;
         align-items: center;
@@ -189,7 +192,7 @@ get_header(); ?>
     }
     .evg-modal-content-wrap img {
         max-width: 100%;
-        max-height: 85vh;
+        max-height: 82vh;
         object-fit: contain;
         border-radius: 8px;
         box-shadow: 0 30px 80px rgba(0,0,0,0.95), 0 0 35px var(--evg-gold-glow);
@@ -203,8 +206,8 @@ get_header(); ?>
         background: var(--evg-obsidian-panel);
         border: 1px solid var(--evg-border-hairline);
         color: var(--evg-text-ash);
-        width: 38px;
-        height: 38px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -220,6 +223,10 @@ get_header(); ?>
         border-color: var(--evg-gold-primary); 
         outline: none;
     }
+
+    @media (max-width: 767.98px) {
+        .evg-modal-close { top: -40px; right: 5px; width: 34px; height: 34px; }
+    }
 </style>
 
 <main class="evg-master-wrapper">
@@ -229,7 +236,7 @@ get_header(); ?>
         <header style="text-align: center; margin-bottom: 20px;">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Vault Archive', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Certified Slab', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Showcase', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 480px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 480px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php esc_html_e( 'A pristine gallery grid of authenticated masterworks preserved in Elite Vault protective slabs.', 'evg-platform' ); ?>
             </p>
         </header>

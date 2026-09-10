@@ -213,12 +213,13 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 860px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
@@ -251,14 +252,14 @@ get_header(); ?>
     background: var(--evg-obsidian-panel);
     border: 1px solid var(--evg-border-hairline);
     border-radius: 8px;
-    padding: 40px;
+    padding: 30px 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
   .evg-form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 16px;
   }
   .evg-grid-full { grid-column: span 2; }
 
@@ -375,13 +376,13 @@ get_header(); ?>
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2rem; 
+    padding: 1.1rem 1.5rem; 
     display: flex; 
     align-items: center; 
     justify-content: center;
@@ -389,6 +390,7 @@ get_header(); ?>
     transition: all 0.3s ease; 
     text-decoration: none; 
     cursor: pointer;
+    box-sizing: border-box;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
@@ -408,10 +410,16 @@ get_header(); ?>
     content: "▸ ";
   }
 
-  @media (max-width: 768px) {
-    .evg-form-grid { grid-template-columns: 1fr; }
+  /* Responsive Media Queries */
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-form-grid { grid-template-columns: 1fr; gap: 12px; }
     .evg-grid-full { grid-column: span 1; }
-    .evg-module { padding: 25px; }
+    .evg-module { padding: 25px 15px; }
+    #strengthMeter + div, div[style*="grid-template-columns: repeat(2"] {
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+    }
   }
 </style>
 
@@ -419,10 +427,10 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- Header -->
-        <header style="margin-bottom: 40px; text-align: center;">
-            <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( 'Client Registry', 'evg-platform' ); ?></span>
+        <header style="margin-bottom: 35px; text-align: center;">
+            <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Client Registry', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Create Your', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Elite Vault Account', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 650px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 650px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php esc_html_e( 'Join Elite Vault Grading to submit Pokémon cards, track your grading orders, and receive updates throughout the grading process.', 'evg-platform' ); ?>
             </p>
         </header>
@@ -432,9 +440,9 @@ get_header(); ?>
 
             <!-- Error Messages -->
             <?php if ( ! empty( $registration_errors->get_error_messages() ) ) : ?>
-                <div style="background: rgba(255, 69, 58, 0.06); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 20px; margin-bottom: 30px;">
-                    <span class="evg-label-micro" style="color: #ff453a; margin-bottom: 8px;"><?php esc_html_e( 'Registration Issues Encountered', 'evg-platform' ); ?></span>
-                    <ul style="color: #e5e5ea; font-size: 0.85rem; line-height: 1.6; margin: 0; padding-left: 20px;">
+                <div style="background: rgba(255, 69, 58, 0.06); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 16px; margin-bottom: 25px;">
+                    <span class="evg-label-micro" style="color: #ff453a; margin-bottom: 6px;"><?php esc_html_e( 'Registration Issues Encountered', 'evg-platform' ); ?></span>
+                    <ul style="color: #e5e5ea; font-size: 0.82rem; line-height: 1.6; margin: 0; padding-left: 18px;">
                         <?php foreach ( $registration_errors->get_error_messages() as $err_msg ) : ?>
                             <li><?php echo esc_html( $err_msg ); ?></li>
                         <?php endforeach; ?>
@@ -450,49 +458,49 @@ get_header(); ?>
                 <?php endif; ?>
 
                 <!-- SECTION 01: PERSONAL IDENTIFICATION -->
-                <div style="margin-bottom: 40px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 20px;">
+                <div style="margin-bottom: 35px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 18px; flex-wrap: wrap; gap: 4px;">
                         <span class="evg-label-micro" style="color: #ffffff;"><?php esc_html_e( '01 // Primary Identification', 'evg-platform' ); ?></span>
-                        <span style="font-size: 0.65rem; letter-spacing: 0.1em; font-family: monospace; color: var(--evg-gold-primary);">* <?php esc_html_e( 'REQUIRED', 'evg-platform' ); ?></span>
+                        <span style="font-size: 0.62rem; letter-spacing: 0.1em; font-family: monospace; color: var(--evg-gold-primary);">* <?php esc_html_e( 'REQUIRED', 'evg-platform' ); ?></span>
                     </div>
                     
                     <div class="evg-form-grid">
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'First Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'First Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="first_name" class="evg-form-control" placeholder="e.g. John" value="<?php echo esc_attr( $form_data['first_name'] ?? '' ); ?>" required autocomplete="given-name">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Last Name', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Last Name', 'evg-platform' ); ?></label>
                             <input type="text" name="last_name" class="evg-form-control" placeholder="e.g. Doe" value="<?php echo esc_attr( $form_data['last_name'] ?? '' ); ?>" autocomplete="family-name">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Email Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Email Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="email" name="email" class="evg-form-control" placeholder="client@domain.com" value="<?php echo esc_attr( $form_data['email'] ?? '' ); ?>" required autocomplete="email">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Confirm Email Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Confirm Email Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="email" name="confirm_email" class="evg-form-control" placeholder="client@domain.com" value="<?php echo esc_attr( $form_data['confirm_email'] ?? '' ); ?>" required autocomplete="email">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Mobile Number (Optional)', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Mobile Number (Optional)', 'evg-platform' ); ?></label>
                             <input type="tel" name="mobile_number" class="evg-form-control" placeholder="+44 7123 456789" value="<?php echo esc_attr( $form_data['mobile_number'] ?? '' ); ?>" autocomplete="tel">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Username (Optional)', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Username (Optional)', 'evg-platform' ); ?></label>
                             <input type="text" name="username" class="evg-form-control" placeholder="e.g. VaultCollector" value="<?php echo esc_attr( $form_data['username'] ?? '' ); ?>" autocomplete="username">
                         </div>
                     </div>
                 </div>
 
                 <!-- SECTION 02: CRYPTOGRAPHIC SECURITY -->
-                <div style="margin-bottom: 40px;">
-                    <div style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 20px;">
+                <div style="margin-bottom: 35px;">
+                    <div style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 18px;">
                         <span class="evg-label-micro" style="color: #ffffff;"><?php esc_html_e( '02 // Password & Cryptographic Security', 'evg-platform' ); ?></span>
                     </div>
                     
                     <div class="evg-form-grid">
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <div class="evg-password-wrapper">
                                 <input type="password" name="password" id="evgPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="new-password">
                                 <button type="button" class="evg-eye-toggle" data-target="evgPassword" aria-label="Toggle password visibility">
@@ -502,7 +510,7 @@ get_header(); ?>
                             </div>
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Confirm Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Confirm Password', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <div class="evg-password-wrapper">
                                 <input type="password" name="confirm_password" id="evgConfirmPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="new-password">
                                 <button type="button" class="evg-eye-toggle" data-target="evgConfirmPassword" aria-label="Toggle confirm password visibility">
@@ -513,13 +521,13 @@ get_header(); ?>
                         </div>
                         
                         <div class="evg-grid-full">
-                            <div style="background: var(--evg-obsidian-base); border: 1px solid #1a1c22; border-radius: 4px; padding: 20px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <div style="background: var(--evg-obsidian-base); border: 1px solid #1a1c22; border-radius: 4px; padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 4px;">
                                     <span class="evg-label-micro" style="color: #ffffff;"><?php esc_html_e( 'Password Requirements', 'evg-platform' ); ?></span>
-                                    <span id="strengthIndicatorLabel" style="font-size: 0.68rem; font-family: monospace; color: #8e8e93; font-weight: 700;"><?php esc_html_e( 'AWAITING INPUT', 'evg-platform' ); ?></span>
+                                    <span id="strengthIndicatorLabel" style="font-size: 0.65rem; font-family: monospace; color: #8e8e93; font-weight: 700;"><?php esc_html_e( 'AWAITING INPUT', 'evg-platform' ); ?></span>
                                 </div>
                                 
-                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: var(--evg-text-ash); font-size: 0.75rem; font-family: monospace; margin-bottom: 12px;">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; color: var(--evg-text-ash); font-size: 0.72rem; font-family: monospace; margin-bottom: 10px;">
                                     <div class="param-item" id="reqLen"><?php esc_html_e( 'Minimum 8 characters', 'evg-platform' ); ?></div>
                                     <div class="param-item" id="reqCase"><?php esc_html_e( 'Uppercase & Lowercase letter', 'evg-platform' ); ?></div>
                                     <div class="param-item" id="reqNum"><?php esc_html_e( 'At least one number', 'evg-platform' ); ?></div>
@@ -538,77 +546,77 @@ get_header(); ?>
                 </div>
 
                 <!-- SECTION 03: LOGISTICS COORDINATES -->
-                <div style="margin-bottom: 40px;">
-                    <div style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 20px;">
+                <div style="margin-bottom: 35px;">
+                    <div style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 18px;">
                         <span class="evg-label-micro" style="color: #ffffff;"><?php esc_html_e( '03 // Address Details (UK Registry)', 'evg-platform' ); ?></span>
                     </div>
                     
                     <div class="evg-form-grid">
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'House Number / Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'House Number / Name', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="house_number" class="evg-form-control" placeholder="e.g. Flat 4B or 12 Vault Way" value="<?php echo esc_attr( $form_data['house_number'] ?? '' ); ?>" required autocomplete="address-line1">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Street Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Street Address', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="street_address" class="evg-form-control" placeholder="e.g. High Street" value="<?php echo esc_attr( $form_data['street_address'] ?? '' ); ?>" required autocomplete="address-line2">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Town / City', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Town / City', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="town_city" class="evg-form-control" placeholder="e.g. London" value="<?php echo esc_attr( $form_data['town_city'] ?? '' ); ?>" required autocomplete="address-level2">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'County', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'County', 'evg-platform' ); ?></label>
                             <input type="text" name="county" class="evg-form-control" placeholder="e.g. Greater London" value="<?php echo esc_attr( $form_data['county'] ?? '' ); ?>" autocomplete="address-level1">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Postcode', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Postcode', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                             <input type="text" name="postcode" class="evg-form-control" placeholder="e.g. SW1A 1AA" value="<?php echo esc_attr( $form_data['postcode'] ?? '' ); ?>" required autocomplete="postal-code">
                         </div>
                         <div class="evg-field-wrap">
-                            <label class="evg-label-micro" style="margin-bottom: 8px; color: var(--evg-text-ash);"><?php esc_html_e( 'Country (Fixed)', 'evg-platform' ); ?></label>
+                            <label class="evg-label-micro" style="margin-bottom: 6px; color: var(--evg-text-ash);"><?php esc_html_e( 'Country (Fixed)', 'evg-platform' ); ?></label>
                             <input type="text" name="country" class="evg-form-control" value="United Kingdom" readonly>
                         </div>
                     </div>
                 </div>
 
                 <!-- SECTION 04: AUTHORIZATIONS & PREFERENCES -->
-                <div style="margin-bottom: 40px;">
-                    <div style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 20px;">
+                <div style="margin-bottom: 35px;">
+                    <div style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 8px; margin-bottom: 18px;">
                         <span class="evg-label-micro" style="color: #ffffff;"><?php esc_html_e( '04 // Preferences & Authorizations', 'evg-platform' ); ?></span>
                     </div>
                     
-                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
                         <div class="evg-checkbox-row">
                             <input class="evg-checkbox" type="checkbox" name="pref_updates" id="prefUpdates" value="yes" <?php checked( ( $form_data['pref_updates'] ?? 'yes' ), 'yes' ); ?>>
-                            <label style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; cursor: pointer;" for="prefUpdates">
+                            <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer;" for="prefUpdates">
                                 <?php esc_html_e( 'Receive grading updates by email', 'evg-platform' ); ?>
                             </label>
                         </div>
                         <div class="evg-checkbox-row">
                             <input class="evg-checkbox" type="checkbox" name="pref_offers" id="prefOffers" value="yes" <?php checked( ( $form_data['pref_offers'] ?? 'no' ), 'yes' ); ?>>
-                            <label style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; cursor: pointer;" for="prefOffers">
+                            <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer;" for="prefOffers">
                                 <?php esc_html_e( 'Receive exclusive offers and promotions (Optional)', 'evg-platform' ); ?>
                             </label>
                         </div>
                     </div>
 
-                    <div style="background: var(--evg-obsidian-base); border: 1px solid #1a1c22; border-radius: 4px; padding: 20px;">
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="background: var(--evg-obsidian-base); border: 1px solid #1a1c22; border-radius: 4px; padding: 16px;">
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
                             <div class="evg-checkbox-row">
                                 <input class="evg-checkbox" type="checkbox" name="terms_agree" id="termsAgree" required>
-                                <label style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; cursor: pointer;" for="termsAgree">
+                                <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer;" for="termsAgree">
                                     <?php esc_html_e( 'I agree to the Terms & Conditions', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span>
                                 </label>
                             </div>
                             <div class="evg-checkbox-row">
                                 <input class="evg-checkbox" type="checkbox" name="privacy_agree" id="privacyAgree" required>
-                                <label style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; cursor: pointer;" for="privacyAgree">
+                                <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer;" for="privacyAgree">
                                     <?php esc_html_e( 'I have read the Privacy Policy', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span>
                                 </label>
                             </div>
                             <div class="evg-checkbox-row">
                                 <input class="evg-checkbox" type="checkbox" name="age_check" id="ageCheck" required>
-                                <label style="color: var(--evg-text-ash); font-size: 0.85rem; line-height: 1.5; cursor: pointer;" for="ageCheck">
+                                <label style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; cursor: pointer;" for="ageCheck">
                                     <?php esc_html_e( 'I am over 18 years old, or I have permission from a parent or guardian', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span>
                                 </label>
                             </div>
@@ -617,7 +625,7 @@ get_header(); ?>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn-evg-executive" style="margin-bottom: 25px;">
+                <button type="submit" class="btn-evg-executive" style="margin-bottom: 20px;">
                     <?php esc_html_e( 'Create My Account', 'evg-platform' ); ?>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;">
                         <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -631,9 +639,9 @@ get_header(); ?>
                     $signin_url = add_query_arg( 'redirect_to', $redirect_to, $signin_url );
                 }
                 ?>
-                <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
-                    <span style="color: var(--evg-text-ash); font-size: 0.85rem;"><?php esc_html_e( 'Already have an account?', 'evg-platform' ); ?></span>
-                    <a href="<?php echo esc_url( $signin_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
+                <div style="text-align: center; padding-top: 16px; border-top: 1px solid var(--evg-border-hairline);">
+                    <span style="color: var(--evg-text-ash); font-size: 0.82rem;"><?php esc_html_e( 'Already have an account?', 'evg-platform' ); ?></span>
+                    <a href="<?php echo esc_url( $signin_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 6px;">
                         <?php esc_html_e( 'Sign In →', 'evg-platform' ); ?>
                     </a>
                 </div>

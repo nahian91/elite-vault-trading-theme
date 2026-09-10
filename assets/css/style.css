@@ -1,5 +1,5 @@
 /* ==========================================
-   ELITE VAULT GRADING - MAIN STYLESHEET
+   ELITE VAULT GRADING - MAIN STYLESHEET (MOBILE FRIENDLY)
    ========================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
@@ -30,6 +30,7 @@ body {
     font-family: var(--font-sans);
     line-height: 1.6;
     overflow-x: hidden;
+    width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -61,6 +62,7 @@ a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: var(--font-sans);
+    text-align: center;
 }
 
 .btn-gold {
@@ -88,7 +90,7 @@ a:hover {
 
 /* --- HEADER --- */
 .header {
-    padding: 25px 0;
+    padding: 20px 0;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--bg-dark);
 }
@@ -96,26 +98,27 @@ a:hover {
 .logo {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .logo-mark {
-    width: 48px;
-    height: 48px;
+    width: 42px;
+    height: 42px;
     border: 1px solid var(--gold);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-serif);
-    font-size: 20px;
+    font-size: 18px;
     color: var(--gold);
     box-shadow: inset 0 0 10px rgba(201, 160, 80, 0.2);
+    flex-shrink: 0;
 }
 
 .logo-text {
     font-family: var(--font-serif);
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 2px;
     color: var(--gold);
     line-height: 1.1;
@@ -132,25 +135,27 @@ a:hover {
 
 .nav-links {
     display: flex;
-    gap: 25px;
+    gap: 20px;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 1.5px;
+    flex-wrap: wrap;
 }
 
 .nav-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .nav-actions .btn-custom {
-    padding: 8px 16px;
+    padding: 8px 14px;
     font-size: 10px;
 }
 
 /* --- HERO SECTION --- */
 .hero {
-    padding: 90px 0;
+    padding: 60px 0;
     position: relative;
     background: radial-gradient(ellipse at 70% 50%, rgba(201, 160, 80, 0.08) 0%, rgba(5, 5, 5, 0) 60%);
 }
@@ -161,28 +166,29 @@ a:hover {
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .hero h1 {
-    font-size: 58px;
+    font-size: clamp(36px, 7vw, 58px);
     color: var(--gold);
-    margin-bottom: 25px;
-    line-height: 1.05;
+    margin-bottom: 20px;
+    line-height: 1.1;
     letter-spacing: 2px;
 }
 
 .hero p {
     color: var(--text-muted);
     font-size: 13px;
-    max-width: 85%;
-    margin-bottom: 40px;
+    max-width: 100%;
+    margin-bottom: 30px;
 }
 
 .hero-actions {
     display: flex;
-    gap: 15px;
-    margin-bottom: 35px;
+    gap: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
 }
 
 .hero-note {
@@ -193,11 +199,13 @@ a:hover {
     color: var(--text-muted);
     letter-spacing: 1.5px;
     text-transform: uppercase;
+    flex-wrap: wrap;
 }
 
 /* --- VAULT DISPLAY --- */
 .vault-container {
     width: 100%;
+    min-height: 350px;
     border-radius: 6px;
     border: 1px solid var(--border-gold);
     background: radial-gradient(circle, rgba(30,25,15,0.8) 0%, rgba(8,8,8,0.95) 80%);
@@ -207,15 +215,16 @@ a:hover {
     justify-content: center;
     overflow: hidden;
     box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    padding: 20px;
 }
 
 .vault-door-graphic {
-    width: 320px;
-    height: 320px;
-    border: 8px solid rgba(201, 160, 80, 0.3);
+    width: 260px;
+    height: 260px;
+    border: 6px solid rgba(201, 160, 80, 0.3);
     border-radius: 50%;
     position: absolute;
-    left: 10%;
+    left: 5%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -223,8 +232,8 @@ a:hover {
 }
 
 .vault-handle {
-    width: 180px;
-    height: 180px;
+    width: 140px;
+    height: 140px;
     border: 4px solid var(--gold);
     border-radius: 50%;
     position: relative;
@@ -244,13 +253,13 @@ a:hover {
 
 /* --- GRADED CARD SLAB --- */
 .slab {
-    width: 200px;
-    height: 320px;
+    width: 180px;
+    height: 290px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
     background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%);
     backdrop-filter: blur(5px);
-    padding: 10px;
+    padding: 8px;
     position: relative;
     z-index: 2;
     box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 15px rgba(201, 160, 80, 0.2);
@@ -263,19 +272,19 @@ a:hover {
     background: #111;
     border: 1px solid var(--gold);
     border-radius: 4px;
-    padding: 8px;
+    padding: 6px;
     text-align: center;
 }
 
 .slab-logo {
     font-family: var(--font-serif);
-    font-size: 10px;
+    font-size: 9px;
     color: var(--gold);
     letter-spacing: 1px;
 }
 
 .slab-grade {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     color: #fff;
     margin-top: 2px;
@@ -283,7 +292,7 @@ a:hover {
 
 .slab-card-art {
     width: 100%;
-    height: 210px;
+    height: 190px;
     background: radial-gradient(circle, #3a1c1c 0%, #110808 100%);
     border-radius: 4px;
     border: 1px solid #333;
@@ -299,7 +308,7 @@ a:hover {
 .feature-strip {
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    padding: 35px 0;
+    padding: 30px 15px;
     background-color: #080808;
 }
 
@@ -307,6 +316,11 @@ a:hover {
     display: flex;
     align-items: flex-start;
     gap: 15px;
+    margin-bottom: 15px;
+}
+
+.feature-strip .row > div:last-child .feature-item {
+    margin-bottom: 0;
 }
 
 .feature-icon-wrap {
@@ -324,9 +338,9 @@ a:hover {
 
 .feature-text h4 {
     font-family: var(--font-sans);
-    font-size: 11px;
-    color: var(--gold);
-    margin-bottom: 4px;
+    font-size: 18px !important;
+    color: var(--gold) !important;
+    margin-bottom: 6px !important;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
@@ -340,40 +354,45 @@ a:hover {
 
 /* --- HOW IT WORKS CARD --- */
 .how-it-works-section {
-    padding: 80px 0;
+    padding: 60px 0;
 }
 
 .section-box {
     border: 1px solid var(--border-gold);
     border-radius: 6px;
-    padding: 50px 30px;
+    padding: 30px 15px;
     background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .section-title {
     color: var(--gold);
-    font-size: 24px;
+    font-size: 22px;
     text-align: center;
-    margin-bottom: 50px;
-    letter-spacing: 3px;
+    margin-bottom: 35px;
+    letter-spacing: 2px;
     text-transform: uppercase;
 }
 
 .step-item {
     text-align: center;
     position: relative;
+    margin-bottom: 30px;
+}
+
+.step-col:last-child .step-item {
+    margin-bottom: 0;
 }
 
 .step-icon-wrap {
-    width: 70px;
-    height: 70px;
+    width: 65px;
+    height: 65px;
     border: 1px solid var(--gold);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 15px;
     background-color: #111;
     color: var(--gold);
     position: relative;
@@ -384,9 +403,9 @@ a:hover {
     content: '→';
     position: absolute;
     top: 22px;
-    right: -15px;
+    right: -10px;
     color: var(--border-color);
-    font-size: 18px;
+    font-size: 16px;
     z-index: 1;
 }
 
@@ -407,18 +426,18 @@ a:hover {
 
 .how-it-works-action {
     text-align: center;
-    margin-top: 40px;
+    margin-top: 30px;
 }
 
 /* --- SHOWCASE SECTION --- */
 .showcase-section {
-    padding-bottom: 80px;
+    padding-bottom: 60px;
 }
 
 .showcase-box {
     border: 1px solid var(--border-gold);
     border-radius: 6px;
-    padding: 40px 30px;
+    padding: 30px 15px;
     background: linear-gradient(180deg, #0d0d0d 0%, #050505 100%);
 }
 
@@ -448,6 +467,7 @@ a:hover {
     justify-content: center;
     align-items: center;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
 .mini-slab {
@@ -461,6 +481,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .mini-slab-header {
@@ -490,18 +511,23 @@ a:hover {
 
 /* --- BOTTOM STRIP --- */
 .bottom-strip {
-    padding: 30px 0;
+    padding: 25px 0;
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     background-color: #080808;
 }
 
 .bottom-strip .feature-item {
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    text-align: center;
-    flex-direction: column;
-    gap: 8px;
+    text-align: left;
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.bottom-strip .row > div:last-child .feature-item {
+    margin-bottom: 0;
 }
 
 .bottom-strip .feature-item h4 {
@@ -519,7 +545,7 @@ a:hover {
 
 /* --- FOOTER --- */
 .footer {
-    padding: 60px 0 40px;
+    padding: 40px 0 20px;
     background-color: var(--bg-dark);
 }
 
@@ -534,7 +560,7 @@ a:hover {
     font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 1.5px;
-    margin-bottom: 20px;
+    margin: 20px 0 15px;
     text-transform: uppercase;
 }
 
@@ -544,7 +570,7 @@ a:hover {
 }
 
 .footer-links li {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .footer-links a {
@@ -559,44 +585,64 @@ a:hover {
 .footer-contact p {
     font-size: 11px;
     color: var(--text-muted);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* --- RESPONSIVE OVERRIDES --- */
-@media (max-width: 991.98px) {
-    .hero h1 { font-size: 42px; }
-    .step-col:not(:last-child) .step-item::after { display: none; }
-    .vault-container { margin-top: 30px; }
-}
-
-@media (max-width: 767.98px) {
-    .card-trio { flex-wrap: wrap; }
-}
-
-.feature-item h4 {
-  color: var(--gold) !important;
-  font-size: 18px !important;
-  margin-bottom: 10px !important;
-}
-.bottom-strip .feature-item {
-	justify-content: center;
-	align-items: center;
-	text-align: left;
-	flex-direction: row;
-	gap: 8px;
-}
 .nav-link-item {
-	text-transform: uppercase;
+    text-transform: uppercase;
 }
 
 /* Override Theme Bootstrap Defaults */
-  .evg-contact-wrapper .text-muted {
+.evg-contact-wrapper .text-muted {
     color: var(--evg-text-muted) !important;
-  }
-  
-  .evg-contact-wrapper .text-light {
+}
+
+.evg-contact-wrapper .text-light {
     color: var(--evg-text-light) !important;
-  }
+}
+
+/* --- RESPONSIVE MEDIA QUERIES --- */
+@media (max-width: 991.98px) {
+    .hero { text-align: center; padding: 40px 0; }
+    .hero h1 { font-size: 38px; }
+    .hero p { max-width: 100%; margin-left: auto; margin-right: auto; }
+    .hero-actions { justify-content: center; }
+    .hero-note { justify-content: center; }
+    .step-col:not(:last-child) .step-item::after { display: none; }
+    .vault-container { margin-top: 30px; }
+    .vault-door-graphic { left: 50%; transform: translateX(-50%); }
+    .bottom-strip .feature-item { margin-bottom: 20px; }
+}
+
+@media (max-width: 767.98px) {
+    .header .row {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .logo {
+        justify-content: center;
+    }
+    .nav-links {
+        justify-content: center;
+        gap: 15px;
+    }
+    .nav-actions {
+        justify-content: center;
+    }
+    .card-trio { flex-wrap: wrap; }
+    .hero h1 { font-size: 32px; }
+}
+
+@media (max-width: 575.98px) {
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    .hero-actions .btn-custom {
+        width: 100%;
+    }
+}

@@ -50,17 +50,18 @@ get_header(); ?>
     position: relative;
     z-index: 1;
     color: var(--evg-text-pure);
+    overflow-x: hidden;
   }
   
   .evg-container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
+    padding: 3rem 15px 5rem 15px;
   }
 
   .evg-title-xl { 
     font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.4rem, 4vw, 3.2rem); 
+    font-size: clamp(2rem, 4vw, 3.2rem); 
     font-weight: 600; 
     letter-spacing: -0.02em; 
     line-height: 1.1; 
@@ -113,14 +114,15 @@ get_header(); ?>
     background: transparent;
     border: none;
     color: var(--evg-text-pure);
-    padding: 1.25rem 1.5rem;
-    font-size: 0.98rem;
+    padding: 1.15rem 1.25rem;
+    font-size: 0.95rem;
     font-weight: 600;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
     transition: color 0.2s ease, background 0.2s ease;
+    gap: 15px;
   }
   
   .evg-faq-button:focus { outline: none; }
@@ -143,8 +145,8 @@ get_header(); ?>
   }
 
   .evg-faq-body {
-    padding: 0 1.5rem 1.5rem 1.5rem;
-    font-size: 0.9rem;
+    padding: 0 1.25rem 1.25rem 1.25rem;
+    font-size: 0.88rem;
     line-height: 1.65;
     color: var(--evg-text-ash);
     display: none;
@@ -158,23 +160,33 @@ get_header(); ?>
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
+    font-size: 0.82rem; 
     font-weight: 800; 
     letter-spacing: 0.15em; 
     text-transform: uppercase;
     border: none; 
     border-radius: 4px; 
-    padding: 1.25rem 2.5rem; 
+    padding: 1.1rem 2rem; 
     display: inline-flex; 
     align-items: center; 
     justify-content: center;
     transition: all 0.3s ease; 
     cursor: pointer; 
     text-decoration: none;
+    text-align: center;
   }
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
+  }
+
+  /* Responsive Media Queries */
+  @media (max-width: 767.98px) {
+    .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-faq-button { padding: 1rem 1rem; font-size: 0.9rem; }
+    .evg-faq-body { padding: 0 1rem 1rem 1rem; }
+    .evg-module { padding: 25px 15px !important; }
+    .btn-evg-executive { width: 100%; max-width: 320px; }
   }
 </style>
 
@@ -182,10 +194,10 @@ get_header(); ?>
     <div class="evg-container">
 
         <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 45px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Knowledge Base Dashboard', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Operational', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Intel & FAQs', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
+            <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
                 <?php printf( esc_html__( 'Access standard operating procedures regarding our £%s base grading process, submission guidelines, %s turnaround schedules, and protective encapsulation.', 'evg-platform' ), number_format( $price_standard, 2 ), esc_html( $turnaround_time ) ); ?>
             </p>
         </header>
@@ -194,8 +206,8 @@ get_header(); ?>
         <div class="faq-section" style="padding-bottom: 20px;">
 
             <!-- 01 // GENERAL -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '01 // General Information', 'evg-platform' ); ?></span>
+            <div style="margin-bottom: 35px;">
+                <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '01 // General Information', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false" aria-controls="faq-01">
@@ -229,8 +241,8 @@ get_header(); ?>
             </div>
 
             <!-- 02 // SUBMITTING CARDS -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '02 // Submission Protocols & Pricing', 'evg-platform' ); ?></span>
+            <div style="margin-bottom: 35px;">
+                <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '02 // Submission Protocols & Pricing', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false" aria-controls="faq-04">
@@ -274,8 +286,8 @@ get_header(); ?>
             </div>
 
             <!-- 03 // PACKAGING & LOGISTICS -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '03 // Packaging & Logistics', 'evg-platform' ); ?></span>
+            <div style="margin-bottom: 35px;">
+                <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '03 // Packaging & Logistics', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false" aria-controls="faq-08">
@@ -299,8 +311,8 @@ get_header(); ?>
             </div>
 
             <!-- 04 // DIAGNOSTIC STANDARDS & FAULT PORTFOLIO -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '04 // Diagnostic Criteria & Damage Telemetry', 'evg-platform' ); ?></span>
+            <div style="margin-bottom: 35px;">
+                <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '04 // Diagnostic Criteria & Damage Telemetry', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false" aria-controls="faq-10">
@@ -334,8 +346,8 @@ get_header(); ?>
             </div>
 
             <!-- 05 // TURNAROUND TIMES -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '05 // Turnaround & Facility Schedules', 'evg-platform' ); ?></span>
+            <div style="margin-bottom: 35px;">
+                <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '05 // Turnaround & Facility Schedules', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false" aria-controls="faq-13">
@@ -359,8 +371,8 @@ get_header(); ?>
             </div>
 
             <!-- 06 // SLABS & ENCAPSULATION -->
-            <div style="margin-bottom: 40px;">
-                <span class="evg-label-micro" style="margin-bottom: 12px;"><?php esc_html_e( '06 // Slabs & Encapsulation', 'evg-platform' ); ?></span>
+            <div style="margin-bottom: 35px;">
+                <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( '06 // Slabs & Encapsulation', 'evg-platform' ); ?></span>
                 
                 <div class="evg-faq-item">
                     <button class="evg-faq-button" type="button" aria-expanded="false" aria-controls="faq-15">
@@ -386,10 +398,10 @@ get_header(); ?>
         </div>
 
         <!-- 3. UNRESOLVED INTEL CTA -->
-        <div class="evg-module" style="padding: 40px; text-align: center; margin-top: 20px;">
+        <div class="evg-module" style="padding: 35px 20px; text-align: center; margin-top: 20px;">
             <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 10px;"><?php esc_html_e( 'Direct Support Escalation', 'evg-platform' ); ?></span>
-            <h2 style="color: #ffffff; font-size: 1.4rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Require Further Assistance?', 'evg-platform' ); ?></h2>
-            <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.9rem; line-height: 1.6;">
+            <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Require Further Assistance?', 'evg-platform' ); ?></h2>
+            <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.88rem; line-height: 1.6;">
                 <?php esc_html_e( 'If your specific inquiry is not covered within this knowledge base, our support specialists are on standby. Standard resolution target is 24–48 hours.', 'evg-platform' ); ?>
             </p>
             <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-evg-executive" style="margin-bottom: 16px;">

@@ -49,14 +49,14 @@ $showcase_slab = $wpdb->get_row( "
 // Gallery/Collage photo set for photo reel and single specimen features
 $theme_img_uri  = get_template_directory_uri() . '/assets/img/';
 $collage_photos = array(
-    $theme_img_uri . 'gallery-1.jpg',
-    $theme_img_uri . 'gallery-2.jpg',
-    $theme_img_uri . 'gallery-3.jpg',
-    $theme_img_uri . 'gallery-4.jpg',
-    $theme_img_uri . 'gallery-5.jpg',
-    $theme_img_uri . 'gallery-6.jpg',
-    $theme_img_uri . 'gallery-7.jpg',
-    $theme_img_uri . 'gallery-8.jpg'
+    $theme_img_uri . 'IMG_0968.jpg',
+    $theme_img_uri . 'IMG_0971.jpg',
+    $theme_img_uri . 'IMG_0973.jpg',
+    $theme_img_uri . 'IMG_0974.jpg',
+    $theme_img_uri . 'IMG_0975.jpg',
+    $theme_img_uri . 'IMG_0978.jpg',
+    $theme_img_uri . 'IMG_0980.jpg',
+    $theme_img_uri . 'IMG_0982.jpg'
 );
 
 // Fetch customer feedback for the testimonial reel strictly respecting marketing permissions
@@ -111,6 +111,7 @@ get_header(); ?>
     color: var(--evg-text-ash);
     position: relative;
     z-index: 1;
+    overflow-x: hidden;
   }
 
   .evg-banner-announcement {
@@ -363,11 +364,21 @@ get_header(); ?>
     margin-bottom: 12px;
   }
 
-  @media (max-width: 992px) {
-    .hero { text-align: center; }
-    .hero-actions { justify-content: center; display: flex; flex-wrap: wrap; gap: 10px; }
-    .btn-gold, .btn-outline-gold { margin-right: 0; }
+  /* --- RESPONSIVE MEDIA QUERIES FOR MOBILE & TABLET --- */
+  @media (max-width: 991.98px) {
+    .hero { text-align: center; padding: 3rem 0; }
+    .hero-actions { justify-content: center; display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn-gold, .btn-outline-gold { margin-right: 0; width: 100%; max-width: 280px; }
     .hero-note { justify-content: center; }
+    .hero p { margin-left: auto; margin-right: auto; }
+    .vault-container-single { margin-top: 2rem; max-width: 420px; }
+  }
+
+  @media (max-width: 767.98px) {
+    .hero h1 { font-size: 2.3rem !important; }
+    .section-title { font-size: 1.5rem; margin-bottom: 2rem; }
+    .feature-item, .step-item { padding: 1.25rem; }
+    .evg-testimonial-card { width: 300px; padding: 18px; }
   }
 </style>
 
@@ -394,10 +405,10 @@ get_header(); ?>
                     <?php endif; ?>
 
                     <div class="hero-subtitle"><?php esc_html_e( 'The Premier Pokémon Card Grading Service', 'evg-platform' ); ?></div>
-                    <h1 style="font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.5rem;">
+                    <h1 style="font-size: clamp(2.3rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.5rem;">
                         SECURE.<br>PRESERVE.<br><span class="evg-text-metallic">ELEVATE.</span>
                     </h1>
-                    <p style="font-size: 1.05rem; line-height: 1.6; max-width: 500px; margin-bottom: 2rem;">
+                    <p style="font-size: 1.01rem; line-height: 1.6; max-width: 500px; margin-bottom: 2rem;">
                         <?php printf( esc_html__( 'Elite Vault Grading protects your Pokémon cards with precision, transparency, and trust. Base grading starting from £%s with turnaround from %s.', 'evg-platform' ), number_format( $price_standard, 2 ), esc_html( $turnaround_time ) ); ?>
                     </p>
                     
@@ -429,7 +440,7 @@ get_header(); ?>
                 <div class="col-lg-7">
                     <div class="vault-container-single">
                         <div class="vault-single-item">
-                            <img src="<?php echo get_template_directory_uri();?>/assets/img/IMG_1035.jpg; ?>" alt="Elite Vault Featured Specimen" loading="lazy">
+                            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/IMG_1035.jpg' ); ?>" alt="Elite Vault Featured Specimen" loading="lazy">
                         </div>
                     </div>
                 </div>
@@ -441,7 +452,7 @@ get_header(); ?>
     <section class="feature-strip" style="border-top: 1px solid var(--evg-border-hairline); border-bottom: 1px solid var(--evg-border-hairline); background: #08080a;">
         <div class="container">
             <div class="row g-4">
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item">
                         <div class="feature-icon-wrap">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -454,7 +465,7 @@ get_header(); ?>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item">
                         <div class="feature-icon-wrap">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -467,7 +478,7 @@ get_header(); ?>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item">
                         <div class="feature-icon-wrap">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -481,7 +492,7 @@ get_header(); ?>
                         </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item">
                         <div class="feature-icon-wrap">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -499,42 +510,28 @@ get_header(); ?>
         </div>
     </section>
 
-    <?php
-// ফোল্ডারে থাকা আপনার নির্দিষ্ট ছবিগুলোর তালিকা দিয়ে অ্যারে তৈরি করুন
-$collage_photos = array(
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0968.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0971.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0973.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0974.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0975.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0978.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0980.jpg',
-    get_stylesheet_directory_uri() . '/assets/img/IMG_0982.jpg'
-);
-?>
-
-<!-- থিন মুভিং ফটো রিল সেকশন -->
-<section class="evg-photo-reel-section" aria-label="Photo Reel">
-    <div class="evg-photo-reel-wrapper">
-        <div class="evg-photo-reel-track">
-            <?php 
-            $loop_collages = array_merge( $collage_photos, $collage_photos );
-            foreach ( $loop_collages as $c_img ) : 
-            ?>
-                <div class="evg-photo-reel-item">
-                    <img src="<?php echo esc_url( $c_img ); ?>" alt="Elite Vault Archive" loading="lazy">
-                </div>
-            <?php endforeach; ?>
+    <!-- THIN MOVING PHOTO REEL -->
+    <section class="evg-photo-reel-section" aria-label="Photo Reel">
+        <div class="evg-photo-reel-wrapper">
+            <div class="evg-photo-reel-track">
+                <?php 
+                $loop_collages = array_merge( $collage_photos, $collage_photos );
+                foreach ( $loop_collages as $c_img ) : 
+                ?>
+                    <div class="evg-photo-reel-item">
+                        <img src="<?php echo esc_url( $c_img ); ?>" alt="Elite Vault Archive" loading="lazy">
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <!-- HOW IT WORKS -->
     <section class="how-it-works-section">
         <div class="container">
             <h2 class="section-title"><?php esc_html_e( 'HOW IT WORKS', 'evg-platform' ); ?></h2>
             <div class="row g-4">
-                <div class="col-6 col-md-3 step-col">
+                <div class="col-12 col-sm-6 col-md-3 step-col">
                     <div class="step-item">
                         <div class="step-icon-wrap">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -545,7 +542,7 @@ $collage_photos = array(
                         <p style="font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Sign up and declare your cards in the submission portal.', 'evg-platform' ); ?></p>
                     </div>
                 </div>
-                <div class="col-6 col-md-3 step-col">
+                <div class="col-12 col-sm-6 col-md-3 step-col">
                     <div class="step-item">
                         <div class="step-icon-wrap">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -557,7 +554,7 @@ $collage_photos = array(
                         <p style="font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Package securely in semi-rigids and dispatch to our UK facility.', 'evg-platform' ); ?></p>
                     </div>
                 </div>
-                <div class="col-6 col-md-3 step-col">
+                <div class="col-12 col-sm-6 col-md-3 step-col">
                     <div class="step-item">
                         <div class="step-icon-wrap">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -569,7 +566,7 @@ $collage_photos = array(
                         <p style="font-size: 0.82rem; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Our graders assess condition and sonically seal your slab.', 'evg-platform' ); ?></p>
                     </div>
                 </div>
-                <div class="col-6 col-md-3 step-col">
+                <div class="col-12 col-sm-6 col-md-3 step-col">
                     <div class="step-item">
                         <div class="step-icon-wrap">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -595,9 +592,9 @@ $collage_photos = array(
     <section class="showcase-section" style="border-top: 1px solid var(--evg-border-hairline); border-bottom: 1px solid var(--evg-border-hairline); background: #08080a;">
         <div class="container">
             <div class="row align-items-center g-4">
-                <div class="col-lg-6">
+                <div class="col-lg-6 text-center text-lg-start">
                     <div class="showcase-subtitle"><?php esc_html_e( 'Shop With Confidence', 'evg-platform' ); ?></div>
-                    <h2 style="font-size: 2rem; font-weight: 700; line-height: 1.2; margin-bottom: 1rem;">
+                    <h2 style="font-size: clamp(1.8rem, 4vw, 2rem); font-weight: 700; line-height: 1.2; margin-bottom: 1rem;">
                         BUY CERTIFIED<br><span class="evg-text-metallic">GRADED SLABS</span>
                     </h2>
                     <p style="font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;">
@@ -611,10 +608,10 @@ $collage_photos = array(
                 <!-- SHOP WITH CONFIDENCE RIGHT: SINGLE PROMINENT SPECIMEN -->
                 <div class="col-lg-6">
                     <div class="vault-container-single">
-    <div class="vault-single-item">
-        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/IMG_1051.jpg' ); ?>" alt="Elite Vault Certified Slab" loading="lazy">
-    </div>
-</div>
+                        <div class="vault-single-item">
+                            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/IMG_1051.jpg' ); ?>" alt="Elite Vault Certified Slab" loading="lazy">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -624,7 +621,7 @@ $collage_photos = array(
     <section class="bottom-strip">
         <div class="container">
             <div class="row g-4">
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item" style="display: flex; align-items: center; gap: 14px;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2" style="flex-shrink: 0;">
                             <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
@@ -636,7 +633,7 @@ $collage_photos = array(
                     </div>
                 </div>
 
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item" style="display: flex; align-items: center; gap: 14px;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2" style="flex-shrink: 0;">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -648,7 +645,7 @@ $collage_photos = array(
                     </div>
                 </div>
 
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item" style="display: flex; align-items: center; gap: 14px;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2" style="flex-shrink: 0;">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
@@ -660,7 +657,7 @@ $collage_photos = array(
                     </div>
                 </div>
 
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6 col-md-3">
                     <div class="feature-item" style="display: flex; align-items: center; gap: 14px;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2" style="flex-shrink: 0;">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -680,7 +677,7 @@ $collage_photos = array(
         <div class="container">
             <div class="evg-reel-header">
                 <div class="showcase-subtitle" style="margin-bottom: 0.5rem;"><?php esc_html_e( 'Collector Endorsements', 'evg-platform' ); ?></div>
-                <h2 style="font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem;">
+                <h2 style="font-size: clamp(1.5rem, 4vw, 1.8rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem;">
                     <?php esc_html_e( 'TRUSTED BY', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'COLLECTORS', 'evg-platform' ); ?></span>
                 </h2>
                 <p style="font-size: 0.85rem; color: var(--evg-text-ash); margin: 0;">
