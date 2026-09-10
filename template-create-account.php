@@ -7,12 +7,17 @@
  *              and fixed, non-editable United Kingdom country lock.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // -------------------------------------------------------------------------
-// 1. RESOLVE REDIRECT TARGET
+// 1. RESOLVE REDIRECT TARGET & GUEST GATING
 // -------------------------------------------------------------------------
 $redirect_to = '';
 if ( isset( $_REQUEST['redirect_to'] ) && ! empty( $_REQUEST['redirect_to'] ) ) {
-    $redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+    $raw_redirect = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+    $redirect_to  = wp_validate_redirect( $raw_redirect, home_url( '/my-account' ) );
 }
 
 // Redirect if already authenticated
@@ -40,21 +45,22 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_register_nonce'] ), 'evg_user_registration_action' ) ) {
         
         // Sanitize incoming fields
-        $first_name       = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
-        $last_name        = sanitize_text_field( wp_unslash( $_POST['last_name'] ?? '' ) );
-        $email            = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
-        $confirm_email    = sanitize_email( wp_unslash( $_POST['confirm_email'] ?? '' ) );
-        $mobile_number    = sanitize_text_field( wp_unslash( $_POST['mobile_number'] ?? '' ) );
-        $username         = sanitize_user( wp_unslash( $_POST['username'] ?? '' ) );
-        $password         = $_POST['password'] ?? '';
-        $confirm_password = $_POST['confirm_password'] ?? '';
+        $first_name       = isset( $_POST['first_name'] ) ? sanitize_text_field( wp_unslash( $_POST['first_name'] ) ) : '';
+        $last_name        = isset( $_POST['last_name'] ) ? sanitize_text_field( wp_unslash( $_POST['last_name'] ) ) : '';
+        $email            = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+        $confirm_email    = isset( $_POST['confirm_email'] ) ? sanitize_email( wp_unslash( $_POST['confirm_email'] ) ) : '';
+        $mobile_number    = isset( $_POST['mobile_number'] ) ? sanitize_text_field( wp_unslash( $_POST['mobile_number'] ) ) : '';
+        $username         = isset( $_POST['username'] ) ? sanitize_user( wp_unslash( $_POST['username'] ) ) : '';
+        $password         = isset( $_POST['password'] ) ? (string) $_POST['password'] : '';
+        $confirm_password = isset( $_POST['confirm_password'] ) ? (string) $_POST['confirm_password'] : '';
         
         // UK Address parameters (Country strictly locked to United Kingdom)
-        $house_number   = sanitize_text_field( wp_unslash( $_POST['house_number'] ?? '' ) );
-        $street_address = sanitize_text_field( wp_unslash( $_POST['street_address'] ?? '' ) );
-        $town_city      = sanitize_text_field( wp_unslash( $_POST['town_city'] ?? '' ) );
-        $county         = sanitize_text_field( wp_unslash( $_POST['county'] ?? '' ) );
-        $postcode       = sanitize_text_field( wp_unslash( $_POST['postcode'] ?? '' ) );
+        $house_number   = isset( $_POST['house_number'] ) ? sanitize_text_field( wp_unslash( $_POST['house_number'] ) ) : '';
+        $street_address = isset( $_POST['street_address'] ) ? sanitize_text_field( wp_unslash( $_POST['street_address'] ) ) : '';
+        $town_city      = isset( $_POST['town_city'] ) ? sanitize_text_field( wp_unslash( $_POST['town_city'] ) ) : '';
+        $county         = isset( $_POST['county'] ) ? sanitize_text_field( wp_unslash( $_POST['county'] ) ) : '';
+        $raw_postcode   = isset( $_POST['postcode'] ) ? sanitize_text_field( wp_unslash( $_POST['postcode'] ) ) : '';
+        $postcode       = strtoupper( trim( preg_replace( '/\s+/', ' ', $raw_postcode ) ) );
         $country        = 'United Kingdom';
         
         // Preferences & Compliance Checkboxes
@@ -78,7 +84,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
 
         if ( empty( $email ) || ! is_email( $email ) ) {
             $registration_errors->add( 'invalid_email', __( 'A valid email address is required.', 'evg-platform' ) );
-        } elseif ( $email !== $confirm_email ) {
+        } elseif ( strtolower( $email ) !== strtolower( $confirm_email ) ) {
             $registration_errors->add( 'email_mismatch', __( 'Email addresses do not match.', 'evg-platform' ) );
         } elseif ( email_exists( $email ) ) {
             $registration_errors->add( 'email_exists', __( 'An account with this email address already exists.', 'evg-platform' ) );
@@ -86,9 +92,13 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
 
         // Generate username if omitted
         if ( empty( $username ) ) {
-            $base_user = sanitize_user( current( explode( '@', $email ) ), true );
-            $username  = $base_user;
-            $suffix    = 1;
+            $email_parts = explode( '@', $email );
+            $base_user   = sanitize_user( current( $email_parts ), true );
+            if ( empty( $base_user ) ) {
+                $base_user = 'collector';
+            }
+            $username = $base_user;
+            $suffix   = 1;
             while ( username_exists( $username ) ) {
                 $username = $base_user . $suffix;
                 $suffix++;
@@ -98,8 +108,8 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
         }
 
         // Strict Cryptographic Password Policy
-        if ( strlen( $password ) < 8 ) {
-            $registration_errors->add( 'password_len', __( 'Password must be at least 8 characters.', 'evg-platform' ) );
+        if ( mb_strlen( $password ) < 8 ) {
+            $registration_errors->add( 'password_len', __( 'Password must be at least 8 characters long.', 'evg-platform' ) );
         }
         if ( ! preg_match( '/[A-Z]/', $password ) ) {
             $registration_errors->add( 'password_upper', __( 'Password must contain at least one uppercase letter.', 'evg-platform' ) );
@@ -146,11 +156,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
                 update_user_meta( $user_id, 'evg_street_address', $street_address );
                 update_user_meta( $user_id, 'evg_town_city', $town_city );
                 update_user_meta( $user_id, 'evg_county', $county );
-                update_user_meta( $user_id, 'evg_postcode', strtoupper( $postcode ) );
+                update_user_meta( $user_id, 'evg_postcode', $postcode );
                 update_user_meta( $user_id, 'evg_country', 'United Kingdom' );
                 update_user_meta( $user_id, 'evg_mobile_number', $mobile_number );
                 update_user_meta( $user_id, 'evg_pref_updates', $pref_updates );
-                update_user_meta( $user_id, 'evg_pref_offers', $pref_offers );
+                update_user_meta( $user_id, 'evg_opt_in_promotions', $pref_offers );
+                update_user_meta( $user_id, 'evg_age_consent', 'yes' );
 
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
                     Elite_Vault_Grading_System::log_activity( "Registered New Collector Account: {$email} (User ID #{$user_id})" );
@@ -160,7 +171,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
                 wp_set_current_user( $user_id );
                 wp_set_auth_cookie( $user_id, true );
 
-                // Direct routing honoring redirect_to
+                // Direct routing honoring safe redirect_to
                 if ( ! empty( $redirect_to ) ) {
                     wp_safe_redirect( $redirect_to );
                 } else {
@@ -250,7 +261,6 @@ get_header(); ?>
     gap: 20px;
   }
   .evg-grid-full { grid-column: span 2; }
-  .evg-grid-third { grid-column: span 1; }
 
   .evg-field-wrap {
     display: flex;
@@ -276,7 +286,7 @@ get_header(); ?>
   }
   .evg-form-control::placeholder { color: #4a4f5c; font-weight: 300; }
   
-  /* Fixed / Readonly styling for Country */
+  /* Readonly styling for Country */
   .evg-form-control:read-only { 
     color: var(--evg-gold-primary) !important; 
     background: #08080a !important; 
@@ -400,7 +410,7 @@ get_header(); ?>
 
   @media (max-width: 768px) {
     .evg-form-grid { grid-template-columns: 1fr; }
-    .evg-grid-full, .evg-grid-third { grid-column: span 1; }
+    .evg-grid-full { grid-column: span 1; }
     .evg-module { padding: 25px; }
   }
 </style>
@@ -618,7 +628,7 @@ get_header(); ?>
                 <?php
                 $signin_url = home_url( '/sign-in' );
                 if ( ! empty( $redirect_to ) ) {
-                    $signin_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $signin_url );
+                    $signin_url = add_query_arg( 'redirect_to', $redirect_to, $signin_url );
                 }
                 ?>
                 <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">

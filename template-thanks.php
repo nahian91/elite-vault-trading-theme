@@ -5,7 +5,13 @@
  *              Connects directly to wp_evg_submissions and wp_evg_cards,
  *              fetches live intake details, generates packing slip links,
  *              and provides solid dark luxury styling with background lines removed.
+ *
+ * @package EliteVaultGrading
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 global $wpdb;
 
@@ -13,45 +19,52 @@ $table_submissions = $wpdb->prefix . 'evg_submissions';
 $table_cards       = $wpdb->prefix . 'evg_cards';
 
 // -------------------------------------------------------------------------
-// 1. DYNAMIC DATA RESOLUTION
+// 1. DYNAMIC DATA RESOLUTION & ACCESS VERIFICATION
 // -------------------------------------------------------------------------
-$submission_id = isset( $_GET['order'] ) ? intval( $_GET['order'] ) : ( isset( $_GET['submission_id'] ) ? intval( $_GET['submission_id'] ) : 0 );
-$submission    = null;
-$cards         = array();
+$current_user_id = get_current_user_id();
+$submission_id   = isset( $_GET['order'] ) ? absint( $_GET['order'] ) : ( isset( $_GET['submission_id'] ) ? absint( $_GET['submission_id'] ) : 0 );
+$submission      = null;
+$cards           = array();
 
 if ( $submission_id > 0 ) {
-    $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d", $submission_id ) );
+    // Only allow access to the order if the current user owns it, or if staff member
+    if ( current_user_can( 'manage_options' ) || ( class_exists( 'Elite_Vault_Grading_System' ) && Elite_Vault_Grading_System::has_access( array( 'administrator', 'support_team' ) ) ) ) {
+        $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d", $submission_id ) );
+    } elseif ( $current_user_id > 0 ) {
+        $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d AND customer_id = %d", $submission_id, $current_user_id ) );
+    }
+
     if ( $submission ) {
         $cards = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_cards} WHERE submission_id = %d ORDER BY id ASC", $submission_id ) );
     }
 }
 
 // Fallbacks & Parameters
-$order_number    = $submission ? $submission->order_number : ( isset( $_GET['order_id'] ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : 'EVG-' . date( 'Y' ) . '-0042' );
+$order_number    = $submission ? $submission->order_number : ( isset( $_GET['order_id'] ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : 'EVG-' . date( 'Y' ) . '-INTAKE' );
 $submission_tier = $submission ? $submission->service_type : ( isset( $_GET['tier'] ) ? sanitize_text_field( wp_unslash( $_GET['tier'] ) ) : 'Standard Base Protocol' );
 $label_option    = $submission ? $submission->label_option : ( isset( $_GET['label'] ) ? sanitize_text_field( wp_unslash( $_GET['label'] ) ) : 'Standard Vault Slab' );
-$card_count      = $submission ? intval( $submission->total_cards ) : ( ! empty( $cards ) ? count( $cards ) : ( isset( $_GET['cards'] ) ? intval( $_GET['cards'] ) : 5 ) );
+$card_count      = $submission ? intval( $submission->total_cards ) : ( ! empty( $cards ) ? count( $cards ) : ( isset( $_GET['cards'] ) ? absint( $_GET['cards'] ) : 1 ) );
 $total_amount    = $submission ? floatval( $submission->total_amount ) : 0.00;
 
 // Resolve Customer Email
 $customer_user = $submission ? get_userdata( $submission->customer_id ) : ( is_user_logged_in() ? wp_get_current_user() : null );
 $raw_email     = $customer_user ? $customer_user->user_email : ( isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : 'collector@domain.co.uk' );
 
-// Mask email for security display (e.g., j***e@domain.co.uk)
+// Mask email for privacy display (e.g., j***e@domain.co.uk)
 $order_email = $raw_email;
 if ( strpos( $raw_email, '@' ) !== false ) {
     list( $user_part, $domain_part ) = explode( '@', $raw_email );
-    if ( strlen( $user_part ) > 2 ) {
-        $masked_user = substr( $user_part, 0, 1 ) . str_repeat( '*', strlen( $user_part ) - 2 ) . substr( $user_part, -1 );
+    if ( mb_strlen( $user_part ) > 2 ) {
+        $masked_user = mb_substr( $user_part, 0, 1 ) . str_repeat( '*', mb_strlen( $user_part ) - 2 ) . mb_substr( $user_part, -1 );
     } else {
-        $masked_user = substr( $user_part, 0, 1 ) . '*';
+        $masked_user = mb_substr( $user_part, 0, 1 ) . '*';
     }
     $order_email = $masked_user . '@' . $domain_part;
 }
 
 // Fetch Dynamic Admin Settings
-$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
-$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
+$support_email   = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 
 get_header(); ?>
 
@@ -74,7 +87,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -126,7 +138,6 @@ get_header(); ?>
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
-  /* Vault Emblem */
   .evg-security-seal {
     width: 76px; 
     height: 76px; 
@@ -140,7 +151,6 @@ get_header(); ?>
     box-shadow: 0 0 25px var(--evg-gold-glow);
   }
 
-  /* Grid Matrices */
   .evg-grid-matrix {
     display: grid; 
     gap: 1px;
@@ -158,7 +168,6 @@ get_header(); ?>
   .evg-grid-cell:hover { background: var(--evg-obsidian-elevated); }
   .evg-workflow-matrix { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 
-  /* Buttons */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -222,7 +231,6 @@ get_header(); ?>
     color: var(--evg-gold-primary); 
   }
 
-  /* Metadata Lists */
   .evg-meta-list { list-style: none; padding: 0; margin: 0; }
   .evg-meta-list li {
     display: flex; 
@@ -280,14 +288,12 @@ get_header(); ?>
                 </div>
 
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <?php if ( $submission_id > 0 ) : ?>
-                        <a href="<?php echo esc_url( admin_url( 'admin-post.php?action=evg_download_invoice&submission_id=' . $submission_id ) ); ?>" target="_blank" class="btn-evg-executive">
-                            📄 <?php esc_html_e( 'Print Packing Slip', 'evg-platform' ); ?>
-                        </a>
-                    <?php endif; ?>
-                    <a href="<?php echo esc_url( home_url( '/my-account' ) ); ?>" class="btn-evg-outline">
+                    <a href="<?php echo esc_url( home_url( '/my-account' ) ); ?>" class="btn-evg-executive">
                         <?php esc_html_e( 'Live Tracking Portal', 'evg-platform' ); ?>
                     </a>
+                    <button type="button" class="btn-evg-outline" onclick="window.print()">
+                        🖨️ <?php esc_html_e( 'Print Manifest Sheet', 'evg-platform' ); ?>
+                    </button>
                 </div>
             </div>
 
@@ -308,7 +314,7 @@ get_header(); ?>
                 <?php if ( $total_amount > 0 ) : ?>
                     <li>
                         <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Total Billed & Settled', 'evg-platform' ); ?></span>
-                        <span style="color: #34c759; font-family: monospace; font-weight: 700; font-size: 0.95rem;">£<?php echo esc_html( number_format( $total_amount, 2 ) ); ?></span>
+                        <span style="color: #34c759; font-family: monospace; font-weight: 700; font-size: 0.95rem;">£<?php echo esc_html( number_format( (float) $total_amount, 2 ) ); ?></span>
                     </li>
                 <?php endif; ?>
                 <li>
@@ -317,7 +323,7 @@ get_header(); ?>
                 </li>
                 <li>
                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Return Delivery (UK)', 'evg-platform' ); ?></span>
-                    <span style="color: #34c759; font-family: monospace; font-size: 0.78rem; font-weight: 700;"><?php esc_html_e( 'ROYAL MAIL TRACKED (INCLUDED)', 'evg-platform' ); ?></span>
+                    <span style="color: #34c759; font-family: monospace; font-size: 0.78rem; font-weight: 700;"><?php esc_html_e( 'ROYAL MAIL TRACKED', 'evg-platform' ); ?></span>
                 </li>
             </ul>
         </section>
@@ -334,7 +340,7 @@ get_header(); ?>
                     <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'Stage 01', 'evg-platform' ); ?></span>
                     <h4 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Package Your Cards', 'evg-platform' ); ?></h4>
                     <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;">
-                        <?php esc_html_e( 'Place cards in penny sleeves and semi-rigids. Enclose a printed copy of your submission reference slip inside a padded box.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Place cards in penny sleeves and semi-rigids. Enclose a printed copy of this reference slip inside a padded box.', 'evg-platform' ); ?>
                     </p>
                 </div>
 

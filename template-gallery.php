@@ -1,8 +1,30 @@
 <?php
 /**
- * Template Name: Gallery - Executive Tier (4-Column Image Archive)
- * Description: Clean 4-column certified slab archive loading 16 local images from assets/img (gallery-1.jpg to gallery-16.jpg) with an image-only lightbox popup.
+ * Template Name: Gallery - Executive Tier (Paged Archive)
+ * Description: Clean 4-column certified slab archive using specific filenames from assets/img, loading 12 images per click.
+ *
+ * @package EliteVaultGrading
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+// Exact list of gallery images from your folder (excluding logo.png)
+$gallery_images = array(
+    'IMG_0968.jpg', 'IMG_0971.jpg', 'IMG_0973.jpg', 'IMG_0974.jpg', 
+    'IMG_0975.jpg', 'IMG_0978.jpg', 'IMG_0980.jpg', 'IMG_0982.jpg', 
+    'IMG_0988.jpg', 'IMG_0989.jpg', 'IMG_0990.jpg', 'IMG_0993.jpg', 
+    'IMG_0995.jpg', 'IMG_0999.jpg', 'IMG_1001.jpg', 'IMG_1004.jpg', 
+    'IMG_1007.jpg', 'IMG_1009.jpg', 'IMG_1011.jpg', 'IMG_1014.jpg', 
+    'IMG_1017.jpg', 'IMG_1018.jpg', 'IMG_1019.jpg', 'IMG_1024.jpg', 
+    'IMG_1026.jpg', 'IMG_1028.jpg', 'IMG_1029.jpg', 'IMG_1030.jpg', 
+    'IMG_1031.jpg', 'IMG_1032.jpg', 'IMG_1033.jpg', 'IMG_1034.jpg', 
+    'IMG_1035.jpg', 'IMG_1036.jpg', 'IMG_1037.jpg', 'IMG_1038.jpg', 
+    'IMG_1039.jpg', 'IMG_1040.jpg', 'IMG_1041.jpg', 'IMG_1042.jpg', 
+    'IMG_1049.jpg', 'IMG_1050.jpg', 'IMG_1051.jpg', 'IMG_1052.jpg', 
+    'IMG_1053.jpg', 'IMG_1055.jpg'
+);
 
 get_header(); ?>
 
@@ -95,8 +117,11 @@ get_header(); ?>
         align-items: center;
         justify-content: center;
         position: relative;
+        padding: 0;
+        outline: none;
     }
-    .evg-slab-thumb:hover {
+    .evg-slab-thumb:hover,
+    .evg-slab-thumb:focus-visible {
         border-color: var(--evg-gold-primary);
         transform: translateY(-4px);
         box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 15px var(--evg-gold-glow);
@@ -105,6 +130,35 @@ get_header(); ?>
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
+    }
+
+    .evg-slab-thumb.hidden-item {
+        display: none;
+    }
+
+    /* Load More Button Wrapper */
+    .evg-load-more-wrap {
+        text-align: center;
+        margin-top: 50px;
+    }
+    .evg-btn-load-more {
+        background: var(--evg-obsidian-panel);
+        border: 1px solid var(--evg-border-gold-faint);
+        color: var(--evg-gold-light);
+        font-size: 0.85rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        padding: 1rem 2.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .evg-btn-load-more:hover {
+        background: var(--evg-gold-primary);
+        color: var(--evg-text-charcoal);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.25);
     }
 
     /* Image-Only Lightbox Modal */
@@ -121,6 +175,7 @@ get_header(); ?>
         align-items: center;
         justify-content: center;
         padding: 30px;
+        box-sizing: border-box;
     }
     .evg-modal-overlay.active { display: flex; }
 
@@ -158,7 +213,13 @@ get_header(); ?>
         transition: all 0.2s ease;
         z-index: 10;
     }
-    .evg-modal-close:hover { background: var(--evg-gold-primary); color: var(--evg-text-charcoal); border-color: var(--evg-gold-primary); }
+    .evg-modal-close:hover,
+    .evg-modal-close:focus-visible { 
+        background: var(--evg-gold-primary); 
+        color: var(--evg-text-charcoal); 
+        border-color: var(--evg-gold-primary); 
+        outline: none;
+    }
 </style>
 
 <main class="evg-master-wrapper">
@@ -169,72 +230,117 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Vault Archive', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Certified Slab', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Showcase', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 480px; margin: 0 auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'A 4-column pristine gallery grid of authenticated masterworks preserved in Elite Vault protective slabs.', 'evg-platform' ); ?>
+                <?php esc_html_e( 'A pristine gallery grid of authenticated masterworks preserved in Elite Vault protective slabs.', 'evg-platform' ); ?>
             </p>
         </header>
 
-        <!-- 4-COLUMN IMAGE GRID (16 Images from assets/img) -->
-        <div class="evg-gallery-grid-4">
-            
+        <!-- 4-COLUMN IMAGE GRID -->
+        <div class="evg-gallery-grid-4" id="evgGalleryGrid">
             <?php
-            // Loop from 1 to 16 to dynamically load gallery-1.jpg through gallery-16.jpg
-            for ( $i = 1; $i <= 16; $i++ ) :
-                // Adjust theme directory path if this template is inside your plugin or theme
-                $img_url = get_template_directory_uri() . '/assets/img/gallery-' . $i . '.jpg';
+            $base_img_uri = get_stylesheet_directory_uri() . '/assets/img/';
+            foreach ( $gallery_images as $index => $filename ) :
+                $img_url   = $base_img_uri . $filename;
+                $alt_title = sprintf( __( 'Elite Vault Certified Specimen - %s', 'evg-platform' ), pathinfo( $filename, PATHINFO_FILENAME ) );
+                // Hide items after the first 12 initially
+                $hidden_class = ( $index >= 12 ) ? 'hidden-item' : '';
             ?>
-                <div class="evg-slab-thumb" data-img-src="<?php echo esc_url( $img_url ); ?>" data-title="<?php echo esc_attr( 'Certified Specimen #' . $i ); ?>">
-                    <img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo esc_attr( 'Elite Vault Certified Slab ' . $i ); ?>" loading="lazy">
-                </div>
-            <?php endfor; ?>
+                <button type="button" 
+                        class="evg-slab-thumb <?php echo esc_attr( $hidden_class ); ?>" 
+                        data-img-src="<?php echo esc_url( $img_url ); ?>" 
+                        data-title="<?php echo esc_attr( $alt_title ); ?>"
+                        aria-label="<?php echo esc_attr( sprintf( __( 'View %s in detail', 'evg-platform' ), $alt_title ) ); ?>">
+                    <img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo esc_attr( $alt_title ); ?>" loading="lazy">
+                </button>
+            <?php endforeach; ?>
+        </div>
 
+        <!-- LOAD MORE BUTTON -->
+        <div class="evg-load-more-wrap" id="evgLoadMoreWrap">
+            <button type="button" class="evg-btn-load-more" id="evgLoadMoreBtn">
+                <?php esc_html_e( 'Load More Masterworks', 'evg-platform' ); ?>
+            </button>
         </div>
 
     </div>
 </main>
 
 <!-- IMAGE-ONLY LIGHTBOX MODAL -->
-<div class="evg-modal-overlay" id="evgImageModal">
+<div class="evg-modal-overlay" id="evgImageModal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Enlarged Slab Preview', 'evg-platform' ); ?>">
     <div class="evg-modal-content-wrap">
-        <button type="button" class="evg-modal-close" id="evgModalClose" aria-label="Close modal">
+        <button type="button" class="evg-modal-close" id="evgModalClose" aria-label="<?php esc_attr_e( 'Close preview', 'evg-platform' ); ?>">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        <!-- Lightbox image container -->
-        <img id="modalActiveImage" src="" alt="Enlarged Slab View">
+        <img id="modalActiveImage" src="" alt="">
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const modalOverlay = document.getElementById('evgImageModal');
-    const modalClose = document.getElementById('evgModalClose');
-    const thumbs = document.querySelectorAll('.evg-slab-thumb');
+    const modalOverlay     = document.getElementById('evgImageModal');
+    const modalClose       = document.getElementById('evgModalClose');
     const modalActiveImage = document.getElementById('modalActiveImage');
+    const galleryGrid      = document.getElementById('evgGalleryGrid');
+    const loadMoreBtn      = document.getElementById('evgLoadMoreBtn');
+    const loadMoreWrap     = document.getElementById('evgLoadMoreWrap');
+    let lastFocusedElement = null;
 
-    thumbs.forEach(thumb => {
-        thumb.addEventListener('click', function() {
-            const imgSrc = this.getAttribute('data-img-src');
-            modalActiveImage.src = imgSrc;
-            modalOverlay.classList.add('active');
-        });
-    });
+    function openModal(imgSrc, imgAlt) {
+        lastFocusedElement = document.activeElement;
+        modalActiveImage.src = imgSrc;
+        modalActiveImage.alt = imgAlt || '';
+        modalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        modalClose.focus();
+    }
 
     function closeModal() {
         modalOverlay.classList.remove('active');
-        modalActiveImage.src = ''; // Clear source on close
+        modalActiveImage.src = '';
+        modalActiveImage.alt = '';
+        document.body.style.overflow = '';
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+        }
     }
+
+    galleryGrid.addEventListener('click', function(e) {
+        const thumb = e.target.closest('.evg-slab-thumb');
+        if (thumb) {
+            const imgSrc = thumb.getAttribute('data-img-src');
+            const imgAlt = thumb.getAttribute('data-title');
+            if (imgSrc) {
+                openModal(imgSrc, imgAlt);
+            }
+        }
+    });
 
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', function(e) {
-        if (e.target === modalOverlay) {
-            closeModal();
-        }
+        if (e.target === modalOverlay) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
     });
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-        }
-    });
+    // Load 12 more items per click
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            const hiddenItems = galleryGrid.querySelectorAll('.evg-slab-thumb.hidden-item');
+            let shownCount = 0;
+            
+            hiddenItems.forEach(item => {
+                if (shownCount < 12) {
+                    item.classList.remove('hidden-item');
+                    shownCount++;
+                }
+            });
+
+            // If no more hidden items remain, hide the button wrapper
+            if (galleryGrid.querySelectorAll('.evg-slab-thumb.hidden-item').length === 0) {
+                loadMoreWrap.style.display = 'none';
+            }
+        });
+    }
 });
 </script>
 

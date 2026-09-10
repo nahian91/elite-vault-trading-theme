@@ -3,16 +3,22 @@
  * Template Name: About Us - Executive Tier
  * Description: Ultra-premium company profile for Elite Vault Grading.
  *              Features corporate identity, 8-pillar operational advantages, customer demographic scope,
- *              live transparency portfolio info (£0.99 unlock), 5-10 business day turnaround,
+ *              live transparency portfolio info (dynamic unlock fee), 5-10 business day turnaround,
  *              dynamic system options, and a clean luxury dark UI.
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 // -------------------------------------------------------------------------
 // 1. DYNAMIC SYSTEM SETTINGS RESOLUTION
 // -------------------------------------------------------------------------
-$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
-$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
-$price_standard  = floatval( get_option( 'evg_price_standard', 9.99 ) );
+$support_email       = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$turnaround_time     = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$price_standard      = floatval( get_option( 'evg_price_standard', 9.99 ) );
+$unlock_fee          = floatval( get_option( 'evg_portfolio_unlock_fee', 0.99 ) );
+$accept_submissions  = get_option( 'evg_accept_submissions', 'yes' );
 
 get_header(); ?>
 
@@ -35,7 +41,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -118,6 +123,13 @@ get_header(); ?>
   .evg-icon { color: var(--evg-text-ash); margin-bottom: 1.25rem; transition: all 0.3s ease; }
   .evg-grid-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
 
+  .evg-telemetry-split {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+
   /* Buttons */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
@@ -139,6 +151,12 @@ get_header(); ?>
   .btn-evg-executive:hover { 
     background: var(--evg-gold-light); 
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
+  }
+  .btn-evg-executive.disabled {
+    background: #333336;
+    color: #88888e !important;
+    cursor: not-allowed;
+    box-shadow: none;
   }
   
   .btn-evg-outline {
@@ -165,7 +183,8 @@ get_header(); ?>
   }
 
   @media (max-width: 992px) {
-    .evg-identity-grid { grid-template-columns: 1fr; }
+    .evg-identity-grid,
+    .evg-telemetry-split { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -177,7 +196,7 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Corporate Overview', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'About', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Elite Vault Grading', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php printf( esc_html__( 'At Elite Vault Grading, we provide collectors with professional, reliable, and consistent card certification starting from £%.2f. Whether protecting a treasured personal collection, authenticating rare inventory, or preparing cards for market liquidity, our standard is precision you can trust.', 'evg-platform' ), $price_standard ); ?>
+                <?php printf( esc_html__( 'At Elite Vault Grading, we provide collectors with professional, reliable, and consistent card certification starting from £%s. Whether protecting a treasured personal collection, authenticating rare inventory, or preparing cards for market liquidity, our standard is precision you can trust.', 'evg-platform' ), number_format( $price_standard, 2 ) ); ?>
             </p>
             <div style="display: inline-flex; align-items: center; gap: 10px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 5px 16px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
                 <span><?php printf( esc_html__( 'CURRENT UK TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
@@ -261,7 +280,7 @@ get_header(); ?>
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                     <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Inclusive Access', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Scalable grading service from £9.99 for casual collectors to high-volume submitters.', 'evg-platform' ); ?></p>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;"><?php printf( esc_html__( 'Scalable grading service starting from £%s for collectors of all levels.', 'evg-platform' ), number_format( $price_standard, 2 ) ); ?></p>
                 </div>
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
@@ -316,7 +335,7 @@ get_header(); ?>
 
         <!-- 5. TRANSPARENCY & DAMAGE PORTFOLIO -->
         <section class="evg-module" style="padding: 35px 30px; margin-bottom: 50px;">
-            <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: center;">
+            <div class="evg-telemetry-split">
                 <div>
                     <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 10px;"><?php esc_html_e( '05 // Diagnostic Telemetry', 'evg-platform' ); ?></span>
                     <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 14px 0;"><?php esc_html_e( 'Optical Transparency: Microscopic Fault Portfolios', 'evg-platform' ); ?></h2>
@@ -324,14 +343,14 @@ get_header(); ?>
                         <?php esc_html_e( 'Elite Vault Grading provides direct diagnostic evidence for completed assessments. Every certified slab lookup includes up to 3 complimentary defect scans for instant inspection.', 'evg-platform' ); ?>
                     </p>
                     <p style="color: var(--evg-text-ash); font-size: 0.88rem; line-height: 1.65; margin: 0;">
-                        <?php esc_html_e( 'Collectors and secondary-market buyers can unlock the full high-resolution microscopic damage portfolio—complete with all flaw angles, coordinate mapping, and sub-score rationale—for a one-time unlock fee of £0.99.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( 'Collectors and secondary-market buyers can unlock the full high-resolution microscopic damage portfolio—complete with all flaw angles, coordinate mapping, and sub-score rationale—for a one-time unlock fee of £%s.', 'evg-platform' ), number_format( $unlock_fee, 2 ) ); ?>
                     </p>
                 </div>
                 <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px; padding: 25px; text-align: center;">
                     <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'ACTIVE PLATFORM FEATURE', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Fault Evidence Telemetry', 'evg-platform' ); ?></h3>
                     <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.5; margin: 0;">
-                        <?php esc_html_e( '3 free previews on all verifications, with comprehensive high-res fault scans unlockable for just £0.99.', 'evg-platform' ); ?>
+                        <?php printf( esc_html__( '3 free previews on all verifications, with comprehensive high-res fault scans unlockable for just £%s.', 'evg-platform' ), number_format( $unlock_fee, 2 ) ); ?>
                     </p>
                 </div>
             </div>
@@ -342,14 +361,21 @@ get_header(); ?>
             <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 10px;"><?php esc_html_e( 'Initialize Asset Intake', 'evg-platform' ); ?></span>
             <h2 style="color: #ffffff; font-size: 1.4rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Ready to Protect Your Collection?', 'evg-platform' ); ?></h2>
             <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.9rem; line-height: 1.6;">
-                <?php printf( esc_html__( 'Submit your Pokémon cards today from £%.2f per card for professional grading and secure encapsulation with %s turnaround.', 'evg-platform' ), $price_standard, esc_html( $turnaround_time ) ); ?>
+                <?php printf( esc_html__( 'Submit your Pokémon cards today from £%s per card for professional grading and secure encapsulation with %s turnaround.', 'evg-platform' ), number_format( $price_standard, 2 ), esc_html( $turnaround_time ) ); ?>
             </p>
             <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <a href="<?php echo esc_url( home_url( '/create-account' ) ); ?>" class="btn-evg-executive">
-                    <?php esc_html_e( 'Create Account', 'evg-platform' ); ?>
-                </a>
-                <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-outline">
-                    <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
+                <?php if ( 'yes' === $accept_submissions ) : ?>
+                    <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
+                        <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
+                    </a>
+                <?php else : ?>
+                    <span class="btn-evg-executive disabled">
+                        <?php esc_html_e( 'Submissions Sold Out', 'evg-platform' ); ?>
+                    </span>
+                <?php endif; ?>
+
+                <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
+                    <?php esc_html_e( 'Browse Marketplace', 'evg-platform' ); ?>
                 </a>
             </div>
         </section>

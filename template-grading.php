@@ -5,254 +5,262 @@
  *              Features dynamic turnaround metrics (5-10 business days), the 7-step operational pipeline, 
  *              the 4 diagnostic pillars with interactive calculators, the strict 1–10 whole-number scale,
  *              updated £9.99 base pricing, and an ultra-premium dark luxury aesthetic.
+ *
+ * @package EliteVaultGrading
  */
 
-$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
-$price_standard  = floatval( get_option( 'evg_price_standard', 9.99 ) );
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+$turnaround_time    = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$price_standard     = floatval( get_option( 'evg_price_standard', 9.99 ) );
+$accept_submissions = get_option( 'evg_accept_submissions', 'yes' );
 
 get_header(); ?>
 
 <style>
-  :root {
-    --evg-gold-primary: #D4AF37;
-    --evg-gold-light: #F3E5AB;
-    --evg-gold-muted: #AA8C2C;
-    --evg-gold-glow: rgba(212, 175, 55, 0.12);
+    :root {
+        --evg-gold-primary: #D4AF37;
+        --evg-gold-light: #F3E5AB;
+        --evg-gold-muted: #AA8C2C;
+        --evg-gold-glow: rgba(212, 175, 55, 0.12);
+        
+        --evg-obsidian-base: #050505;
+        --evg-obsidian-panel: #0D0D0F;
+        --evg-obsidian-elevated: #141416;
+        
+        --evg-border-hairline: #1F1F23;
+        --evg-border-gold-faint: rgba(212, 175, 55, 0.2);
+
+        --evg-text-pure: #FFFFFF;
+        --evg-text-ash: #8E8E93;
+        --evg-text-charcoal: #030406;
+    }
+
+    .evg-master-wrapper {
+        background-color: var(--evg-obsidian-base);
+        background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
+        background-size: 100% 100%;
+        min-height: 100vh;
+        font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        position: relative;
+        z-index: 1;
+        color: var(--evg-text-pure);
+    }
     
-    --evg-obsidian-base: #050505;
-    --evg-obsidian-panel: #0D0D0F;
-    --evg-obsidian-elevated: #141416;
+    .evg-container {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 4rem 20px 6rem 20px;
+    }
+
+    .evg-title-xl { 
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: clamp(2.4rem, 4vw, 3.2rem); 
+        font-weight: 600; 
+        letter-spacing: -0.02em; 
+        line-height: 1.1; 
+        color: #ffffff;
+        margin: 0 0 12px 0;
+    }
     
-    --evg-border-hairline: #1F1F23;
-    --evg-border-gold-faint: rgba(212, 175, 55, 0.2);
+    .evg-text-metallic {
+        background: linear-gradient(170deg, var(--evg-gold-light) 0%, var(--evg-gold-muted) 100%);
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text;
+    }
+    
+    .evg-label-micro { 
+        font-size: 0.68rem; 
+        text-transform: uppercase; 
+        letter-spacing: 0.2em; 
+        font-weight: 700; 
+        color: var(--evg-gold-primary); 
+        display: block; 
+    }
 
-    --evg-text-pure: #FFFFFF;
-    --evg-text-ash: #8E8E93;
-    --evg-text-charcoal: #030406;
-  }
+    .evg-module {
+        background: var(--evg-obsidian-panel);
+        border: 1px solid var(--evg-border-hairline);
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
 
-  .evg-master-wrapper {
-    background-color: var(--evg-obsidian-base);
-    background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
-    background-size: 100% 100%;
-    min-height: 100vh;
-    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    position: relative;
-    z-index: 1;
-    color: var(--evg-text-pure);
-  }
-  
-  .evg-container {
-    max-width: 1140px;
-    margin: 0 auto;
-    padding: 4rem 20px 6rem 20px;
-  }
+    .evg-grid-matrix {
+        display: grid; 
+        gap: 1px;
+        background: var(--evg-border-hairline); 
+        border: 1px solid var(--evg-border-hairline); 
+        border-radius: 8px; 
+        overflow: hidden;
+    }
+    .evg-grid-cell {
+        background: var(--evg-obsidian-panel); 
+        padding: 2rem 1.75rem; 
+        transition: all 0.3s ease;
+    }
+    .evg-grid-cell:hover { 
+        background: var(--evg-obsidian-elevated); 
+    }
+    
+    .evg-pipeline-matrix { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .evg-pillar-matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
-  .evg-title-xl { 
-    font-family: "Playfair Display", Georgia, serif;
-    font-size: clamp(2.4rem, 4vw, 3.2rem); 
-    font-weight: 600; 
-    letter-spacing: -0.02em; 
-    line-height: 1.1; 
-    color: #ffffff;
-    margin: 0 0 12px 0;
-  }
-  
-  .evg-text-metallic {
-    background: linear-gradient(170deg, var(--evg-gold-light) 0%, var(--evg-gold-muted) 100%);
-    -webkit-background-clip: text; 
-    -webkit-text-fill-color: transparent; 
-    background-clip: text;
-  }
-  
-  .evg-label-micro { 
-    font-size: 0.68rem; 
-    text-transform: uppercase; 
-    letter-spacing: 0.2em; 
-    font-weight: 700; 
-    color: var(--evg-gold-primary); 
-    display: block; 
-  }
+    .evg-icon { color: var(--evg-text-ash); margin-bottom: 1.25rem; transition: all 0.3s ease; }
+    .evg-grid-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
 
-  .evg-module {
-    background: var(--evg-obsidian-panel);
-    border: 1px solid var(--evg-border-hairline);
-    border-radius: 8px;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-  }
-
-  /* Grid Matrices (Used for Pipeline & Pillars) */
-  .evg-grid-matrix {
-    display: grid; 
-    gap: 1px;
-    background: var(--evg-border-hairline); 
-    border: 1px solid var(--evg-border-hairline); 
-    border-radius: 8px; 
-    overflow: hidden;
-  }
-  .evg-grid-cell {
-    background: var(--evg-obsidian-panel); 
-    padding: 2rem 1.75rem; 
-    transition: all 0.3s ease;
-  }
-  .evg-grid-cell:hover { 
-    background: var(--evg-obsidian-elevated); 
-  }
-  
-  .evg-pipeline-matrix { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-  .evg-pillar-matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-
-  /* Icons */
-  .evg-icon { color: var(--evg-text-ash); margin-bottom: 1.25rem; transition: all 0.3s ease; }
-  .evg-grid-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
-
-  /* 1-10 Scale Registry */
-  .evg-scale-registry {
-    list-style: none; 
-    padding: 0; 
-    margin: 0;
-  }
-  .evg-scale-row {
-    display: flex; 
-    align-items: center; 
-    gap: 1.75rem;
-    padding: 1.35rem 2rem; 
-    border-bottom: 1px solid var(--evg-border-hairline);
-    transition: background 0.2s ease;
-  }
-  .evg-scale-row:last-child { border-bottom: none; }
-  .evg-scale-row:hover { background: rgba(212, 175, 55, 0.03); }
-  
-  .evg-grade-badge {
-    width: 50px; 
-    height: 50px; 
-    border-radius: 6px;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    font-weight: 800; 
-    font-size: 1.3rem; 
-    font-family: monospace; 
-    flex-shrink: 0;
-    border: 1px solid transparent;
-  }
-  
-  .evg-grade-10 {
-    background: rgba(212, 175, 55, 0.12); 
-    border-color: var(--evg-gold-primary);
-    color: var(--evg-gold-light); 
-    box-shadow: 0 0 20px var(--evg-gold-glow);
-  }
-  .evg-grade-9 { 
-    background: var(--evg-obsidian-elevated); 
-    border-color: var(--evg-border-gold-faint); 
-    color: var(--evg-gold-primary); 
-  }
-  .evg-grade-standard { 
-    background: var(--evg-obsidian-elevated); 
-    border-color: var(--evg-border-hairline); 
-    color: var(--evg-text-ash); 
-  }
-
-  /* Diagnostic Calculator Widget */
-  .evg-calc-card {
-    background: var(--evg-obsidian-panel);
-    border: 1px solid var(--evg-border-gold-faint);
-    border-radius: 8px;
-    padding: 30px;
-    margin-bottom: 50px;
-  }
-  .evg-calc-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr;
-    gap: 20px;
-    align-items: center;
-  }
-  .evg-calc-input {
-    background: var(--evg-obsidian-elevated);
-    border: 1px solid #242428;
-    color: #ffffff;
-    padding: 10px 14px;
-    border-radius: 4px;
-    width: 100%;
-    font-family: monospace;
-    font-size: 0.9rem;
-    box-sizing: border-box;
-    outline: none;
-  }
-  .evg-calc-input:focus {
-    border-color: var(--evg-gold-primary);
-  }
-  .evg-calc-result-box {
-    background: var(--evg-obsidian-base);
-    border: 1px solid var(--evg-border-hairline);
-    border-radius: 6px;
-    padding: 15px 20px;
-    text-align: center;
-  }
-
-  /* Buttons */
-  .btn-evg-executive {
-    background: var(--evg-gold-primary); 
-    color: var(--evg-text-charcoal) !important;
-    font-size: 0.85rem; 
-    font-weight: 800; 
-    letter-spacing: 0.15em; 
-    text-transform: uppercase;
-    border: none; 
-    border-radius: 4px; 
-    padding: 1.25rem 2.5rem; 
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: center;
-    transition: all 0.3s ease; 
-    cursor: pointer; 
-    text-decoration: none;
-  }
-  .btn-evg-executive:hover { 
-    background: var(--evg-gold-light); 
-    box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
-  }
-  
-  .btn-evg-outline {
-    background: transparent; 
-    color: var(--evg-gold-primary) !important;
-    font-size: 0.85rem; 
-    font-weight: 800; 
-    letter-spacing: 0.15em; 
-    text-transform: uppercase;
-    border: 1px solid var(--evg-gold-primary); 
-    border-radius: 4px; 
-    padding: 1.25rem 2.5rem; 
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: center;
-    transition: all 0.3s ease; 
-    cursor: pointer; 
-    text-decoration: none;
-  }
-  .btn-evg-outline:hover { 
-    background: rgba(212, 175, 55, 0.1); 
-    color: var(--evg-gold-light) !important; 
-    border-color: var(--evg-gold-light); 
-  }
-
-  @media (max-width: 992px) {
-    .evg-calc-grid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 768px) {
+    .evg-scale-registry {
+        list-style: none; 
+        padding: 0; 
+        margin: 0;
+    }
     .evg-scale-row {
-      padding: 1.25rem 1rem;
-      gap: 1rem;
+        display: flex; 
+        align-items: center; 
+        gap: 1.75rem;
+        padding: 1.35rem 2rem; 
+        border-bottom: 1px solid var(--evg-border-hairline);
+        transition: background 0.2s ease;
     }
+    .evg-scale-row:last-child { border-bottom: none; }
+    .evg-scale-row:hover { background: rgba(212, 175, 55, 0.03); }
+    
     .evg-grade-badge {
-      width: 42px;
-      height: 42px;
-      font-size: 1.1rem;
+        width: 50px; 
+        height: 50px; 
+        border-radius: 6px;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        font-weight: 800; 
+        font-size: 1.3rem; 
+        font-family: monospace; 
+        flex-shrink: 0;
+        border: 1px solid transparent;
     }
-  }
+    
+    .evg-grade-10 {
+        background: rgba(212, 175, 55, 0.12); 
+        border-color: var(--evg-gold-primary);
+        color: var(--evg-gold-light); 
+        box-shadow: 0 0 20px var(--evg-gold-glow);
+    }
+    .evg-grade-9 { 
+        background: var(--evg-obsidian-elevated); 
+        border-color: var(--evg-border-gold-faint); 
+        color: var(--evg-gold-primary); 
+    }
+    .evg-grade-standard { 
+        background: var(--evg-obsidian-elevated); 
+        border-color: var(--evg-border-hairline); 
+        color: var(--evg-text-ash); 
+    }
+
+    .evg-calc-card {
+        background: var(--evg-obsidian-panel);
+        border: 1px solid var(--evg-border-gold-faint);
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 50px;
+    }
+    .evg-calc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.2fr;
+        gap: 20px;
+        align-items: center;
+    }
+    .evg-calc-input {
+        background: var(--evg-obsidian-elevated);
+        border: 1px solid #242428;
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 4px;
+        width: 100%;
+        font-family: monospace;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .evg-calc-input:focus {
+        border-color: var(--evg-gold-primary);
+    }
+    .evg-calc-result-box {
+        background: var(--evg-obsidian-base);
+        border: 1px solid var(--evg-border-hairline);
+        border-radius: 6px;
+        padding: 15px 20px;
+        text-align: center;
+    }
+
+    .btn-evg-executive {
+        background: var(--evg-gold-primary); 
+        color: var(--evg-text-charcoal) !important;
+        font-size: 0.85rem; 
+        font-weight: 800; 
+        letter-spacing: 0.15em; 
+        text-transform: uppercase;
+        border: none; 
+        border-radius: 4px; 
+        padding: 1.25rem 2.5rem; 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center;
+        transition: all 0.3s ease; 
+        cursor: pointer; 
+        text-decoration: none;
+    }
+    .btn-evg-executive:hover { 
+        background: var(--evg-gold-light); 
+        box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
+    }
+    .btn-evg-executive.disabled {
+        background: #333336;
+        color: #88888e !important;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    
+    .btn-evg-outline {
+        background: transparent; 
+        color: var(--evg-gold-primary) !important;
+        font-size: 0.85rem; 
+        font-weight: 800; 
+        letter-spacing: 0.15em; 
+        text-transform: uppercase;
+        border: 1px solid var(--evg-gold-primary); 
+        border-radius: 4px; 
+        padding: 1.25rem 2.5rem; 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center;
+        transition: all 0.3s ease; 
+        cursor: pointer; 
+        text-decoration: none;
+    }
+    .btn-evg-outline:hover { 
+        background: rgba(212, 175, 55, 0.1); 
+        color: var(--evg-gold-light) !important; 
+        border-color: var(--evg-gold-light); 
+    }
+
+    @media (max-width: 992px) {
+        .evg-calc-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+        .evg-scale-row {
+            padding: 1.25rem 1rem;
+            gap: 1rem;
+        }
+        .evg-grade-badge {
+            width: 42px;
+            height: 42px;
+            font-size: 1.1rem;
+        }
+    }
 </style>
 
 <main class="evg-master-wrapper">
@@ -266,7 +274,7 @@ get_header(); ?>
                 <?php esc_html_e( 'Every Pokémon card entrusted to Elite Vault Grading receives a rigorous, consistent, and transparent assessment. From intake check-in to tamper-evident sonic encapsulation, precision drives our entire operational architecture.', 'evg-platform' ); ?>
             </p>
             <div style="display: inline-flex; align-items: center; gap: 12px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 6px 16px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
-                <span><?php printf( esc_html__( 'STANDARD BASE RATE: £%.2f / CARD', 'evg-platform' ), $price_standard ); ?></span>
+                <span><?php printf( esc_html__( 'STANDARD BASE RATE: £%s / CARD', 'evg-platform' ), number_format( (float) $price_standard, 2 ) ); ?></span>
                 <span style="color: #4a4f5c;">|</span>
                 <span><?php printf( esc_html__( 'TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
             </div>
@@ -280,7 +288,6 @@ get_header(); ?>
             </div>
 
             <div class="evg-grid-matrix evg-pipeline-matrix">
-                <!-- Step 1 -->
                 <div class="evg-grid-cell">
                     <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 01', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Registry Check-In', 'evg-platform' ); ?></h3>
@@ -289,7 +296,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 2 -->
                 <div class="evg-grid-cell">
                     <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 02', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Authentication Check', 'evg-platform' ); ?></h3>
@@ -298,7 +304,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 3 -->
                 <div class="evg-grid-cell">
                     <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 03', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Diagnostic Assessment', 'evg-platform' ); ?></h3>
@@ -307,7 +312,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 4 -->
                 <div class="evg-grid-cell">
                     <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 04', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Grade Determination', 'evg-platform' ); ?></h3>
@@ -316,7 +320,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 5 -->
                 <div class="evg-grid-cell">
                     <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 05', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Quality Control (QC)', 'evg-platform' ); ?></h3>
@@ -325,7 +328,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 6 -->
                 <div class="evg-grid-cell">
                     <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 06', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Sonic Encapsulation', 'evg-platform' ); ?></h3>
@@ -334,7 +336,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 7 -->
                 <div class="evg-grid-cell" style="grid-column: 1 / -1; background: rgba(212, 175, 55, 0.04);">
                     <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'Stage 07 // Finalization', 'evg-platform' ); ?></span>
                     <h3 style="color: #ffffff; font-size: 1rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( 'Secure UK Insured Dispatch', 'evg-platform' ); ?></h3>
@@ -495,9 +496,15 @@ get_header(); ?>
                 <?php esc_html_e( 'Experience verified assessment standards, tamper-evident sonic encapsulation, and transparent stage tracking.', 'evg-platform' ); ?>
             </p>
             <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-executive">
-                    <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
-                </a>
+                <?php if ( 'yes' === $accept_submissions ) : ?>
+                    <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
+                        <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
+                    </a>
+                <?php else : ?>
+                    <span class="btn-evg-executive disabled">
+                        <?php esc_html_e( 'Submissions Sold Out', 'evg-platform' ); ?>
+                    </span>
+                <?php endif; ?>
                 <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
                     <?php esc_html_e( 'Explore Marketplace', 'evg-platform' ); ?>
                 </a>
@@ -551,7 +558,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (borderA && borderB) {
         borderA.addEventListener('input', calculateCentering);
-        borderB.addEventListener('input', calculateCentenering || calculateCentering);
+        borderB.addEventListener('input', calculateCentering);
     }
 });
 </script>

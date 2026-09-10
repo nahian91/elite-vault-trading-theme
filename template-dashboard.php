@@ -8,9 +8,13 @@
  *              downloadable invoices, UK logistics coordinates management, and password update.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // Force authentication
 if ( ! is_user_logged_in() ) {
-    wp_safe_redirect( add_query_arg( 'redirect_to', urlencode( home_url( '/my-account' ) ), home_url( '/sign-in' ) ) );
+    wp_safe_redirect( add_query_arg( 'redirect_to', home_url( '/my-account' ), home_url( '/sign-in' ) ) );
     exit;
 }
 
@@ -24,9 +28,12 @@ $user_id_badge   = 'EVG-' . str_pad( (string) $current_user_id, 5, '0', STR_PAD_
 
 $table_submissions = $wpdb->prefix . 'evg_submissions';
 $table_cards       = $wpdb->prefix . 'evg_cards';
+$table_marketplace = $wpdb->prefix . 'evg_marketplace';
 $table_orders      = $wpdb->prefix . 'evg_orders';
 $table_unlocks     = $wpdb->prefix . 'evg_portfolio_unlocks';
 $table_faults      = $wpdb->prefix . 'evg_fault_images';
+
+$portfolio_unlock_fee = floatval( get_option( 'evg_portfolio_unlock_fee', 0.99 ) );
 
 // -------------------------------------------------------------------------
 // 1. HANDLE PROFILE & PASSWORD UPDATES
@@ -47,7 +54,8 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_update_profile_
         $street_address = sanitize_text_field( wp_unslash( $_POST['street_address'] ?? '' ) );
         $town_city      = sanitize_text_field( wp_unslash( $_POST['town_city'] ?? '' ) );
         $county         = sanitize_text_field( wp_unslash( $_POST['county'] ?? '' ) );
-        $postcode       = sanitize_text_field( wp_unslash( $_POST['postcode'] ?? '' ) );
+        $raw_postcode   = sanitize_text_field( wp_unslash( $_POST['postcode'] ?? '' ) );
+        $postcode       = strtoupper( trim( preg_replace( '/\s+/', ' ', $raw_postcode ) ) );
 
         wp_update_user( array(
             'ID'           => $current_user_id,
@@ -61,7 +69,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_update_profile_
         update_user_meta( $current_user_id, 'evg_street_address', $street_address );
         update_user_meta( $current_user_id, 'evg_town_city', $town_city );
         update_user_meta( $current_user_id, 'evg_county', $county );
-        update_user_meta( $current_user_id, 'evg_postcode', strtoupper( $postcode ) );
+        update_user_meta( $current_user_id, 'evg_postcode', $postcode );
 
         if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
             Elite_Vault_Grading_System::log_activity( "Customer ID {$current_user_id} updated shipping coordinates." );
@@ -76,15 +84,15 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_update_password
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_update_password_nonce'] ), 'evg_update_password_action' ) ) {
         $active_tab_slug = 'tab-security';
 
-        $current_pwd = $_POST['current_password'] ?? '';
-        $new_pwd     = $_POST['new_password'] ?? '';
-        $confirm_pwd = $_POST['confirm_password'] ?? '';
+        $current_pwd = (string) ( $_POST['current_password'] ?? '' );
+        $new_pwd     = (string) ( $_POST['new_password'] ?? '' );
+        $confirm_pwd = (string) ( $_POST['confirm_password'] ?? '' );
 
         if ( empty( $current_pwd ) || empty( $new_pwd ) || empty( $confirm_pwd ) ) {
             $password_notice = '<div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; color: #ff453a; font-size: 0.85rem; font-weight: 600;">✕ ' . esc_html__( 'All password fields are required.', 'evg-platform' ) . '</div>';
         } elseif ( ! wp_check_password( $current_pwd, $current_user->user_pass, $current_user_id ) ) {
             $password_notice = '<div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; color: #ff453a; font-size: 0.85rem; font-weight: 600;">✕ ' . esc_html__( 'Current password does not match our records.', 'evg-platform' ) . '</div>';
-        } elseif ( strlen( $new_pwd ) < 8 || ! preg_match( '/[A-Z]/', $new_pwd ) || ! preg_match( '/[0-9]/', $new_pwd ) ) {
+        } elseif ( mb_strlen( $new_pwd ) < 8 || ! preg_match( '/[A-Z]/', $new_pwd ) || ! preg_match( '/[0-9]/', $new_pwd ) ) {
             $password_notice = '<div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; color: #ff453a; font-size: 0.85rem; font-weight: 600;">✕ ' . esc_html__( 'New password must be at least 8 characters and contain uppercase letters and numbers.', 'evg-platform' ) . '</div>';
         } elseif ( $new_pwd !== $confirm_pwd ) {
             $password_notice = '<div style="background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.3); border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; color: #ff453a; font-size: 0.85rem; font-weight: 600;">✕ ' . esc_html__( 'New password entries do not match.', 'evg-platform' ) . '</div>';
@@ -141,11 +149,17 @@ $unlocked_card_ids = $wpdb->get_col( $wpdb->prepare( "
     WHERE user_id = %d AND payment_status = 'Completed'
 ", $current_user_id ) );
 
-// Fetch Marketplace Slab Purchases
+// Fetch Marketplace Purchases (coalescing details if standalone stock)
 $marketplace_orders = $wpdb->get_results( $wpdb->prepare( "
-    SELECT o.*, c.card_name, c.set_name, c.card_number, c.final_grade, c.front_image_url
+    SELECT o.*, 
+           COALESCE(c.card_name, m.card_title, 'Certified Slab') AS display_title,
+           COALESCE(c.set_name, m.set_name, 'Vault Stock') AS display_set,
+           COALESCE(c.card_number, m.card_number, '') AS display_number,
+           COALESCE(c.final_grade, m.assigned_grade, NULL) AS display_grade,
+           COALESCE(c.front_image_url, m.image_url, '') AS display_img
     FROM {$table_orders} o
     LEFT JOIN {$table_cards} c ON o.card_id = c.id
+    LEFT JOIN {$table_marketplace} m ON o.marketplace_item_id = m.id
     WHERE o.customer_id = %d
     ORDER BY o.purchased_at DESC
 ", $current_user_id ) );
@@ -160,18 +174,20 @@ $town_city      = get_user_meta( $current_user_id, 'evg_town_city', true );
 $county         = get_user_meta( $current_user_id, 'evg_county', true );
 $postcode       = get_user_meta( $current_user_id, 'evg_postcode', true );
 
-// Official EVG Standardized Pipeline Stages
-$pipeline_stages = array(
-    '01. Cards Awaiting Arrival' => 'Cards Awaiting Arrival',
-    '02. Cards Received'         => 'Cards Received',
-    '03. Authentication Check'   => 'Authentication Check',
-    '04. Under Review'           => 'Under Review',
-    '05. Grading In Progress'    => 'Grading In Progress',
-    '06. Quality Control'        => 'Quality Control',
-    '07. Encapsulation'          => 'Encapsulation',
-    '08. Completed'              => 'Completed',
-    '09. Returned To Customer'   => 'Returned To Customer'
-);
+// Standard EVG Pipeline Stages
+$pipeline_stages = class_exists( 'Elite_Vault_Grading_System' ) 
+    ? Elite_Vault_Grading_System::get_order_stages() 
+    : array(
+        'Cards Awaiting Arrival' => 'Cards Awaiting Arrival',
+        'Cards Received'         => 'Cards Received',
+        'Authentication Check'   => 'Authentication Check',
+        'Under Review'           => 'Under Review',
+        'Grading In Progress'    => 'Grading In Progress',
+        'Quality Control'        => 'Quality Control',
+        'Encapsulation'          => 'Encapsulation',
+        'Completed'              => 'Completed',
+        'Returned To Customer'   => 'Returned To Customer',
+    );
 
 get_header(); ?>
 
@@ -317,7 +333,6 @@ get_header(); ?>
     background: #07080a; 
   }
 
-  /* Password Wrapper with Toggle Eye */
   .evg-password-wrapper {
     position: relative;
     display: flex;
@@ -480,7 +495,7 @@ get_header(); ?>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-executive">
+                    <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
                         + <?php esc_html_e( 'Submit Cards for Grading', 'evg-platform' ); ?>
                     </a>
                     <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
@@ -541,13 +556,13 @@ get_header(); ?>
             </aside>
 
             <!-- RIGHT: TAB CONTENT DATA PANELS -->
-            <main>
+            <div>
                 <!-- TAB 01: LIVE TELEMETRY & SUBMISSIONS TRACKER -->
                 <section class="evg-tab-panel <?php echo ( 'tab-telemetry' === $active_tab_slug ) ? 'active' : ''; ?>" id="tab-telemetry">
                     <div class="evg-module" style="padding: 35px 30px;">
                         
                         <?php if ( $active_submission ) : 
-                            $stage_keys  = array_values( $pipeline_stages );
+                            $stage_keys  = array_keys( $pipeline_stages );
                             $current_idx = array_search( $active_submission->current_stage, $stage_keys, true );
                             if ( false === $current_idx ) {
                                 $current_idx = 0;
@@ -601,13 +616,13 @@ get_header(); ?>
                                 </div>
                             <?php endif; ?>
 
-                            <!-- 9-Stage Visual Telemetry Matrix -->
+                            <!-- Visual Telemetry Matrix -->
                             <span class="evg-label-micro" style="color: #ffffff; margin-bottom: 12px;"><?php esc_html_e( 'Standard 5-10 Day Pipeline Telemetry', 'evg-platform' ); ?></span>
                             <div style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 20px;">
                                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                     <?php 
                                     $step_count = 0;
-                                    foreach ( $pipeline_stages as $label => $key ) : 
+                                    foreach ( $pipeline_stages as $stage_key => $stage_name ) : 
                                         $badge_style = 'evg-track-pending';
                                         if ( $step_count < $current_idx ) {
                                             $badge_style = 'evg-track-completed';
@@ -616,7 +631,7 @@ get_header(); ?>
                                         }
                                     ?>
                                         <span class="evg-track-badge <?php echo esc_attr( $badge_style ); ?>">
-                                            <?php echo esc_html( $label ); ?> <?php echo ( $step_count < $current_idx ) ? '✓' : ''; ?>
+                                            <?php echo esc_html( sprintf( '%02d. %s', $step_count + 1, $stage_name ) ); ?> <?php echo ( $step_count < $current_idx ) ? '✓' : ''; ?>
                                         </span>
                                     <?php 
                                         $step_count++;
@@ -631,7 +646,7 @@ get_header(); ?>
                                 <p style="color: var(--evg-text-ash); font-size: 0.9rem; max-width: 480px; margin: 0 auto 20px auto;">
                                     <?php esc_html_e( 'You do not have any active grading submissions currently progressing through our laboratory queue.', 'evg-platform' ); ?>
                                 </p>
-                                <a href="<?php echo esc_url( home_url( '/submit' ) ); ?>" class="btn-evg-executive">
+                                <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
                                     <?php esc_html_e( 'Initialize Your First Submission', 'evg-platform' ); ?>
                                 </a>
                             </div>
@@ -665,14 +680,16 @@ get_header(); ?>
                                             <tr>
                                                 <td><strong style="color: var(--evg-gold-primary); font-family: monospace;">#<?php echo esc_html( $mo->order_number ); ?></strong></td>
                                                 <td>
-                                                    <strong style="color: #ffffff;"><?php echo esc_html( $mo->card_name ); ?></strong>
-                                                    <span style="background: var(--evg-gold-primary); color: #000; font-weight: 800; font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 6px;">
-                                                        EVG <?php echo esc_html( $mo->final_grade ? $mo->final_grade : '10' ); ?>
-                                                    </span>
-                                                    <br><small style="color: var(--evg-text-ash);"><?php echo esc_html( $mo->set_name ); ?> #<?php echo esc_html( $mo->card_number ); ?></small>
+                                                    <strong style="color: #ffffff;"><?php echo esc_html( $mo->display_title ); ?></strong>
+                                                    <?php if ( ! empty( $mo->display_grade ) ) : ?>
+                                                        <span style="background: var(--evg-gold-primary); color: #000; font-weight: 800; font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 6px;">
+                                                            EVG <?php echo esc_html( $mo->display_grade ); ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <br><small style="color: var(--evg-text-ash);"><?php echo esc_html( $mo->display_set ); ?> <?php echo ! empty( $mo->display_number ) ? '#' . esc_html( $mo->display_number ) : ''; ?></small>
                                                 </td>
                                                 <td style="color: var(--evg-text-ash); font-size: 0.8rem;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $mo->purchased_at ) ) ); ?></td>
-                                                <td><strong style="color: #ffffff; font-family: monospace;">&pound;<?php echo esc_html( number_format( $mo->amount_paid, 2 ) ); ?></strong></td>
+                                                <td><strong style="color: #ffffff; font-family: monospace;">&pound;<?php echo esc_html( number_format( (float) $mo->amount_paid, 2 ) ); ?></strong></td>
                                                 <td><span style="color: #34c759; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;">● <?php echo esc_html( $mo->payment_status ); ?></span></td>
                                                 <td>
                                                     <span class="evg-track-badge evg-track-<?php echo ( 'Dispatched' === $mo->shipping_status || 'Delivered' === $mo->shipping_status ) ? 'completed' : 'active'; ?>">
@@ -753,7 +770,7 @@ get_header(); ?>
                                                         </a>
                                                     <?php elseif ( $fault_count > 3 ) : ?>
                                                         <a href="<?php echo esc_url( home_url( '/checkout?action=unlock_portfolio&card_id=' . $c->id ) ); ?>" class="btn-evg-executive" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
-                                                            🔒 <?php esc_html_e( 'Unlock Full (£0.99)', 'evg-platform' ); ?>
+                                                            🔒 <?php printf( esc_html__( 'Unlock Full (£%s)', 'evg-platform' ), number_format( $portfolio_unlock_fee, 2 ) ); ?>
                                                         </a>
                                                     <?php else : ?>
                                                         <a href="<?php echo esc_url( home_url( '/verify?cert=EVG-' . str_pad( (string) $c->id, 5, '0', STR_PAD_LEFT ) ) ); ?>" class="btn-evg-outline" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">
@@ -799,7 +816,7 @@ get_header(); ?>
                                                 <td style="color: var(--evg-text-ash); font-size: 0.8rem;"><?php echo esc_html( date_i18n( 'M j, Y', strtotime( $s->submission_date ) ) ); ?></td>
                                                 <td><?php echo esc_html( $s->service_type ); ?></td>
                                                 <td><?php echo esc_html( $s->total_cards ); ?></td>
-                                                <td><strong style="color: #ffffff; font-family: monospace;">&pound;<?php echo esc_html( number_format( $s->total_amount, 2 ) ); ?></strong></td>
+                                                <td><strong style="color: #ffffff; font-family: monospace;">&pound;<?php echo esc_html( number_format( (float) $s->total_amount, 2 ) ); ?></strong></td>
                                                 <td>
                                                     <span style="color: <?php echo ( 'Paid' === $s->payment_status ) ? '#34c759' : '#ff9f0a'; ?>; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;">
                                                         ● <?php echo esc_html( $s->payment_status ); ?>
@@ -951,7 +968,7 @@ get_header(); ?>
                         </form>
                     </div>
                 </section>
-            </main>
+            </div>
 
         </div>
     </div>
@@ -959,7 +976,6 @@ get_header(); ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Tab Switching Logic
     const navButtons = document.querySelectorAll('.evg-nav-pills .nav-btn');
     const tabPanels  = document.querySelectorAll('.evg-tab-panel');
 
@@ -978,14 +994,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 2. Show/Hide Password Eye Toggle Logic
     const eyeButtons = document.querySelectorAll('.evg-eye-toggle');
     eyeButtons.forEach(btn => {
         btn.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
+            const targetId   = this.getAttribute('data-target');
             const inputField = document.getElementById(targetId);
-            const eyeOpen = this.querySelector('.eye-open');
-            const eyeClosed = this.querySelector('.eye-closed');
+            const eyeOpen    = this.querySelector('.eye-open');
+            const eyeClosed  = this.querySelector('.eye-closed');
 
             if (!inputField) return;
 

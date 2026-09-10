@@ -5,10 +5,16 @@
  *              Handles grading submission consignments, marketplace certified slab acquisitions,
  *              and microscopic fault portfolio unlocks (£0.99) exclusively through Stripe,
  *              with polished executive address badge formatting and updated £9.99 base tier pricing.
+ *
+ * @package EliteVaultGrading
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // -------------------------------------------------------------------------
-// 1. BACKEND INITIALIZATION & DATA RESOLUTION
+// 1. BACKEND INITIALIZATION & AUTHENTICATION RESOLUTION
 // -------------------------------------------------------------------------
 global $wpdb;
 
@@ -17,6 +23,16 @@ $table_cards       = $wpdb->prefix . 'evg_cards';
 $table_marketplace = $wpdb->prefix . 'evg_marketplace';
 $table_orders      = $wpdb->prefix . 'evg_orders';
 $table_unlocks     = $wpdb->prefix . 'evg_portfolio_unlocks';
+
+// Gating: Require user authentication so receipts and unlocks associate with an account
+if ( ! is_user_logged_in() ) {
+    $redirect_target = add_query_arg( array(), home_url( $_SERVER['REQUEST_URI'] ) );
+    wp_safe_redirect( add_query_arg( 'redirect_to', $redirect_target, home_url( '/sign-in' ) ) );
+    exit;
+}
+
+$current_user    = wp_get_current_user();
+$current_user_id = $current_user->ID;
 
 // Fetch Stripe & Global Settings
 $stripe_publishable_key = get_option( 'evg_stripe_publishable_key', 'pk_test_placeholder_key' );
@@ -27,9 +43,6 @@ $shipping_fee_standard  = floatval( get_option( 'evg_return_shipping_fee', 9.99 
 $turnaround_time        = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 $accept_submissions     = get_option( 'evg_accept_submissions', 'yes' );
 
-// Resolve User & Context
-$current_user_id = get_current_user_id();
-
 // Determine checkout mode: 'submission', 'marketplace', or 'unlock_portfolio'
 $checkout_type = 'submission';
 if ( isset( $_GET['action'] ) && 'unlock_portfolio' === sanitize_key( $_GET['action'] ) ) {
@@ -38,9 +51,9 @@ if ( isset( $_GET['action'] ) && 'unlock_portfolio' === sanitize_key( $_GET['act
     $checkout_type = 'marketplace';
 }
 
-$submission_id = isset( $_GET['submission_id'] ) ? absint( $_GET['submission_id'] ) : ( isset( $_POST['submission_id'] ) ? absint( $_POST['submission_id'] ) : 0 );
-$item_id       = isset( $_GET['item_id'] ) ? absint( $_GET['item_id'] ) : ( isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0 );
-$card_id       = isset( $_GET['card_id'] ) ? absint( $_GET['card_id'] ) : ( isset( $_POST['card_id'] ) ? absint( $_POST['card_id'] ) : 0 );
+$submission_id = isset( $_REQUEST['submission_id'] ) ? absint( $_REQUEST['submission_id'] ) : 0;
+$item_id       = isset( $_REQUEST['item_id'] ) ? absint( $_REQUEST['item_id'] ) : 0;
+$card_id       = isset( $_REQUEST['card_id'] ) ? absint( $_REQUEST['card_id'] ) : 0;
 
 $submission       = null;
 $marketplace_item = null;
@@ -50,9 +63,11 @@ $checkout_error   = '';
 
 // 1A. Resolve Grading Submission Data
 if ( 'submission' === $checkout_type && $submission_id > 0 ) {
-    $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d", $submission_id ) );
+    $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d AND customer_id = %d", $submission_id, $current_user_id ) );
     if ( $submission ) {
         $cards = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_cards} WHERE submission_id = %d ORDER BY id ASC", $submission_id ) );
+    } else {
+        $checkout_error = __( 'The requested grading submission could not be verified for this account.', 'evg-platform' );
     }
 }
 
@@ -106,7 +121,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
             if ( ! $submission ) {
                 $checkout_error = __( 'Invalid submission reference identified.', 'evg-platform' );
             } else {
-                // Update submission status to Paid & advance pipeline stage
                 $wpdb->update(
                     $table_submissions,
                     array(
@@ -130,11 +144,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
                 exit;
             }
         } elseif ( 'marketplace' === $checkout_type ) {
-            if ( ! $marketplace_item || $marketplace_item->stock_quantity < 1 ) {
+            $current_stock = (int) $wpdb->get_var( $wpdb->prepare( "SELECT stock_quantity FROM {$table_marketplace} WHERE id = %d AND status = 'Available'", $item_id ) );
+
+            if ( $current_stock < 1 ) {
                 $checkout_error = __( 'This item has just sold out and cannot be purchased.', 'evg-platform' );
             } else {
-                // Decrement stock and toggle sold status if quantity is zero
-                $new_stock  = max( 0, intval( $marketplace_item->stock_quantity ) - 1 );
+                $new_stock  = max( 0, $current_stock - 1 );
                 $new_status = ( 0 === $new_stock ) ? 'Sold' : 'Available';
 
                 $wpdb->update(
@@ -148,28 +163,29 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
                     array( '%d' )
                 );
 
-                // Insert into marketplace purchases ledger
                 $order_ref = 'MKT-' . date( 'Y' ) . '-' . strtoupper( wp_generate_password( 5, false, false ) );
                 $wpdb->insert(
                     $table_orders,
                     array(
-                        'order_number'    => $order_ref,
-                        'customer_id'     => $current_user_id,
-                        'card_id'         => $marketplace_item->card_id,
-                        'amount_paid'     => floatval( $marketplace_item->price ),
-                        'payment_status'  => 'Paid',
-                        'shipping_status' => 'Processing',
-                        'tracking_number' => '',
-                        'purchased_at'    => current_time( 'mysql' ),
+                        'order_number'        => $order_ref,
+                        'customer_id'         => $current_user_id,
+                        'marketplace_item_id' => $marketplace_item->id,
+                        'card_id'             => $marketplace_item->card_id,
+                        'amount_paid'         => number_format( (float) $marketplace_item->price, 2, '.', '' ),
+                        'payment_gateway'     => 'Stripe',
+                        'payment_status'      => 'Paid',
+                        'shipping_status'     => 'Processing',
+                        'tracking_number'     => '',
+                        'purchased_at'        => current_time( 'mysql' ),
                     ),
-                    array( '%s', '%d', '%d', '%f', '%s', '%s', '%s', '%s' )
+                    array( '%s', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
                 );
 
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
                     Elite_Vault_Grading_System::log_activity( "Marketplace item #{$marketplace_item->id} ({$marketplace_item->display_title}) purchased via Stripe by User #{$current_user_id}." );
                 }
 
-                wp_safe_redirect( add_query_arg( array( 'purchase' => 'success', 'item_id' => $marketplace_item->id ), home_url( '/my-account' ) ) );
+                wp_safe_redirect( add_query_arg( array( 'purchase' => 'success', 'order_ref' => $order_ref ), home_url( '/my-account' ) ) );
                 exit;
             }
         } elseif ( 'unlock_portfolio' === $checkout_type ) {
@@ -178,25 +194,24 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_checkout_nonce'
             } else {
                 $transaction_id = 'STRIPE-UNLK-' . strtoupper( wp_generate_password( 8, false, false ) );
 
-                // Record unlock receipt in wp_evg_portfolio_unlocks
                 $wpdb->replace(
                     $table_unlocks,
                     array(
                         'user_id'        => $current_user_id,
                         'card_id'        => $unlock_card->id,
-                        'amount_paid'    => $portfolio_unlock_fee,
+                        'amount_paid'    => number_format( (float) $portfolio_unlock_fee, 2, '.', '' ),
                         'payment_status' => 'Completed',
                         'transaction_id' => $transaction_id,
                         'unlocked_at'    => current_time( 'mysql' ),
                     ),
-                    array( '%d', '%d', '%f', '%s', '%s', '%s' )
+                    array( '%d', '%d', '%s', '%s', '%s', '%s' )
                 );
 
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
-                    Elite_Vault_Grading_System::log_activity( "User #{$current_user_id} unlocked Full Damage Portfolio for Card #{$unlock_card->id} via Stripe (£{$portfolio_unlock_fee})." );
+                    Elite_Vault_Grading_System::log_activity( "User #{$current_user_id} unlocked Full Damage Portfolio for Card #{$unlock_card->id} via Stripe (£" . number_format( (float) $portfolio_unlock_fee, 2 ) . ")." );
                 }
 
-                wp_safe_redirect( add_query_arg( array( 'cert' => 'EVG-' . str_pad( $unlock_card->id, 5, '0', STR_PAD_LEFT ), 'unlocked' => '1' ), home_url( '/verify' ) ) );
+                wp_safe_redirect( add_query_arg( array( 'cert' => 'EVG-' . str_pad( (string) $unlock_card->id, 5, '0', STR_PAD_LEFT ), 'unlocked' => '1' ), home_url( '/verify' ) ) );
                 exit;
             }
         }
@@ -213,7 +228,7 @@ if ( 'marketplace' === $checkout_type && $marketplace_item ) {
     $card_count     = 1;
     $subtotal       = floatval( $marketplace_item->price );
     $upgrade_total  = 0.00;
-    $shipping_total = 0.00; // Marketplace orders include shipping
+    $shipping_total = 0.00;
     $total_payable  = $subtotal;
 } elseif ( 'unlock_portfolio' === $checkout_type && $unlock_card ) {
     $order_number   = 'UNLK-' . $unlock_card->id . '-' . date( 'ymd' );
@@ -237,18 +252,15 @@ if ( 'marketplace' === $checkout_type && $marketplace_item ) {
     $total_payable     = $submission ? floatval( $submission->total_amount ) : ( $subtotal + $upgrade_total + $shipping_total );
 }
 
-// Customer Identity & UK Logistics Resolution
-$customer_user  = $submission ? get_userdata( $submission->customer_id ) : ( $current_user_id ? wp_get_current_user() : null );
-$customer_name  = $customer_user ? $customer_user->display_name : __( 'Guest Collector', 'evg-platform' );
-$customer_mail  = $customer_user ? $customer_user->user_email : '';
-
-$target_user_id = $customer_user ? $customer_user->ID : $current_user_id;
-$house_number   = $target_user_id ? get_user_meta( $target_user_id, 'evg_house_number', true ) : '';
-$street_address = $target_user_id ? get_user_meta( $target_user_id, 'evg_street_address', true ) : '';
-$town_city      = $target_user_id ? get_user_meta( $target_user_id, 'evg_town_city', true ) : '';
-$county         = $target_user_id ? get_user_meta( $target_user_id, 'evg_county', true ) : '';
-$postcode       = $target_user_id ? get_user_meta( $target_user_id, 'evg_postcode', true ) : '';
-$mobile_number  = $target_user_id ? get_user_meta( $target_user_id, 'evg_mobile_number', true ) : '';
+// User Address Verification
+$customer_name  = $current_user->display_name ? $current_user->display_name : $current_user->user_login;
+$customer_mail  = $current_user->user_email;
+$house_number   = get_user_meta( $current_user_id, 'evg_house_number', true );
+$street_address = get_user_meta( $current_user_id, 'evg_street_address', true );
+$town_city      = get_user_meta( $current_user_id, 'evg_town_city', true );
+$county         = get_user_meta( $current_user_id, 'evg_county', true );
+$postcode       = get_user_meta( $current_user_id, 'evg_postcode', true );
+$mobile_number  = get_user_meta( $current_user_id, 'evg_mobile_number', true );
 
 get_header(); ?>
 
@@ -511,7 +523,7 @@ get_header(); ?>
                 <span class="evg-label-micro" style="color: #ff453a; margin-bottom: 6px;"><?php esc_html_e( 'INTAKE CAPACITY REACHED', 'evg-platform' ); ?></span>
                 <h3 style="color: #ffffff; font-size: 1.2rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'GRADING CURRENTLY SOLD OUT', 'evg-platform' ); ?></h3>
                 <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0;">
-                    <?php esc_html_e( 'We have reached maximum capacity for the current intake window. Active consignments can finalize payment below.', 'evg-platform' ); ?>
+                    <?php esc_html_e( 'We have reached maximum capacity for the current intake window. Existing consignments can finalize payment below.', 'evg-platform' ); ?>
                 </p>
             </div>
         <?php endif; ?>
@@ -522,7 +534,7 @@ get_header(); ?>
             <p id="stripe-error-message" style="color: #e5e5ea; font-size: 0.85rem; margin: 0;"><?php echo esc_html( $checkout_error ); ?></p>
         </div>
 
-        <form action="<?php echo esc_url( get_permalink() ); ?>" method="post" id="evg-stripe-payment-form">
+        <form action="<?php echo esc_url( add_query_arg( array() ) ); ?>" method="post" id="evg-stripe-payment-form">
             <?php wp_nonce_field( 'evg_process_checkout_action', 'evg_checkout_nonce' ); ?>
             <input type="hidden" name="submission_id" value="<?php echo esc_attr( $submission ? $submission->id : 0 ); ?>">
             <input type="hidden" name="item_id" value="<?php echo esc_attr( $marketplace_item ? $marketplace_item->id : 0 ); ?>">
@@ -603,7 +615,7 @@ get_header(); ?>
                                                 <?php echo esc_html( $marketplace_item->display_title . ' (' . $marketplace_item->display_set . ' #' . $marketplace_item->display_number . ')' ); ?>
                                             </span>
                                             <span style="color: var(--evg-gold-primary); font-weight: 700;">
-                                                <?php echo $marketplace_item->display_grade ? 'EVG ' . esc_html( $marketplace_item->display_grade ) : 'RAW'; ?>
+                                                <?php echo ! empty( $marketplace_item->display_grade ) ? 'EVG ' . esc_html( $marketplace_item->display_grade ) : 'RAW'; ?>
                                             </span>
                                         </li>
                                     <?php elseif ( 'unlock_portfolio' === $checkout_type && $unlock_card ) : ?>
@@ -612,7 +624,7 @@ get_header(); ?>
                                                 <?php echo esc_html( $unlock_card->card_name . ' (' . $unlock_card->set_name . ' #' . $unlock_card->card_number . ')' ); ?>
                                             </span>
                                             <span style="color: var(--evg-gold-primary); font-weight: 700;">
-                                                <?php echo 'CERT: EVG-' . str_pad( $unlock_card->id, 5, '0', STR_PAD_LEFT ); ?>
+                                                <?php echo 'CERT: EVG-' . str_pad( (string) $unlock_card->id, 5, '0', STR_PAD_LEFT ); ?>
                                             </span>
                                         </li>
                                     <?php elseif ( ! empty( $cards ) ) : ?>
@@ -634,7 +646,7 @@ get_header(); ?>
                             </div>
                         </div>
 
-                        <!-- Return Logistics Coordinates (Hidden for digital portfolio unlock) -->
+                        <!-- Return Logistics Coordinates -->
                         <?php if ( 'unlock_portfolio' !== $checkout_type ) : ?>
                             <div style="margin-bottom: 30px;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
@@ -704,7 +716,7 @@ get_header(); ?>
                             <?php if ( 'marketplace' === $checkout_type ) : ?>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Marketplace Certified Item', 'evg-platform' ); ?></span>
-                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( $subtotal, 2 ) ); ?></span>
+                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( (float) $subtotal, 2 ) ); ?></span>
                                 </li>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Insured UK Delivery & Tracking', 'evg-platform' ); ?></span>
@@ -713,7 +725,7 @@ get_header(); ?>
                             <?php elseif ( 'unlock_portfolio' === $checkout_type ) : ?>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Full Damage Portfolio Unlock Fee', 'evg-platform' ); ?></span>
-                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( $subtotal, 2 ) ); ?></span>
+                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( (float) $subtotal, 2 ) ); ?></span>
                                 </li>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Access Fulfillment', 'evg-platform' ); ?></span>
@@ -722,17 +734,17 @@ get_header(); ?>
                             <?php else : ?>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php printf( esc_html__( 'Base Grading (%d Cards @ £%.2f)', 'evg-platform' ), $card_count, $price_standard_fee ); ?></span>
-                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( $subtotal, 2 ) ); ?></span>
+                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( (float) $subtotal, 2 ) ); ?></span>
                                 </li>
                                 <?php if ( $upgrade_total > 0 ) : ?>
                                     <li>
                                         <span style="color: var(--evg-text-ash);"><?php printf( esc_html__( 'Custom Label Upgrades (%d Cards @ +£%.2f)', 'evg-platform' ), $card_count, $price_upgrade_fee ); ?></span>
-                                        <span style="color: var(--evg-gold-light); font-weight: 600;">&pound;<?php echo esc_html( number_format( $upgrade_total, 2 ) ); ?></span>
+                                        <span style="color: var(--evg-gold-light); font-weight: 600;">&pound;<?php echo esc_html( number_format( (float) $upgrade_total, 2 ) ); ?></span>
                                     </li>
                                 <?php endif; ?>
                                 <li>
                                     <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Insured UK Tracked Return Shipping', 'evg-platform' ); ?></span>
-                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( $shipping_total, 2 ) ); ?></span>
+                                    <span style="color: #ffffff; font-weight: 600;">&pound;<?php echo esc_html( number_format( (float) $shipping_total, 2 ) ); ?></span>
                                 </li>
                             <?php endif; ?>
                         </ul>
@@ -740,7 +752,7 @@ get_header(); ?>
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--evg-obsidian-elevated); border: 1px solid var(--evg-border-gold-faint); border-radius: 6px;">
                             <span style="color: #ffffff; font-weight: 600; font-size: 1rem;"><?php esc_html_e( 'Total Amount Payable', 'evg-platform' ); ?></span>
                             <span style="color: var(--evg-gold-primary); font-family: monospace; font-size: 1.6rem; font-weight: 800;">
-                                &pound;<?php echo esc_html( number_format( $total_payable, 2 ) ); ?>
+                                &pound;<?php echo esc_html( number_format( (float) $total_payable, 2 ) ); ?>
                             </span>
                         </div>
                     </div>
@@ -770,8 +782,8 @@ get_header(); ?>
                         </div>
 
                         <!-- Authorization Button -->
-                        <button type="submit" id="evg-stripe-submit-btn" class="btn-evg-executive" style="margin-bottom: 20px;">
-                            <span id="btn-label-text"><?php printf( esc_html__( 'Authorize £%.2f with Stripe', 'evg-platform' ), $total_payable ); ?></span>
+                        <button type="submit" id="evg-stripe-submit-btn" class="btn-evg-executive" style="margin-bottom: 20px;" <?php disabled( ! empty( $checkout_error ) ); ?>>
+                            <span id="btn-label-text"><?php printf( esc_html__( 'Authorize £%s with Stripe', 'evg-platform' ), number_format( (float) $total_payable, 2 ) ); ?></span>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left: 8px;">
                                 <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                             </svg>
@@ -821,6 +833,9 @@ get_header(); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var stripeKey = '<?php echo esc_js( $stripe_publishable_key ); ?>';
+    if (!stripeKey || stripeKey === 'pk_test_placeholder_key') {
+        console.warn('Stripe publishable key has not been configured in EVG Settings.');
+    }
     var stripe = Stripe(stripeKey);
     var elements = stripe.elements();
 
@@ -870,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorCard.style.display = 'block';
                 errorMsg.textContent = result.error.message;
                 submitBtn.disabled = false;
-                btnLabel.textContent = 'Authorize £<?php echo esc_js( number_format( $total_payable, 2 ) ); ?> with Stripe';
+                btnLabel.textContent = 'Authorize £<?php echo esc_js( number_format( (float) $total_payable, 2 ) ); ?> with Stripe';
             } else {
                 document.getElementById('stripe_token_id').value = result.token.id;
                 form.submit();

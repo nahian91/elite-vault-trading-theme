@@ -6,6 +6,10 @@
  *              audits activity, and provides a luxury obsidian/gold UI without background grid lines.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // -------------------------------------------------------------------------
 // 1. BACKEND FEEDBACK INTAKE & STORAGE ENGINE
 // -------------------------------------------------------------------------
@@ -13,7 +17,7 @@ $feedback_status  = '';
 $feedback_message = '';
 $form_data        = array();
 
-$support_email = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
+$support_email = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submission_nonce'] ) ) {
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_feedback_submission_nonce'] ), 'evg_submit_feedback_action' ) ) {
@@ -22,12 +26,27 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submis
         $email_address     = sanitize_email( wp_unslash( $_POST['feedback_email'] ?? '' ) );
         $order_number      = sanitize_text_field( wp_unslash( $_POST['feedback_order_num'] ?? '' ) );
         $feedback_type     = sanitize_text_field( wp_unslash( $_POST['feedback_type'] ?? 'General Feedback' ) );
-        $rating            = isset( $_POST['experience_rating'] ) ? intval( $_POST['experience_rating'] ) : 5;
+        $raw_rating        = isset( $_POST['experience_rating'] ) ? intval( $_POST['experience_rating'] ) : 5;
+        $rating            = max( 1, min( 5, $raw_rating ) );
         $feedback_text     = sanitize_textarea_field( wp_unslash( $_POST['feedback_text'] ?? '' ) );
-        $recommend         = sanitize_text_field( wp_unslash( $_POST['recommend'] ?? 'Not sure' ) );
+        $raw_recommend     = sanitize_text_field( wp_unslash( $_POST['recommend'] ?? 'Yes' ) );
         $permission_to_use = isset( $_POST['permission_use'] ) ? 1 : 0;
 
+        $allowed_recs = array( 'Yes', 'No', 'Not sure' );
+        $recommend    = in_array( $raw_recommend, $allowed_recs, true ) ? $raw_recommend : 'Not sure';
+
         $form_data = compact( 'customer_name', 'email_address', 'order_number', 'feedback_type', 'rating', 'feedback_text', 'recommend', 'permission_to_use' );
+
+        // Rate limiting cooldown (60-second window per IP)
+        $client_ip = '0.0.0.0';
+        if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+            $raw_ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+            if ( filter_var( $raw_ip, FILTER_VALIDATE_IP ) ) {
+                $client_ip = $raw_ip;
+            }
+        }
+        $ip_hash      = md5( $client_ip );
+        $cooldown_key = 'evg_feedback_cooldown_' . $ip_hash;
 
         // Validation Checks
         if ( empty( $feedback_text ) ) {
@@ -36,6 +55,9 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submis
         } elseif ( ! empty( $email_address ) && ! is_email( $email_address ) ) {
             $feedback_status  = 'error';
             $feedback_message = __( 'Please provide a valid email address.', 'evg-platform' );
+        } elseif ( false !== get_transient( $cooldown_key ) ) {
+            $feedback_status  = 'error';
+            $feedback_message = __( 'Please wait a moment before submitting another report.', 'evg-platform' );
         } else {
             global $wpdb;
             $table_feedback = $wpdb->prefix . 'evg_feedback';
@@ -53,31 +75,36 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submis
                     'recommend'         => $recommend,
                     'permission_to_use' => $permission_to_use,
                     'status'            => 'Pending',
+                    'admin_notes'       => '',
                     'submitted_at'      => current_time( 'mysql' ),
                 ),
-                array( '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s' )
+                array( '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s' )
             );
 
             if ( false !== $inserted ) {
-                // Dispatch alert to support inbox
-                $subject = sprintf( '[EVG Feedback] %d-Star Review from %s', $rating, ( $customer_name ? $customer_name : 'Collector' ) );
-                $body    = "New feedback submitted to the platform:\n\n";
-                $body   .= "Customer: " . ( $customer_name ? $customer_name : 'Anonymous' ) . "\n";
-                $body   .= "Email: " . ( $email_address ? $email_address : 'Not provided' ) . "\n";
-                $body   .= "Order Ref: " . ( $order_number ? '#' . $order_number : 'N/A' ) . "\n";
-                $body   .= "Scope: {$feedback_type}\n";
-                $body   .= "Rating: {$rating}/5 Stars\n";
-                $body   .= "Recommendation: {$recommend}\n";
-                $body   .= "Marketing Permission: " . ( $permission_to_use ? 'Granted' : 'Private' ) . "\n\n";
-                $body   .= "Feedback Message:\n{$feedback_text}\n\n";
-                $body   .= "---\nManage this entry via EVG Database > Customer Feedback in WP-Admin.";
+                // Dispatch email alert with sanitized header construction
+                $clean_name = preg_replace( "/[\r\n]+/", '', ( $customer_name ? $customer_name : 'Collector' ) );
+                $subject    = sprintf( '[EVG Feedback] %d-Star Review from %s', $rating, $clean_name );
+                $body       = "New feedback submitted to the platform:\n\n";
+                $body      .= "Customer: {$clean_name}\n";
+                $body      .= "Email: " . ( $email_address ? $email_address : 'Not provided' ) . "\n";
+                $body      .= "Order Ref: " . ( $order_number ? '#' . $order_number : 'N/A' ) . "\n";
+                $body      .= "Scope: {$feedback_type}\n";
+                $body      .= "Rating: {$rating}/5 Stars\n";
+                $body      .= "Recommendation: {$recommend}\n";
+                $body      .= "Marketing Permission: " . ( $permission_to_use ? 'Granted' : 'Private' ) . "\n\n";
+                $body      .= "Feedback Message:\n{$feedback_text}\n\n";
+                $body      .= "---\nManage this entry via EVG Database > Feedback in WP-Admin.";
 
                 $headers = array( 'Content-Type: text/plain; charset=UTF-8' );
                 if ( ! empty( $email_address ) ) {
-                    $headers[] = 'Reply-To: ' . $customer_name . ' <' . $email_address . '>';
+                    $headers[] = 'Reply-To: ' . $clean_name . ' <' . $email_address . '>';
                 }
 
                 wp_mail( $support_email, $subject, $body, $headers );
+
+                // Set 60-second cooldown
+                set_transient( $cooldown_key, 1, 60 );
 
                 // Activity Logging
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
@@ -123,7 +150,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -175,7 +201,6 @@ get_header(); ?>
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
-  /* Form Elements */
   .evg-form-control {
     background: var(--evg-obsidian-elevated);
     border: 1px solid #242428;
@@ -195,7 +220,6 @@ get_header(); ?>
   }
   .evg-form-control::placeholder { color: #4A4F5C; font-weight: 300; }
 
-  /* Interactive Control Matrix (Ratings & Pills) */
   .evg-control-matrix {
     display: flex; 
     flex-wrap: wrap; 
@@ -249,7 +273,6 @@ get_header(); ?>
     fill: var(--evg-gold-primary); 
   }
 
-  /* Custom Checkbox */
   .evg-checkbox {
     appearance: none;
     -webkit-appearance: none;
@@ -278,7 +301,6 @@ get_header(); ?>
   .evg-checkbox:checked { border-color: var(--evg-gold-primary); }
   .evg-checkbox:checked::before { transform: scale(1); }
 
-  /* Submit Button */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -338,7 +360,7 @@ get_header(); ?>
                 </div>
             <?php endif; ?>
 
-            <form action="<?php echo esc_url( get_permalink() ); ?>" method="post" class="evg-feedback-form">
+            <form action="<?php echo esc_url( add_query_arg( array(), get_permalink() ) ); ?>" method="post" class="evg-feedback-form">
                 <?php wp_nonce_field( 'evg_submit_feedback_action', 'evg_feedback_submission_nonce' ); ?>
                 
                 <!-- IDENTIFICATION SECTION -->
@@ -377,7 +399,7 @@ get_header(); ?>
                     <label class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Overall Rating', 'evg-platform' ); ?> <span style="color: var(--evg-gold-primary);">*</span></label>
                     <div class="evg-control-matrix">
                         <?php 
-                        $current_rating = intval( $form_data['rating'] ?? 5 );
+                        $current_rating = max( 1, min( 5, intval( $form_data['rating'] ?? 5 ) ) );
                         for ( $i = 1; $i <= 5; $i++ ) : 
                         ?>
                             <label class="evg-control-cell">

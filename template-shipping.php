@@ -4,11 +4,18 @@
  * Description: Logistics, packaging, and parcel preparation protocol portal for Elite Vault Grading.
  *              Includes 4-step packaging guidelines, courier liability boundaries, pre-dispatch checklists,
  *              live admin settings routing, and solid dark luxury styling with background lines removed.
+ *
+ * @package EliteVaultGrading
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // Fetch Dynamic Admin Settings
-$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
-$turnaround_time = get_option( 'evg_turnaround_time', '30-45 Business Days' );
+$support_email   = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
+$return_shipping = floatval( get_option( 'evg_return_shipping_fee', 9.99 ) );
 
 get_header(); ?>
 
@@ -31,7 +38,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -83,7 +89,6 @@ get_header(); ?>
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
-  /* Grid Matrices */
   .evg-grid-matrix {
     display: grid; 
     gap: 1px;
@@ -101,11 +106,9 @@ get_header(); ?>
   
   .evg-step-matrix { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 
-  /* Icons */
   .evg-icon { color: var(--evg-text-ash); margin-bottom: 1.25rem; transition: all 0.3s ease; }
   .evg-grid-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
 
-  /* Two Column Split */
   .evg-split-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -113,11 +116,10 @@ get_header(); ?>
     align-items: stretch;
   }
 
-  /* Metadata Lists */
   .evg-meta-list { list-style: none; padding: 0; margin: 0; }
   .evg-meta-list li {
     display: flex; 
-    justify-content: space-between;
+    justify-content: space-between; 
     align-items: center; 
     padding: 0.95rem 0; 
     border-bottom: 1px solid var(--evg-border-hairline);
@@ -125,7 +127,6 @@ get_header(); ?>
   }
   .evg-meta-list li:last-child { border-bottom: none; }
 
-  /* Checkbox Checklist Cards */
   .evg-checklist-item {
     background: var(--evg-obsidian-elevated);
     border: 1px solid #222226;
@@ -155,7 +156,6 @@ get_header(); ?>
     margin-top: 2px;
   }
 
-  /* Buttons */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -214,7 +214,7 @@ get_header(); ?>
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Logistics & Handling Specification', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Shipping &', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Packaging Guidelines', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 20px auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php esc_html_e( 'Proper packaging ensures your Pokémon cards arrive safely at our UK vault facility without transit damage. Follow our step-by-step preparation protocol before dispatching your consignment.', 'evg-platform' ); ?>
+                <?php printf( esc_html__( 'Proper packaging ensures your Pokémon cards arrive safely at our UK vault facility without transit damage. Consignments are turned around within %s from facility arrival.', 'evg-platform' ), esc_html( $turnaround_time ) ); ?>
             </p>
             <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--evg-obsidian-panel); border: 1px solid var(--evg-border-gold-faint); border-radius: 4px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="2">
@@ -234,7 +234,6 @@ get_header(); ?>
             </div>
 
             <div class="evg-grid-matrix evg-step-matrix" style="text-align: center;">
-                <!-- Step 1 -->
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
@@ -246,7 +245,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 2 -->
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
@@ -258,7 +256,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 3 -->
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <polygon points="12 2 2 7 12 22 22 7 12 2"/>
@@ -270,7 +267,6 @@ get_header(); ?>
                     </p>
                 </div>
 
-                <!-- Step 4 -->
                 <div class="evg-grid-cell">
                     <svg class="evg-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <polygon points="21 16 12 21 3 16 3 8 12 3 21 8 21 16"/><polyline points="3 8 12 13 21 8"/><polyline points="12 21 12 13"/>
@@ -314,15 +310,15 @@ get_header(); ?>
                     <ul class="evg-meta-list" style="margin-bottom: 20px;">
                         <li>
                             <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Return Courier', 'evg-platform' ); ?></span>
-                            <span style="color: #ffffff; font-weight: 600;"><?php esc_html_e( 'Royal Mail Tracked / Special Delivery', 'evg-platform' ); ?></span>
+                            <span style="color: #ffffff; font-weight: 600;"><?php esc_html_e( 'Royal Mail Tracked 24 / Special Delivery', 'evg-platform' ); ?></span>
                         </li>
                         <li>
-                            <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Return Postage Fee', 'evg-platform' ); ?></span>
-                            <span style="color: #34c759; font-family: monospace; font-size: 0.78rem; font-weight: 700;"><?php esc_html_e( 'INCLUDED IN SERVICE RATE', 'evg-platform' ); ?></span>
+                            <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Flat Return Shipping Rate', 'evg-platform' ); ?></span>
+                            <span style="color: var(--evg-gold-light); font-family: monospace; font-size: 0.85rem; font-weight: 700;">&pound;<?php echo esc_html( number_format( $return_shipping, 2 ) ); ?></span>
                         </li>
                         <li>
                             <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Live Dispatch Alert', 'evg-platform' ); ?></span>
-                            <span style="color: #ffffff; font-weight: 600;"><?php esc_html_e( 'Tracking number uploaded to account', 'evg-platform' ); ?></span>
+                            <span style="color: #ffffff; font-weight: 600;"><?php esc_html_e( 'Tracking reference uploaded to account', 'evg-platform' ); ?></span>
                         </li>
                     </ul>
                 </div>

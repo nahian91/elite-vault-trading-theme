@@ -6,6 +6,10 @@
  *              audit logging, 5-10 business day turnaround compliance, and a clean luxury dark UI.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // -------------------------------------------------------------------------
 // 1. BACKEND ENQUIRY & TICKET DISPATCH ENGINE
 // -------------------------------------------------------------------------
@@ -14,7 +18,7 @@ $contact_message = '';
 $form_data       = array();
 
 // Fetch Dynamic Admin Settings Configured in inc/settings.php
-$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
+$support_email   = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
 $turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce'] ) ) {
@@ -28,6 +32,17 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce']
 
         $form_data = compact( 'customer_name', 'email_address', 'order_number', 'feedback_type', 'message_content' );
 
+        // Client IP Rate Limiting Guard (60-second cooldown)
+        $client_ip = '0.0.0.0';
+        if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+            $raw_ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+            if ( filter_var( $raw_ip, FILTER_VALIDATE_IP ) ) {
+                $client_ip = $raw_ip;
+            }
+        }
+        $ip_hash      = md5( $client_ip );
+        $cooldown_key = 'evg_contact_cooldown_' . $ip_hash;
+
         // Validation
         if ( empty( $customer_name ) || empty( $email_address ) || empty( $message_content ) ) {
             $contact_status  = 'error';
@@ -35,12 +50,15 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce']
         } elseif ( ! is_email( $email_address ) ) {
             $contact_status  = 'error';
             $contact_message = __( 'Please supply a valid email address.', 'evg-platform' );
+        } elseif ( false !== get_transient( $cooldown_key ) ) {
+            $contact_status  = 'error';
+            $contact_message = __( 'Please wait a moment before sending another transmission.', 'evg-platform' );
         } else {
             global $wpdb;
             $table_feedback = $wpdb->prefix . 'evg_feedback';
 
-            // 1. Store in EVG Platform Feedback / Support Table (compatible with inc/feedback.php)
-            $inserted = $wpdb->insert(
+            // 1. Store in EVG Platform Feedback / Support Table
+            $wpdb->insert(
                 $table_feedback,
                 array(
                     'customer_name'     => $customer_name,
@@ -52,32 +70,37 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce']
                     'recommend'         => 'Yes',
                     'permission_to_use' => 0,
                     'status'            => 'Pending',
+                    'admin_notes'       => '',
                     'submitted_at'      => current_time( 'mysql' ),
                 ),
-                array( '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s' )
+                array( '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s' )
             );
 
-            // 2. Dispatch Email to Configured Support Inbox
-            $subject = sprintf( '[EVG Support Ticket] %s from %s', $feedback_type, $customer_name );
-            $body    = "New secure support transmission received:\n\n";
-            $body   .= "Name: {$customer_name}\n";
-            $body   .= "Email: {$email_address}\n";
+            // 2. Dispatch Email to Support Inbox with Sanitized Headers
+            $clean_sender_name = preg_replace( "/[\r\n]+/", '', $customer_name );
+            $subject           = sprintf( '[EVG Support Ticket] %s from %s', $feedback_type, $clean_sender_name );
+            $body              = "New secure support transmission received:\n\n";
+            $body             .= "Name: {$clean_sender_name}\n";
+            $body             .= "Email: {$email_address}\n";
             if ( ! empty( $order_number ) ) {
                 $body .= "Order Ref: #{$order_number}\n";
             }
-            $body   .= "Category: {$feedback_type}\n";
-            $body   .= "Time: " . current_time( 'mysql' ) . " GMT\n\n";
-            $body   .= "Message:\n{$message_content}\n\n";
-            $body   .= "---\nElite Vault Grading Automated Dispatch Engine";
+            $body .= "Category: {$feedback_type}\n";
+            $body .= "Time: " . current_time( 'mysql' ) . " GMT\n\n";
+            $body .= "Message:\n{$message_content}\n\n";
+            $body .= "---\nElite Vault Grading Automated Dispatch Engine";
 
             $headers = array(
                 'Content-Type: text/plain; charset=UTF-8',
-                'Reply-To: ' . $customer_name . ' <' . $email_address . '>',
+                'Reply-To: ' . $clean_sender_name . ' <' . $email_address . '>',
             );
 
             wp_mail( $support_email, $subject, $body, $headers );
 
-            // 3. Security Audit Logging
+            // 3. Set Rate Limit Cooldown (60 seconds)
+            set_transient( $cooldown_key, 1, 60 );
+
+            // 4. Security Audit Logging
             if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
                 Elite_Vault_Grading_System::log_activity( "Support Ticket Opened by {$email_address} (Ref: {$order_number})" );
             }
@@ -118,7 +141,6 @@ get_header(); ?>
     --evg-text-charcoal: #030406;
   }
 
-  /* Solid clean background without grid lines */
   .evg-master-wrapper {
     background-color: var(--evg-obsidian-base);
     background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 70%);
@@ -170,7 +192,6 @@ get_header(); ?>
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 
-  /* Two Column Layout */
   .evg-contact-layout {
     display: grid;
     grid-template-columns: 1.35fr 1fr;
@@ -178,7 +199,6 @@ get_header(); ?>
     align-items: start;
   }
 
-  /* Form Elements */
   .evg-form-control {
     background: var(--evg-obsidian-elevated);
     border: 1px solid #242428;
@@ -198,7 +218,6 @@ get_header(); ?>
   }
   .evg-form-control::placeholder { color: #4A4F5C; font-weight: 300; }
 
-  /* Info Meta List */
   .evg-meta-list { list-style: none; padding: 0; margin: 0; }
   .evg-meta-list li {
     display: flex; 
@@ -210,7 +229,6 @@ get_header(); ?>
   }
   .evg-meta-list li:last-child { border-bottom: none; }
 
-  /* Grid Matrix for Triage Categories */
   .evg-topic-matrix {
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
@@ -229,7 +247,6 @@ get_header(); ?>
   .evg-topic-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
   .evg-icon { color: var(--evg-text-ash); margin-bottom: 0.85rem; transition: all 0.3s ease; }
 
-  /* Submit Button */
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -316,12 +333,13 @@ get_header(); ?>
                         </div>
                         <div>
                             <label class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( 'Enquiry Category', 'evg-platform' ); ?></label>
+                            <?php $current_cat = $form_data['feedback_type'] ?? 'General Enquiry'; ?>
                             <select name="enquiry_category" class="evg-form-control" style="cursor: pointer;">
-                                <option value="General Enquiry"><?php esc_html_e( 'General Enquiry', 'evg-platform' ); ?></option>
-                                <option value="Grading Diagnostics"><?php esc_html_e( 'Grading Diagnostics & Standards', 'evg-platform' ); ?></option>
-                                <option value="Submission Intake"><?php esc_html_e( 'Submission Intake & Allocation', 'evg-platform' ); ?></option>
-                                <option value="Billing & Invoices"><?php esc_html_e( 'Billing & Invoices', 'evg-platform' ); ?></option>
-                                <option value="Collector Feedback"><?php esc_html_e( 'Collector Feedback', 'evg-platform' ); ?></option>
+                                <option value="General Enquiry" <?php selected( $current_cat, 'General Enquiry' ); ?>><?php esc_html_e( 'General Enquiry', 'evg-platform' ); ?></option>
+                                <option value="Grading Diagnostics" <?php selected( $current_cat, 'Grading Diagnostics' ); ?>><?php esc_html_e( 'Grading Diagnostics & Standards', 'evg-platform' ); ?></option>
+                                <option value="Submission Intake" <?php selected( $current_cat, 'Submission Intake' ); ?>><?php esc_html_e( 'Submission Intake & Allocation', 'evg-platform' ); ?></option>
+                                <option value="Billing & Invoices" <?php selected( $current_cat, 'Billing & Invoices' ); ?>><?php esc_html_e( 'Billing & Invoices', 'evg-platform' ); ?></option>
+                                <option value="Collector Feedback" <?php selected( $current_cat, 'Collector Feedback' ); ?>><?php esc_html_e( 'Collector Feedback', 'evg-platform' ); ?></option>
                             </select>
                         </div>
                     </div>

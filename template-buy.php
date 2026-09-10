@@ -7,6 +7,10 @@
  *              with guest authentication redirection back to the targeted checkout page.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 global $wpdb;
 
 $table_marketplace = $wpdb->prefix . 'evg_marketplace';
@@ -15,7 +19,7 @@ $table_cards       = $wpdb->prefix . 'evg_cards';
 // -------------------------------------------------------------------------
 // 1. DYNAMIC FILTER & PAGINATION PARSING
 // -------------------------------------------------------------------------
-$current_page = max( 1, get_query_var( 'paged' ) ? get_query_var( 'paged' ) : ( isset( $_GET['pg'] ) ? intval( $_GET['pg'] ) : 1 ) );
+$current_page = max( 1, get_query_var( 'paged' ) ? get_query_var( 'paged' ) : ( isset( $_GET['pg'] ) ? absint( $_GET['pg'] ) : 1 ) );
 $per_page     = 9;
 $offset       = ( $current_page - 1 ) * $per_page;
 
@@ -31,8 +35,9 @@ $query_params  = array();
 
 // Keyword Search
 if ( ! empty( $search_keyword ) ) {
-    $where_clauses[] = "(m.card_title LIKE %s OR c.card_name LIKE %s OR m.set_name LIKE %s OR c.set_name LIKE %s OR m.card_number LIKE %s)";
+    $where_clauses[] = "(m.card_title LIKE %s OR c.card_name LIKE %s OR m.set_name LIKE %s OR c.set_name LIKE %s OR m.card_number LIKE %s OR m.category LIKE %s)";
     $like_val        = '%' . $wpdb->esc_like( $search_keyword ) . '%';
+    $query_params[]  = $like_val;
     $query_params[]  = $like_val;
     $query_params[]  = $like_val;
     $query_params[]  = $like_val;
@@ -621,13 +626,13 @@ get_header(); ?>
                                 home_url( '/checkout' )
                             );
 
-                            // Intercept guest to sign-in then auto-redirect to checkout
+                            // Intercept guest to sign-in with seamless redirect_to preserved without double-encoding
                             if ( is_user_logged_in() ) {
                                 $action_button_url = $target_checkout_url;
                             } else {
                                 $action_button_url = add_query_arg(
                                     'redirect_to',
-                                    urlencode( $target_checkout_url ),
+                                    $target_checkout_url,
                                     home_url( '/sign-in' )
                                 );
                             }
@@ -678,7 +683,7 @@ get_header(); ?>
                                         <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 10px; border-top: 1px solid var(--evg-border-hairline);">
                                             <span class="evg-label-micro" style="margin: 0;"><?php esc_html_e( 'Valuation', 'evg-platform' ); ?></span>
                                             <div style="font-family: monospace; font-size: 1.25rem; font-weight: 800; color: #ffffff;">
-                                                &pound;<?php echo esc_html( number_format( $card->price, 2 ) ); ?>
+                                                &pound;<?php echo esc_html( number_format( (float) $card->price, 2 ) ); ?>
                                             </div>
                                         </div>
                                     </div>
@@ -768,7 +773,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.evg-lightbox-trigger').forEach(function(el) {
         el.addEventListener('click', function(e) {
             var imgUrl = this.getAttribute('data-img');
-            if (imgUrl) {
+            if (imgUrl && imgUrl.trim() !== '') {
                 modal.style.display = 'flex';
                 modalImg.src = imgUrl;
             }

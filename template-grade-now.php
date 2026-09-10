@@ -8,6 +8,10 @@
  *              and updated £9.99 base tier pricing with 5-10 business day turnaround compliance.
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // -------------------------------------------------------------------------
 // 1. DYNAMIC SYSTEM SETTINGS & PRICING RESOLUTION
 // -------------------------------------------------------------------------
@@ -22,6 +26,7 @@ $turnaround_time    = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 $price_standard     = floatval( get_option( 'evg_price_standard', 9.99 ) );
 $price_upgrade      = floatval( get_option( 'evg_price_premium_upgrade', 2.99 ) );
 $shipping_fee       = floatval( get_option( 'evg_return_shipping_fee', 9.99 ) );
+$max_cards_limit    = max( 1, absint( get_option( 'evg_max_cards_per_submission', 50 ) ) );
 
 // Fetch dynamic or fallback service tiers
 $service_tiers = get_option( 'evg_service_tiers', array(
@@ -62,18 +67,20 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['evg_grade_submit_no
     } elseif ( 'yes' !== $accept_submissions ) {
         $error_message = __( 'Grading submissions are temporarily at capacity (Sold Out). Please try again shortly.', 'evg-platform' );
     } elseif ( ! is_user_logged_in() ) {
-        $redirect_target = add_query_arg( 'redirect_to', urlencode( home_url( '/grade-now' ) ), home_url( '/sign-in' ) );
+        $redirect_target = add_query_arg( 'redirect_to', home_url( '/grade-now' ), home_url( '/sign-in' ) );
         wp_safe_redirect( $redirect_target );
         exit;
     } else {
         $current_user_id = get_current_user_id();
-        $declared_cards  = isset( $_POST['cards'] ) && is_array( $_POST['cards'] ) ? $_POST['cards'] : array();
+        $declared_cards  = isset( $_POST['cards'] ) && is_array( $_POST['cards'] ) ? array_values( $_POST['cards'] ) : array();
         $service_type    = sanitize_text_field( wp_unslash( $_POST['service_type'] ?? 'Standard Base Grading' ) );
         $label_option    = sanitize_text_field( wp_unslash( $_POST['label_option'] ?? 'Standard Label' ) );
         $total_card_cnt  = count( $declared_cards );
 
         if ( $total_card_cnt < 1 ) {
             $error_message = __( 'Please declare at least one card in your submission roster.', 'evg-platform' );
+        } elseif ( $total_card_cnt > $max_cards_limit ) {
+            $error_message = sprintf( __( 'The maximum allowable allocation per submission parcel is %d cards.', 'evg-platform' ), $max_cards_limit );
         } else {
             // Calculate base cost and slab upgrade cost + flat shipping
             $selected_base_rate = isset( $service_tiers[ $service_type ]['price'] ) ? floatval( $service_tiers[ $service_type ]['price'] ) : $price_standard;
@@ -86,7 +93,7 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['evg_grade_submit_no
             // Generate clean Order Reference ID
             $order_number = 'EVG-' . date( 'Y' ) . '-' . strtoupper( wp_generate_password( 5, false, false ) );
 
-            // Insert parent submission record
+            // Insert parent submission record with Pending payment status awaiting Stripe checkout
             $inserted_sub = $wpdb->insert(
                 $table_submissions,
                 array(
@@ -97,12 +104,12 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['evg_grade_submit_no
                     'submission_slot_tier' => $total_card_cnt . ' Card Allocation',
                     'total_cards'          => $total_card_cnt,
                     'label_option'         => $label_option,
-                    'payment_status'       => 'Paid',
-                    'total_amount'         => $final_total,
+                    'payment_status'       => 'Pending',
+                    'total_amount'         => number_format( (float) $final_total, 2, '.', '' ),
                     'current_stage'        => 'Cards Awaiting Arrival',
                     'return_tracking'      => '',
                 ),
-                array( '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%f', '%s', '%s' )
+                array( '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
             );
 
             if ( false !== $inserted_sub ) {
@@ -137,22 +144,19 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['evg_grade_submit_no
                 }
 
                 if ( class_exists( 'Elite_Vault_Grading_System' ) && method_exists( 'Elite_Vault_Grading_System', 'log_activity' ) ) {
-                    Elite_Vault_Grading_System::log_activity( "Customer #{$current_user_id} submitted grading order #{$order_number} ({$total_card_cnt} cards)." );
+                    Elite_Vault_Grading_System::log_activity( "Customer #{$current_user_id} created submission #{$order_number} ({$total_card_cnt} cards). Routing to Stripe checkout." );
                 }
 
-                // Redirect cleanly to Thank You / Order Confirmation
-                $thank_you_url = add_query_arg(
+                // Redirect directly to checkout to collect payment via Stripe
+                $checkout_url = add_query_arg(
                     array(
-                        'order'    => $submission_id,
-                        'order_id' => $order_number,
-                        'tier'     => urlencode( $service_type ),
-                        'cards'    => $total_card_cnt,
-                        'label'    => urlencode( $label_option ),
+                        'submission_id' => $submission_id,
+                        'item_type'     => 'submission',
                     ),
-                    home_url( '/thank-you' )
+                    home_url( '/checkout' )
                 );
 
-                wp_safe_redirect( $thank_you_url );
+                wp_safe_redirect( $checkout_url );
                 exit;
             } else {
                 $error_message = __( 'Database write error. Please contact EVG support.', 'evg-platform' );
@@ -403,7 +407,7 @@ get_header(); ?>
             <span class="evg-label-micro"><?php esc_html_e( 'Official Certification & Authentication', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Submit Cards For', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Grading', 'evg-platform' ); ?></span></h1>
             <p style="color: var(--evg-text-ash); max-width: 680px; margin: 0 auto 15px auto; font-size: 0.95rem; line-height: 1.6;">
-                <?php printf( esc_html__( 'Standard grading starting from £%.2f per card. Declare your Pokémon TCG assets, configure custom labels, and secure your allocation in our UK vault registry.', 'evg-platform' ), $price_standard ); ?>
+                <?php printf( esc_html__( 'Standard grading starting from £%s per card. Declare your Pokémon TCG assets, configure custom labels, and secure your allocation in our UK vault registry.', 'evg-platform' ), number_format( $price_standard, 2 ) ); ?>
             </p>
             <div style="display: inline-flex; align-items: center; gap: 8px; font-family: monospace; font-size: 0.75rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 4px 14px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint);">
                 <span><?php printf( esc_html__( 'ESTIMATED TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
@@ -428,7 +432,7 @@ get_header(); ?>
             </div>
         <?php else : ?>
 
-            <form method="post" action="" id="evg-grading-form">
+            <form method="post" action="<?php echo esc_url( add_query_arg( array() ) ); ?>" id="evg-grading-form">
                 <?php wp_nonce_field( 'evg_grade_submit_action', 'evg_grade_submit_nonce' ); ?>
 
                 <div class="evg-form-grid">
@@ -446,7 +450,7 @@ get_header(); ?>
                                 <select name="service_type" id="evg_service_type" class="evg-field-control" onchange="evg_recalc_pricing()">
                                     <?php foreach ( $service_tiers as $tier_key => $tier_data ) : ?>
                                         <option value="<?php echo esc_attr( $tier_key ); ?>" data-price="<?php echo esc_attr( $tier_data['price'] ); ?>">
-                                            <?php echo esc_html( $tier_data['label'] ); ?> — &pound;<?php echo esc_html( number_format( $tier_data['price'], 2 ) ); ?> / card
+                                            <?php echo esc_html( $tier_data['label'] ); ?> — &pound;<?php echo esc_html( number_format( (float) $tier_data['price'], 2 ) ); ?> / card
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -456,7 +460,7 @@ get_header(); ?>
                                 <label><?php esc_html_e( 'Label & Slab Housing Design', 'evg-platform' ); ?></label>
                                 <select name="label_option" id="evg_label_option" class="evg-field-control" onchange="evg_recalc_pricing()">
                                     <?php foreach ( $slab_options as $slab_key => $slab_data ) : 
-                                        $surcharge_text = ( $slab_data['surcharge'] > 0 ) ? ' (+£' . number_format( $slab_data['surcharge'], 2 ) . ' / card)' : ' (Included in Base Rate)';
+                                        $surcharge_text = ( $slab_data['surcharge'] > 0 ) ? ' (+£' . number_format( (float) $slab_data['surcharge'], 2 ) . ' / card)' : ' (Included in Base Rate)';
                                     ?>
                                         <option value="<?php echo esc_attr( $slab_key ); ?>" data-surcharge="<?php echo esc_attr( $slab_data['surcharge'] ); ?>">
                                             <?php echo esc_html( $slab_data['label'] . $surcharge_text ); ?>
@@ -542,7 +546,7 @@ get_header(); ?>
                                 </li>
                                 <li>
                                     <span>Base Grading Rate</span>
-                                    <strong id="summary-base-rate">&pound;<?php echo esc_html( number_format( $price_standard, 2 ) ); ?></strong>
+                                    <strong id="summary-base-rate">&pound;<?php echo esc_html( number_format( (float) $price_standard, 2 ) ); ?></strong>
                                 </li>
                                 <li>
                                     <span>Slab Upgrade Surcharge</span>
@@ -550,22 +554,22 @@ get_header(); ?>
                                 </li>
                                 <li>
                                     <span>UK Return Delivery</span>
-                                    <strong style="color: #34c759; font-family: monospace; font-size: 0.75rem;">&pound;<?php echo esc_html( number_format( $shipping_fee, 2 ) ); ?> (TRACKED)</strong>
+                                    <strong style="color: #34c759; font-family: monospace; font-size: 0.75rem;">&pound;<?php echo esc_html( number_format( (float) $shipping_fee, 2 ) ); ?> (TRACKED)</strong>
                                 </li>
                                 <li style="border-bottom: none; padding-top: 15px; font-size: 1.1rem; color: #ffffff;">
                                     <strong>Total Authorized</strong>
                                     <strong id="summary-total-amount" style="color: var(--evg-gold-primary); font-family: monospace;">
-                                        &pound;<?php echo esc_html( number_format( $price_standard + $shipping_fee, 2 ) ); ?>
+                                        &pound;<?php echo esc_html( number_format( (float) ($price_standard + $shipping_fee), 2 ) ); ?>
                                     </strong>
                                 </li>
                             </ul>
 
                             <?php if ( is_user_logged_in() ) : ?>
                                 <button type="submit" class="btn-evg-gold">
-                                    <?php esc_html_e( 'Lock In & Submit', 'evg-platform' ); ?> &rarr;
+                                    <?php esc_html_e( 'Lock In & Continue to Payment', 'evg-platform' ); ?> &rarr;
                                 </button>
                             <?php else : ?>
-                                <a href="<?php echo esc_url( add_query_arg( 'redirect_to', urlencode( home_url( '/grade-now' ) ), home_url( '/sign-in' ) ) ); ?>" class="btn-evg-gold">
+                                <a href="<?php echo esc_url( add_query_arg( 'redirect_to', home_url( '/grade-now' ), home_url( '/sign-in' ) ) ); ?>" class="btn-evg-gold">
                                     <?php esc_html_e( 'Log In To Complete Order', 'evg-platform' ); ?> &rarr;
                                 </a>
                                 <p style="color: var(--evg-text-ash); font-size: 0.75rem; text-align: center; margin-top: 10px;">
@@ -586,6 +590,7 @@ get_header(); ?>
 <script>
     var evgCardIndex = 1;
     var returnShippingFee = <?php echo esc_js( $shipping_fee ); ?>;
+    var maxCardsAllowed = <?php echo esc_js( $max_cards_limit ); ?>;
 
     function evg_recalc_pricing() {
         var cardCount = jQuery('#evg-cards-container .evg-card-item').length;
@@ -608,10 +613,16 @@ get_header(); ?>
     }
 
     function evg_add_card_unit() {
+        var currentCount = jQuery('#evg-cards-container .evg-card-item').length;
+        if (currentCount >= maxCardsAllowed) {
+            alert('The maximum card allocation per submission is ' + maxCardsAllowed + ' cards.');
+            return;
+        }
+
         var html = `
             <div class="evg-card-item" data-index="${evgCardIndex}">
                 <div class="evg-card-item-header">
-                    <span class="evg-card-item-title">Card #${evgCardIndex + 1}</span>
+                    <span class="evg-card-item-title">Card #${currentCount + 1}</span>
                     <button type="button" class="evg-btn-remove-card" onclick="evg_remove_card_unit(this)">✕ Remove</button>
                 </div>
                 <div class="evg-field-group">

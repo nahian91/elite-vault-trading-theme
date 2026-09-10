@@ -4,14 +4,36 @@
  * Description: Fully dynamic authentication terminal matching Elite Vault Grading specifications, 
  *              featuring server-side authentication, post-login target redirection, captcha filter bypass
  *              for frontend signons, explicit authentication cookies, and an interactive password toggle eye icon.
+ *
+ * @package EliteVaultGrading
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // -------------------------------------------------------------------------
-// 1. RESOLVE REDIRECT TARGET
+// 1. RESOLVE REDIRECT TARGET & ALREADY-AUTHENTICATED CHECK
 // -------------------------------------------------------------------------
 $redirect_to = '';
 if ( isset( $_REQUEST['redirect_to'] ) && ! empty( $_REQUEST['redirect_to'] ) ) {
-    $redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+    $raw_redirect = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+    $redirect_to  = wp_validate_redirect( $raw_redirect, home_url( '/my-account' ) );
+}
+
+// Redirect if already authenticated
+if ( is_user_logged_in() && 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+    $current_user = wp_get_current_user();
+    $staff_roles  = array( 'administrator', 'head_grader', 'grader', 'support_team' );
+    
+    if ( ! empty( array_intersect( $staff_roles, (array) $current_user->roles ) ) ) {
+        wp_safe_redirect( admin_url( 'admin.php?page=evg_management_system&tab=dashboard' ) );
+    } elseif ( ! empty( $redirect_to ) ) {
+        wp_safe_redirect( $redirect_to );
+    } else {
+        wp_safe_redirect( home_url( '/my-account' ) );
+    }
+    exit;
 }
 
 // -------------------------------------------------------------------------
@@ -23,7 +45,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_login_nonce'] )
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_login_nonce'] ), 'evg_user_login_action' ) ) {
         
         $user_login = sanitize_text_field( wp_unslash( $_POST['log'] ?? '' ) );
-        $user_pwd   = $_POST['pwd'] ?? '';
+        $user_pwd   = (string) ( $_POST['pwd'] ?? '' );
         $remember   = isset( $_POST['rememberme'] );
 
         if ( empty( $user_login ) || empty( $user_pwd ) ) {
@@ -63,7 +85,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_login_nonce'] )
                     Elite_Vault_Grading_System::log_activity( "Collector Signed In: {$user->user_email} (ID #{$user->ID})" );
                 }
 
-                // Dynamic Routing
+                // Dynamic Role-Based Routing
                 $staff_roles = array( 'administrator', 'head_grader', 'grader', 'support_team' );
                 $user_roles  = (array) $user->roles;
 
@@ -78,21 +100,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_login_nonce'] )
             }
         }
     }
-}
-
-// Redirect if already authenticated
-if ( is_user_logged_in() && 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
-    $current_user = wp_get_current_user();
-    $staff_roles  = array( 'administrator', 'head_grader', 'grader', 'support_team' );
-    
-    if ( ! empty( array_intersect( $staff_roles, (array) $current_user->roles ) ) ) {
-        wp_safe_redirect( admin_url( 'admin.php?page=evg_management_system&tab=dashboard' ) );
-    } elseif ( ! empty( $redirect_to ) ) {
-        wp_safe_redirect( $redirect_to );
-    } else {
-        wp_safe_redirect( home_url( '/dashboard' ) );
-    }
-    exit;
 }
 
 get_header(); ?>
@@ -288,7 +295,7 @@ get_header(); ?>
     padding: 1.25rem 2rem; 
     display: flex; 
     align-items: center; 
-    justify-content: center;
+    justify-content: center; 
     width: 100%; 
     transition: all 0.3s ease; 
     text-decoration: none; 
@@ -372,7 +379,7 @@ get_header(); ?>
                             </svg>
                         </span>
                         <input type="password" name="pwd" id="loginPassword" class="evg-form-control" placeholder="••••••••••••" required autocomplete="current-password">
-                        <button type="button" class="evg-eye-toggle" data-target="loginPassword" aria-label="Toggle password visibility">
+                        <button type="button" class="evg-eye-toggle" data-target="loginPassword" aria-label="<?php esc_attr_e( 'Toggle password visibility', 'evg-platform' ); ?>">
                             <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             <svg class="eye-closed" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                         </button>
@@ -397,17 +404,17 @@ get_header(); ?>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-muted)" stroke-width="2">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
+                    <span><?php esc_html_e( '256-BIT ENCRYPTED SSL GATEWAY', 'evg-platform' ); ?></span>
                 </div>
 
                 <!-- SIGN UP REDIRECT -->
                 <?php 
                 $register_url = home_url( '/create-account' );
                 if ( ! empty( $redirect_to ) ) {
-                    $register_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $register_url );
+                    $register_url = add_query_arg( 'redirect_to', $redirect_to, $register_url );
                 }
                 ?>
                 <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
-                    
                     <a href="<?php echo esc_url( $register_url ); ?>" class="evg-label-micro" style="color: #ffffff; text-decoration: none; margin-top: 8px;">
                         <?php esc_html_e( 'Create Account →', 'evg-platform' ); ?>
                     </a>
@@ -417,7 +424,7 @@ get_header(); ?>
         </div>
 
         <!-- 3. CAPABILITIES PREVIEW MATRIX -->
-        <section class="evg-feature-matrix" aria-label="Portal Capabilities">
+        <section class="evg-feature-matrix" aria-label="<?php esc_attr_e( 'Portal Capabilities', 'evg-platform' ); ?>">
             <div class="evg-feature-cell">
                 <span style="display: block; color: #ffffff; font-size: 0.8rem; margin-bottom: 4px;"><?php esc_html_e( 'Live Telemetry', 'evg-platform' ); ?></span>
                 <span class="evg-label-micro" style="color: var(--evg-text-ash);"><?php esc_html_e( 'Order Tracking', 'evg-platform' ); ?></span>
@@ -444,10 +451,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const eyeButtons = document.querySelectorAll('.evg-eye-toggle');
     eyeButtons.forEach(btn => {
         btn.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
+            const targetId   = this.getAttribute('data-target');
             const inputField = document.getElementById(targetId);
-            const eyeOpen = this.querySelector('.eye-open');
-            const eyeClosed = this.querySelector('.eye-closed');
+            const eyeOpen    = this.querySelector('.eye-open');
+            const eyeClosed  = this.querySelector('.eye-closed');
 
             if (!inputField) return;
 

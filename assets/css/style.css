@@ -198,7 +198,6 @@ a:hover {
 /* --- VAULT DISPLAY --- */
 .vault-container {
     width: 100%;
-    height: 480px;
     border-radius: 6px;
     border: 1px solid var(--border-gold);
     background: radial-gradient(circle, rgba(30,25,15,0.8) 0%, rgba(8,8,8,0.95) 80%);
