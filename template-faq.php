@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Fetch Dynamic Admin Settings
-$support_email   = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 $turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 $price_standard  = floatval( get_option( 'evg_price_standard', 9.99 ) );
 $price_upgrade   = floatval( get_option( 'evg_price_premium_upgrade', 2.99 ) );
@@ -250,7 +250,7 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div id="faq-04" class="evg-faq-body" role="region">
-                        <?php printf( esc_html__( 'Standard grading begins at £%s per card unit with our Standard Label. Optional custom label editions (such as Custom Gold Foil or Vault Door designs) are available for +£%s per card. Insured tracked return shipping is calculated at checkout.', 'evg-platform' ), number_format( $price_standard, 2 ), number_format( $price_upgrade, 2 ) ); ?>
+                        <?php printf( esc_html__( 'Standard grading begins at £%s per card unit with our standard label. Optional custom label editions (such as colour match £0.99, lighting £0.99 and extended art work £2.99) are available per card. Insured tracked return shipping is calculated at checkout as a one-time fee per order.', 'evg-platform' ), number_format( $price_standard, 2 ) ); ?>
                     </div>
                 </div>
 
@@ -305,7 +305,7 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div id="faq-09" class="evg-faq-body" role="region">
-                        <?php esc_html_e( 'We recommend Royal Mail Special Delivery Guaranteed by 1pm, which provides full end-to-end barcode tracking and up to £500-£2,500 postal insurance coverage.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'We are only using Royal Mail signed for, insured for £500-£2,500 etc.', 'evg-platform' ); ?>
                     </div>
                 </div>
             </div>
@@ -330,7 +330,7 @@ get_header(); ?>
                         <svg class="evg-faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     <div id="faq-11" class="evg-faq-body" role="region">
-                        <?php printf( esc_html__( 'When looking up any certified card on our slab verification registry, the public can inspect up to 3 defect preview scans free of charge. For complete transparency, secondary buyers or owners can pay a one-time micro-fee of £%s to unlock the entire high-resolution flaw portfolio showing all defect angles, coordinate mapping, and sub-score rationale.', 'evg-platform' ), number_format( $unlock_fee, 2 ) ); ?>
+                        <?php echo esc_html( 'When looking up any certified card on our slab verification registry, the public can inspect up to 3 defect preview scans free of charge. For complete transparency, secondary buyers or owners can pay 99p per card to unlock the entire high-resolution flaw portfolio showing all defect angles, coordinate mapping, and sub-score rationale.' ); ?>
                     </div>
                 </div>
 

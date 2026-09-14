@@ -3,8 +3,7 @@
  * Template Name: Home
  * Description: Clean, high-performance executive homepage for Elite Vault Grading.
  *              Includes full database connectivity, updated £9.99 pricing and 5-10 business day turnaround,
- *              single high-impact hero specimen, automated photo reel above How It Works,
- *              marketplace showcase with a single prominent slab display, obsidian/gold luxury styling, and a customer feedback reel.
+ *              4-image collage grids, "100s +" stats, obsidian/gold luxury styling, and customer feedback reel.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,32 +20,16 @@ $table_marketplace = $wpdb->prefix . 'evg_marketplace';
 $table_submissions = $wpdb->prefix . 'evg_submissions';
 $table_feedback    = $wpdb->prefix . 'evg_feedback';
 
-// Fetch live platform settings (defaults: £9.99 & 5-10 Business Days)
+// Fetch live platform settings
 $accept_submissions  = get_option( 'evg_accept_submissions', 'yes' );
 $turnaround_time     = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 $price_standard      = floatval( get_option( 'evg_price_standard', 9.99 ) );
 $announcement_banner = get_option( 'evg_announcement_banner', '' );
 
-// Fetch real-time count of completed/graded cards
-$total_cards_graded = (int) $wpdb->get_var( "SELECT COUNT(id) FROM {$table_cards} WHERE grading_status IN ('Encapsulation', 'Completed') OR final_grade > 0" );
-$display_card_count = $total_cards_graded > 1000 ? number_format( $total_cards_graded ) : ( $total_cards_graded > 0 ? number_format( $total_cards_graded ) : 'THOUSANDS' );
+// Card count fixed to "100s +" per client request
+$display_card_count  = '100s +';
 
-// Fetch single featured slab from active public marketplace for the showcase section
-$showcase_slab = $wpdb->get_row( "
-    SELECT m.price, 
-           COALESCE(c.card_name, m.card_title, 'Graded Card') AS card_name,
-           COALESCE(c.set_name, m.set_name, 'Vault Collection') AS set_name,
-           COALESCE(c.card_number, m.card_number, '') AS card_number,
-           COALESCE(c.final_grade, m.assigned_grade, 10) AS final_grade,
-           COALESCE(c.front_image_url, m.image_url, '') AS card_image
-    FROM {$table_marketplace} m
-    LEFT JOIN {$table_cards} c ON m.card_id = c.id
-    WHERE m.status = 'Available'
-    ORDER BY m.listed_date DESC
-    LIMIT 1
-" );
-
-// Gallery/Collage photo set for photo reel and single specimen features
+// Gallery/Collage photo set for the 4-image grids and photo reel
 $theme_img_uri  = get_template_directory_uri() . '/assets/img/';
 $collage_photos = array(
     $theme_img_uri . 'IMG_0968.jpg',
@@ -59,7 +42,7 @@ $collage_photos = array(
     $theme_img_uri . 'IMG_0982.jpg'
 );
 
-// Fetch customer feedback for the testimonial reel strictly respecting marketing permissions
+// Fetch customer feedback for the testimonial reel
 $testimonials = array();
 if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table_feedback}'" ) === $table_feedback ) {
     $testimonials = $wpdb->get_results( 
@@ -74,7 +57,7 @@ if ( $wpdb->get_var( "SHOW TABLES LIKE '{$table_feedback}'" ) === $table_feedbac
 if ( empty( $testimonials ) ) {
     $testimonials = array(
         (object) array('customer_name' => 'Alex Turner', 'rating' => 5, 'feedback_text' => 'Absolutely blown away by the casing quality! The slab looks extremely premium and secure.'),
-        (object) array('customer_name' => 'James Wilson', 'rating' => 5, 'feedback_text' => 'Elite Vault Grading is my go-to grading company now. Consistent 10s and gorgeous labels!'),
+        (object) array('customer_name' => 'James Wilson', 'rating' => 5, 'feedback_text' => 'Elite Vault Grading is my go-to grading company now. Gorgeous labels!'),
         (object) array('customer_name' => 'David Miller', 'rating' => 5, 'feedback_text' => 'The transparency report feature is incredible! Being able to see fault photos is next level.'),
         (object) array('customer_name' => 'Ryan G.', 'rating' => 5, 'feedback_text' => 'Fast service, elite protection slabs, and pristine sub-grades. 10/10 experience.'),
         (object) array('customer_name' => 'Daniel C.', 'rating' => 5, 'feedback_text' => 'Magnificent vault security and professional grading staff. Highly recommended!')
@@ -232,7 +215,7 @@ get_header(); ?>
   }
   .how-it-works-action { text-align: center; margin-top: 3rem; }
   
-  /* Single Prominent Specimen Container (Hero & Showcase) */
+  /* 4-Image Collage Grid Styles */
   .vault-container-single { 
     background: var(--evg-obsidian-panel); 
     border: 1px solid var(--evg-border-hairline); 
@@ -242,16 +225,26 @@ get_header(); ?>
     max-width: 580px;
     margin: 0 auto;
   }
-  .vault-single-item {
+  .evg-image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .evg-grid-item {
     background: #08080a;
     border: 1px solid var(--evg-border-gold-faint);
     border-radius: 6px;
     overflow: hidden;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 5;
     position: relative;
     box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+    transition: border-color 0.2s ease, transform 0.2s ease;
   }
-  .vault-single-item img {
+  .evg-grid-item:hover {
+    border-color: var(--evg-gold-primary);
+    transform: translateY(-2px);
+  }
+  .evg-grid-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -364,7 +357,6 @@ get_header(); ?>
     margin-bottom: 12px;
   }
 
-  /* --- RESPONSIVE MEDIA QUERIES FOR MOBILE & TABLET --- */
   @media (max-width: 991.98px) {
     .hero { text-align: center; padding: 3rem 0; }
     .hero-actions { justify-content: center; display: flex; flex-wrap: wrap; gap: 12px; }
@@ -397,7 +389,6 @@ get_header(); ?>
             <div class="row align-items-center">
                 <div class="col-lg-5 mb-5 mb-lg-0">
                     
-                    <!-- Dynamic Sold Out Notice -->
                     <?php if ( 'yes' !== $accept_submissions ) : ?>
                         <div style="display: inline-block; background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.3); padding: 5px 14px; border-radius: 4px; color: #ff453a; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">
                             ● <?php esc_html_e( 'Grading Currently Sold Out', 'evg-platform' ); ?>
@@ -414,7 +405,7 @@ get_header(); ?>
                     
                     <div class="hero-actions">
                         <?php if ( 'yes' === $accept_submissions ) : ?>
-                            <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-gold">
+                            <a href="<?php echo esc_url( home_url( '/grading' ) ); ?>" class="btn-gold">
                                 <?php esc_html_e( 'Submit For Grading', 'evg-platform' ); ?>
                             </a>
                         <?php else : ?>
@@ -423,7 +414,7 @@ get_header(); ?>
                             </span>
                         <?php endif; ?>
 
-                        <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-outline-gold">
+                        <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-outline-gold">
                             <?php esc_html_e( 'Buy Graded Cards', 'evg-platform' ); ?>
                         </a>
                     </div>
@@ -436,11 +427,22 @@ get_header(); ?>
                     </div>
                 </div>
 
-                <!-- HERO RIGHT: SINGLE PROMINENT SPECIMEN -->
+                <!-- HERO RIGHT: 4-IMAGE COLLAGE GRID -->
                 <div class="col-lg-7">
                     <div class="vault-container-single">
-                        <div class="vault-single-item">
-                            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/IMG_1035.jpg' ); ?>" alt="Elite Vault Featured Specimen" loading="lazy">
+                        <div class="evg-image-grid">
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0968.jpg' ); ?>" alt="Elite Vault Specimen 1" loading="lazy">
+                            </div>
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0971.jpg' ); ?>" alt="Elite Vault Specimen 2" loading="lazy">
+                            </div>
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0973.jpg' ); ?>" alt="Elite Vault Specimen 3" loading="lazy">
+                            </div>
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0974.jpg' ); ?>" alt="Elite Vault Specimen 4" loading="lazy">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -581,7 +583,7 @@ get_header(); ?>
             </div>
 
             <div class="how-it-works-action">
-                <a href="<?php echo esc_url( home_url( '/grading-process' ) ); ?>" class="btn-gold">
+                <a href="<?php echo esc_url( home_url( '/grading' ) ); ?>" class="btn-gold">
                     <?php esc_html_e( 'Learn More About Grading', 'evg-platform' ); ?>
                 </a>
             </div>
@@ -600,16 +602,27 @@ get_header(); ?>
                     <p style="font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;">
                         <?php esc_html_e( 'Explore our live inventory of authenticated Pokémon cards, professionally graded and sonically encapsulated in tamper-evident obsidian shields.', 'evg-platform' ); ?>
                     </p>
-                    <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-gold">
+                    <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-gold">
                         <?php esc_html_e( 'Browse Marketplace →', 'evg-platform' ); ?>
                     </a>
                 </div>
 
-                <!-- SHOP WITH CONFIDENCE RIGHT: SINGLE PROMINENT SPECIMEN -->
+                <!-- SHOP WITH CONFIDENCE RIGHT: 4-IMAGE COLLAGE GRID -->
                 <div class="col-lg-6">
                     <div class="vault-container-single">
-                        <div class="vault-single-item">
-                            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/IMG_1051.jpg' ); ?>" alt="Elite Vault Certified Slab" loading="lazy">
+                        <div class="evg-image-grid">
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0975.jpg' ); ?>" alt="Elite Vault Slab 1" loading="lazy">
+                            </div>
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0978.jpg' ); ?>" alt="Elite Vault Slab 2" loading="lazy">
+                            </div>
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0980.jpg' ); ?>" alt="Elite Vault Slab 3" loading="lazy">
+                            </div>
+                            <div class="evg-grid-item">
+                                <img src="<?php echo esc_url( $theme_img_uri . 'IMG_0982.jpg' ); ?>" alt="Elite Vault Slab 4" loading="lazy">
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -440,7 +440,7 @@ get_header(); ?>
                 <p style="color: var(--evg-text-ash); max-width: 500px; margin: 0 auto 20px auto; font-size: 0.88rem; line-height: 1.5;">
                     <?php esc_html_e( 'Our laboratory capacity for this drop has been fully allocated to preserve our 5-10 business day turnaround standard. Please check back shortly or explore certified slabs on our public marketplace.', 'evg-platform' ); ?>
                 </p>
-                <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-gold" style="width: auto; display: inline-flex;">
+                <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-evg-gold" style="width: auto; display: inline-flex;">
                     <?php esc_html_e( 'Browse Marketplace Slabs', 'evg-platform' ); ?>
                 </a>
             </div>

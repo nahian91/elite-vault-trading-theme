@@ -192,7 +192,7 @@ get_header();
                     <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="evg-btn-home">
                         <?php esc_html_e( '← Return to Vault Home', 'evg' ); ?>
                     </a>
-                    <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="evg-btn-home">
+                    <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="evg-btn-home">
                         <?php esc_html_e( 'Browse Marketplace', 'evg' ); ?>
                     </a>
                 </div>

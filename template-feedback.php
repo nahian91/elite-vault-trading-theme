@@ -17,7 +17,7 @@ $feedback_status  = '';
 $feedback_message = '';
 $form_data        = array();
 
-$support_email = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$support_email = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_feedback_submission_nonce'] ) ) {
     if ( wp_verify_nonce( sanitize_key( $_POST['evg_feedback_submission_nonce'] ), 'evg_submit_feedback_action' ) ) {

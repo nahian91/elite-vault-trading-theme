@@ -51,6 +51,24 @@ get_header(); ?>
     padding: 3rem 15px 5rem 15px;
   }
 
+  /* QR Code Box Style */
+  .evg-qr-box {
+    background: var(--evg-obsidian-panel);
+    border: 1px solid var(--evg-border-hairline);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+    display: inline-block;
+  }
+  .evg-qr-box img {
+    width: 120px;
+    height: 120px;
+    background: #fff;
+    padding: 6px;
+    border-radius: 6px;
+  }
+
   @media (max-width: 767.98px) {
     .evg-container { padding: 2rem 15px 4rem 15px; }
     form[style*="flex"] {
@@ -71,6 +89,19 @@ get_header(); ?>
             $cert_param = isset( $_GET['cert'] ) ? sanitize_text_field( wp_unslash( $_GET['cert'] ) ) : '';
             if ( ! empty( $cert_param ) ) {
                 evg_render_public_slab_certificate( $cert_param );
+                
+                // Generate QR Code dynamically for this specific certificate URL
+                $current_verify_url = home_url( '/verify/?cert=' . urlencode( $cert_param ) );
+                $qr_api_url = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode( $current_verify_url );
+                ?>
+                <div style="text-align: center; margin-top: 30px;">
+                    <div class="evg-qr-box">
+                        <p style="color: var(--evg-gold-primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;"><?php esc_html_e( 'Scan to Verify Slab', 'evg-platform' ); ?></p>
+                        <img src="<?php echo esc_url( $qr_api_url ); ?>" alt="Slab QR Code">
+                        <p style="color: var(--evg-text-ash); font-size: 0.7rem; font-family: monospace; margin-top: 8px; margin-bottom: 0;"><?php echo esc_html( $cert_param ); ?></p>
+                    </div>
+                </div>
+                <?php
             } else {
                 ?>
                 <div style="background: #0f0f11; border: 1px solid #222224; border-radius: 14px; padding: 35px 20px; text-align: center; color: #ffffff;">

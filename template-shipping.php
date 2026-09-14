@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Fetch Dynamic Admin Settings
-$support_email   = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 $turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 $return_shipping = floatval( get_option( 'evg_return_shipping_fee', 9.99 ) );
 

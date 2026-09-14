@@ -3,7 +3,7 @@
  * Template Name: Contact Us - Executive Tier
  * Description: Fully dynamic, production-ready contact portal for Elite Vault Grading.
  *              Features server-side enquiry dispatch, database feedback logging, dynamic admin settings routing,
- *              audit logging, 5-10 business day turnaround compliance, and a clean luxury dark UI.
+ *              audit logging, 5-10 business day turnaround compliance, and a clean luxury dark UI with centered alignment.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,7 +18,7 @@ $contact_message = '';
 $form_data       = array();
 
 // Fetch Dynamic Admin Settings Configured in inc/settings.php
-$support_email   = get_option( 'evg_support_email', 'support@elitevaultgrading.com' );
+$support_email   = get_option( 'evg_support_email', 'info@elitevaultgrading.com' );
 $turnaround_time = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_contact_nonce'] ) ) {
@@ -231,9 +231,11 @@ get_header(); ?>
   }
   .evg-meta-list li:last-child { border-bottom: none; }
 
+  /* Centered Diagnostic Support Matrix */
   .evg-topic-matrix {
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1px;
     background: var(--evg-border-hairline); 
     border: 1px solid var(--evg-border-hairline); 
@@ -243,6 +245,9 @@ get_header(); ?>
   .evg-topic-cell {
     background: var(--evg-obsidian-panel); 
     padding: 1.5rem 1.25rem; 
+    flex: 1 1 280px;
+    max-width: 360px;
+    text-align: center;
     transition: background 0.3s ease; 
   }
   .evg-topic-cell:hover { background: var(--evg-obsidian-elevated); }
@@ -415,7 +420,7 @@ get_header(); ?>
             </div>
         </div>
 
-        <!-- 3. TRIAGE / SUPPORT MATRIX -->
+        <!-- 3. TRIAGE / SUPPORT MATRIX (Centered) -->
         <div>
             <div style="text-align: center; margin-bottom: 20px;">
                 <span class="evg-label-micro" style="margin-bottom: 8px;"><?php esc_html_e( '02 // Support Infrastructure', 'evg-platform' ); ?></span>

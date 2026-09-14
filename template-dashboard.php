@@ -516,7 +516,7 @@ get_header(); ?>
                     <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
                         + <?php esc_html_e( 'Submit Cards for Grading', 'evg-platform' ); ?>
                     </a>
-                    <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
+                    <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-evg-outline">
                         <?php esc_html_e( 'Browse Marketplace', 'evg-platform' ); ?>
                     </a>
                     <a href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>" class="btn-evg-outline" style="border-color: #3f1a1a; color: #ff453a !important;">
@@ -728,7 +728,7 @@ get_header(); ?>
                                 <p style="color: var(--evg-text-ash); font-size: 0.88rem; max-width: 450px; margin: 0 auto 20px auto; line-height: 1.5;">
                                     <?php esc_html_e( 'Explore our live inventory of certified Pokémon slabs permanently encapsulated in tamper-evident cases.', 'evg-platform' ); ?>
                                 </p>
-                                <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-executive">
+                                <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-evg-executive">
                                     <?php esc_html_e( 'Explore Certified Slabs', 'evg-platform' ); ?>
                                 </a>
                             </div>

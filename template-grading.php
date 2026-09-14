@@ -414,7 +414,7 @@ get_header(); ?>
             <div class="evg-module">
                 <div style="padding: 25px 20px; border-bottom: 1px solid var(--evg-border-hairline); background: #08080a;">
                     <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( '03 // The Numeric Hierarchy', 'evg-platform' ); ?></span>
-                    <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( '1–10 Whole Number Scale', 'evg-platform' ); ?></h2>
+                    <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0 0 8px 0;"><?php esc_html_e( '1–10 Whole Number Scale Examples', 'evg-platform' ); ?></h2>
                     <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0; line-height: 1.5;">
                         <?php esc_html_e( 'We employ a strict whole-number hierarchy. No half-grades or 9.5 variations are permitted within the Elite Vault Grading system.', 'evg-platform' ); ?>
                     </p>
@@ -425,7 +425,7 @@ get_header(); ?>
                         <div class="evg-grade-badge evg-grade-10">10</div>
                         <div>
                             <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 4px 0;"><?php esc_html_e( 'Grade 10 — Elite Gem', 'evg-platform' ); ?></h3>
-                            <p style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Virtually flawless; exceptional centring (55/45 or better), razor sharp corners, clean edges, and an immaculate surface free of print defects.', 'evg-platform' ); ?></p>
+                            <p style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Virtually flawless; exceptional centring (60/40 or better), razor sharp corners, clean edges, and an immaculate surface free of print defects.', 'evg-platform' ); ?></p>
                         </div>
                     </li>
                     <li class="evg-scale-row">
@@ -512,7 +512,7 @@ get_header(); ?>
                         <?php esc_html_e( 'Submissions Sold Out', 'evg-platform' ); ?>
                     </span>
                 <?php endif; ?>
-                <a href="<?php echo esc_url( home_url( '/marketplace' ) ); ?>" class="btn-evg-outline">
+                <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-evg-outline">
                     <?php esc_html_e( 'Explore Marketplace', 'evg-platform' ); ?>
                 </a>
             </div>
@@ -548,12 +548,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         ratioOutput.textContent = higher + ' / ' + lower;
 
-        if (higher <= 55) {
-            verdictOutput.textContent = '✓ ELITE GEM 10 CENTRING ELIGIBLE (55/45 or better)';
+        // Updated logic: 60/40 or better (e.g., 57/43) qualifies for Gem Mint 10 / Mint 9 eligibility
+        if (higher <= 60) {
+            verdictOutput.textContent = '✓ GEM MINT 10 / MINT 9 CENTRING ELIGIBLE (60/40 or better)';
             verdictOutput.style.color = '#34c759';
-        } else if (higher <= 60) {
-            verdictOutput.textContent = '✓ MINT 9 CENTRING ELIGIBLE (60/40 or better)';
-            verdictOutput.style.color = '#d4af37';
         } else if (higher <= 70) {
             verdictOutput.textContent = '⚠ GRADE 8 OR 7 CENTRING THRESHOLD';
             verdictOutput.style.color = '#ff9f0a';
