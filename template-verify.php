@@ -3,7 +3,7 @@
  * Template Name: Slab Verification & Damage Portfolio - Executive Tier
  * Description: Public certificate verification portal for Elite Vault Grading. Displays slab authentication,
  *              whole-number grades (1-10), 4 diagnostic sub-scores, up to 3 free preview defect photos,
- *              and the £0.99 portfolio unlock paywall with guaranteed QR Code integration.
+ *              and the £0.99 portfolio unlock paywall with guaranteed side-by-side QR Code layout.
  *
  * @package EliteVaultGrading
  */
@@ -46,16 +46,16 @@ get_header(); ?>
   }
 
   .evg-container {
-    max-width: 960px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 3rem 15px 5rem 15px;
   }
 
-  /* Guaranteed QR Code Panel Styles */
+  /* Side-by-Side Layout Grid */
   .evg-verified-wrapper {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 20px;
+    grid-template-columns: 1fr 220px;
+    gap: 24px;
     align-items: start;
   }
 
@@ -63,26 +63,30 @@ get_header(); ?>
     background: var(--evg-obsidian-panel);
     border: 1px solid var(--evg-border-gold-faint);
     border-radius: 12px;
-    padding: 20px;
+    padding: 22px 15px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-    min-width: 170px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    position: sticky;
+    top: 30px;
   }
 
   .evg-qr-floating-box img {
-    width: 130px;
-    height: 130px;
+    width: 140px;
+    height: 140px;
     background: #ffffff;
-    padding: 6px;
-    border-radius: 6px;
+    padding: 8px;
+    border-radius: 8px;
     display: block;
-    margin: 0 auto 10px auto;
+    margin: 0 auto 12px auto;
+  }
+
+  @media (max-width: 991.98px) {
+    .evg-verified-wrapper { grid-template-columns: 1fr; }
+    .evg-qr-floating-box { max-width: 320px; margin: 20px auto 0 auto; position: static; }
   }
 
   @media (max-width: 767.98px) {
     .evg-container { padding: 2rem 15px 4rem 15px; }
-    .evg-verified-wrapper { grid-template-columns: 1fr; }
-    .evg-qr-floating-box { width: 100%; box-sizing: border-box; }
     form[style*="flex"] {
         flex-direction: column !important;
     }
@@ -99,13 +103,13 @@ get_header(); ?>
         $cert_param = isset( $_GET['cert'] ) ? sanitize_text_field( wp_unslash( $_GET['cert'] ) ) : '';
 
         if ( ! empty( $cert_param ) ) {
-            // Generate QR Code URL specifically for this certificate
+            // Generate QR Code URL specifically for this certificate pointing to the correct verify link
             $current_verify_url = home_url( '/verify/?cert=' . urlencode( $cert_param ) );
-            $qr_api_url         = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode( $current_verify_url );
+            $qr_api_url         = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode( $current_verify_url );
             ?>
             <div class="evg-verified-wrapper">
                 <!-- Main Certificate Terminal -->
-                <div>
+                <div style="width: 100%; overflow-x: auto;">
                     <?php
                     if ( function_exists( 'evg_render_public_slab_certificate' ) ) {
                         evg_render_public_slab_certificate( $cert_param );
@@ -115,14 +119,17 @@ get_header(); ?>
                     ?>
                 </div>
 
-                <!-- Dedicated QR Code Verification Card -->
+                <!-- Dedicated QR Code Verification Card (Visible on Right Side) -->
                 <div class="evg-qr-floating-box">
-                    <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--evg-gold-primary); font-weight: 700; display: block; margin-bottom: 8px;">
+                    <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--evg-gold-primary); font-weight: 700; display: block; margin-bottom: 10px;">
                         <?php esc_html_e( 'Scan to Verify', 'evg-platform' ); ?>
                     </span>
                     <img src="<?php echo esc_url( $qr_api_url ); ?>" alt="Slab Verification QR Code" loading="lazy">
-                    <span style="font-size: 0.72rem; color: var(--evg-text-ash); font-family: monospace; display: block; font-weight: 600;">
+                    <span style="font-size: 0.78rem; color: var(--evg-text-pure); font-family: monospace; display: block; font-weight: 700; margin-top: 4px;">
                         <?php echo esc_html( $cert_param ); ?>
+                    </span>
+                    <span style="font-size: 0.65rem; color: var(--evg-text-ash); display: block; margin-top: 6px; line-height: 1.3;">
+                        <?php esc_html_e( 'Points securely to verification registry.', 'evg-platform' ); ?>
                     </span>
                 </div>
             </div>
