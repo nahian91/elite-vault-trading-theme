@@ -3,7 +3,7 @@
  * Template Name: Slab Verification & Damage Portfolio - Executive Tier
  * Description: Public certificate verification portal for Elite Vault Grading. Displays slab authentication,
  *              whole-number grades (1-10), 4 diagnostic sub-scores, up to 3 free preview defect photos,
- *              and the £0.99 portfolio unlock paywall.
+ *              and the £0.99 portfolio unlock paywall with guaranteed QR Code integration.
  *
  * @package EliteVaultGrading
  */
@@ -46,31 +46,43 @@ get_header(); ?>
   }
 
   .evg-container {
-    max-width: 920px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 3rem 15px 5rem 15px;
   }
 
-  /* QR Code Box Style */
-  .evg-qr-box {
+  /* Guaranteed QR Code Panel Styles */
+  .evg-verified-wrapper {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .evg-qr-floating-box {
     background: var(--evg-obsidian-panel);
-    border: 1px solid var(--evg-border-hairline);
-    border-radius: 10px;
+    border: 1px solid var(--evg-border-gold-faint);
+    border-radius: 12px;
     padding: 20px;
     text-align: center;
-    margin-top: 20px;
-    display: inline-block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    min-width: 170px;
   }
-  .evg-qr-box img {
-    width: 120px;
-    height: 120px;
-    background: #fff;
+
+  .evg-qr-floating-box img {
+    width: 130px;
+    height: 130px;
+    background: #ffffff;
     padding: 6px;
     border-radius: 6px;
+    display: block;
+    margin: 0 auto 10px auto;
   }
 
   @media (max-width: 767.98px) {
     .evg-container { padding: 2rem 15px 4rem 15px; }
+    .evg-verified-wrapper { grid-template-columns: 1fr; }
+    .evg-qr-floating-box { width: 100%; box-sizing: border-box; }
     form[style*="flex"] {
         flex-direction: column !important;
     }
@@ -84,45 +96,48 @@ get_header(); ?>
 <div class="evg-master-wrapper">
     <div class="evg-container">
         <?php
-        // Calls the public verification terminal from the core plugin (inc/verification.php)
-        if ( function_exists( 'evg_render_public_slab_certificate' ) ) {
-            $cert_param = isset( $_GET['cert'] ) ? sanitize_text_field( wp_unslash( $_GET['cert'] ) ) : '';
-            if ( ! empty( $cert_param ) ) {
-                evg_render_public_slab_certificate( $cert_param );
-                
-                // Generate QR Code dynamically for this specific certificate URL
-                $current_verify_url = home_url( '/verify/?cert=' . urlencode( $cert_param ) );
-                $qr_api_url = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode( $current_verify_url );
-                ?>
-                <div style="text-align: center; margin-top: 30px;">
-                    <div class="evg-qr-box">
-                        <p style="color: var(--evg-gold-primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;"><?php esc_html_e( 'Scan to Verify Slab', 'evg-platform' ); ?></p>
-                        <img src="<?php echo esc_url( $qr_api_url ); ?>" alt="Slab QR Code">
-                        <p style="color: var(--evg-text-ash); font-size: 0.7rem; font-family: monospace; margin-top: 8px; margin-bottom: 0;"><?php echo esc_html( $cert_param ); ?></p>
-                    </div>
+        $cert_param = isset( $_GET['cert'] ) ? sanitize_text_field( wp_unslash( $_GET['cert'] ) ) : '';
+
+        if ( ! empty( $cert_param ) ) {
+            // Generate QR Code URL specifically for this certificate
+            $current_verify_url = home_url( '/verify/?cert=' . urlencode( $cert_param ) );
+            $qr_api_url         = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode( $current_verify_url );
+            ?>
+            <div class="evg-verified-wrapper">
+                <!-- Main Certificate Terminal -->
+                <div>
+                    <?php
+                    if ( function_exists( 'evg_render_public_slab_certificate' ) ) {
+                        evg_render_public_slab_certificate( $cert_param );
+                    } else {
+                        echo '<div style="background:#0f0f11; padding:20px; border-radius:8px; text-align:center;">' . esc_html__( 'Certificate rendering module initializing...', 'evg-platform' ) . '</div>';
+                    }
+                    ?>
                 </div>
-                <?php
-            } else {
-                ?>
-                <div style="background: #0f0f11; border: 1px solid #222224; border-radius: 14px; padding: 35px 20px; text-align: center; color: #ffffff;">
-                    <h2 style="color: #d4af37; font-size: 1.35rem; margin-top: 0;"><?php esc_html_e( 'Slab Verification Lookup', 'evg-platform' ); ?></h2>
-                    <p style="color: #8e8e93; font-size: 0.88rem; margin-bottom: 25px; line-height: 1.5;">
-                        <?php esc_html_e( 'Please provide a valid slab certificate ID in the URL query (e.g. /verify/?cert=EVG-00142).', 'evg-platform' ); ?>
-                    </p>
-                    <form method="get" action="" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" name="cert" placeholder="EVG-00000" style="background: #141416; border: 1px solid #28282b; color: #fff; padding: 12px 16px; border-radius: 6px; font-family: monospace; outline: none; text-align: center; max-width: 260px; width: 100%; box-sizing: border-box;" required>
-                        <button type="submit" style="background: #d4af37; color: #0a0a0a; border: none; padding: 12px 24px; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em;"><?php esc_html_e( 'Verify Slab', 'evg-platform' ); ?></button>
-                    </form>
+
+                <!-- Dedicated QR Code Verification Card -->
+                <div class="evg-qr-floating-box">
+                    <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--evg-gold-primary); font-weight: 700; display: block; margin-bottom: 8px;">
+                        <?php esc_html_e( 'Scan to Verify', 'evg-platform' ); ?>
+                    </span>
+                    <img src="<?php echo esc_url( $qr_api_url ); ?>" alt="Slab Verification QR Code" loading="lazy">
+                    <span style="font-size: 0.72rem; color: var(--evg-text-ash); font-family: monospace; display: block; font-weight: 600;">
+                        <?php echo esc_html( $cert_param ); ?>
+                    </span>
                 </div>
-                <?php
-            }
+            </div>
+            <?php
         } else {
             ?>
-            <div style="background: #0f0f11; border: 1px solid #222224; border-radius: 14px; padding: 40px 20px; text-align: center; color: #ffffff;">
-                <h2 style="color: #d4af37; font-size: 1.2rem; margin-top: 0;"><?php esc_html_e( 'Verification Module Offline', 'evg-platform' ); ?></h2>
-                <p style="color: #8e8e93; font-size: 0.85rem; margin-bottom: 0; line-height: 1.5;">
-                    <?php esc_html_e( 'The verification terminal module is currently initializing. Please ensure the Elite Vault Grading plugin core is active.', 'evg-platform' ); ?>
+            <div style="background: #0f0f11; border: 1px solid #222224; border-radius: 14px; padding: 35px 20px; text-align: center; color: #ffffff;">
+                <h2 style="color: #d4af37; font-size: 1.35rem; margin-top: 0;"><?php esc_html_e( 'Slab Verification Lookup', 'evg-platform' ); ?></h2>
+                <p style="color: #8e8e93; font-size: 0.88rem; margin-bottom: 25px; line-height: 1.5;">
+                    <?php esc_html_e( 'Please provide a valid slab certificate ID in the URL query (e.g. /verify/?cert=EVG-00142).', 'evg-platform' ); ?>
                 </p>
+                <form method="get" action="" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" name="cert" placeholder="EVG-00000" style="background: #141416; border: 1px solid #28282b; color: #fff; padding: 12px 16px; border-radius: 6px; font-family: monospace; outline: none; text-align: center; max-width: 260px; width: 100%; box-sizing: border-box;" required>
+                    <button type="submit" style="background: #d4af37; color: #0a0a0a; border: none; padding: 12px 24px; font-weight: 800; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em;"><?php esc_html_e( 'Verify Slab', 'evg-platform' ); ?></button>
+                </form>
             </div>
             <?php
         }
