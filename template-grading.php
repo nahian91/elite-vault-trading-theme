@@ -249,6 +249,27 @@ get_header(); ?>
         border-color: var(--evg-gold-light); 
     }
 
+    .evg-pipeline-matrix { 
+        display: grid; 
+        grid-template-columns: repeat(3, minmax(260px, 1fr));
+        gap: 1px;
+        justify-content: center;
+    }
+    
+    /* Center align the last stage boxes neatly */
+    .evg-pipeline-matrix .evg-grid-cell:nth-child(7) {
+        grid-column: 2 / span 1;
+    }
+
+    @media (max-width: 991.98px) {
+        .evg-pipeline-matrix { 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+        }
+        .evg-pipeline-matrix .evg-grid-cell:nth-child(7) {
+            grid-column: auto;
+        }
+    }
+
     /* Responsive Media Queries */
     @media (max-width: 991.98px) {
         .evg-calc-grid { grid-template-columns: 1fr; }
