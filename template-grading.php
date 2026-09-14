@@ -525,7 +525,7 @@ get_header(); ?>
             </p>
             <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                 <?php if ( 'yes' === $accept_submissions ) : ?>
-                    <a href="<?php echo esc_url( home_url( '/grade-now' ) ); ?>" class="btn-evg-executive">
+                    <a href="<?php echo esc_url( home_url( '/grading' ) ); ?>" class="btn-evg-executive">
                         <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
                     </a>
                 <?php else : ?>
