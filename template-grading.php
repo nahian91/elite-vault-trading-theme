@@ -2,9 +2,9 @@
 /**
  * Template Name: Grading Process & Scale - Executive Tier
  * Description: Clean, high-performance grading architecture template for Elite Vault Grading.
- *              Features dynamic turnaround metrics (5-10 business days), the 7-step operational pipeline, 
- *              the 4 diagnostic pillars with interactive calculators, the strict 1–10 whole-number scale,
- *              updated £9.99 base pricing, and an ultra-premium dark luxury aesthetic.
+ *              Features dynamic turnaround metrics, 7-step pipeline, interactive calculators, 
+ *              strict 1-10 whole-number scale, PO Box dispatch address, manual certificate numbering field (starting at 0100), 
+ *              full multi-card submission form, and Stripe/Database backend processing.
  *
  * @package EliteVaultGrading
  */
@@ -107,17 +107,21 @@ get_header(); ?>
         background: var(--evg-obsidian-elevated); 
     }
     
-    .evg-pipeline-matrix { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    .evg-pillar-matrix { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .evg-pipeline-matrix { 
+        display: grid; 
+        grid-template-columns: repeat(3, minmax(260px, 1fr));
+        gap: 1px;
+        justify-content: center;
+    }
+    .evg-pipeline-matrix .evg-grid-cell:nth-child(7) {
+        grid-column: 2 / span 1;
+    }
 
+    .evg-pillar-matrix { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
     .evg-icon { color: var(--evg-text-ash); margin-bottom: 1.25rem; transition: all 0.3s ease; }
     .evg-grid-cell:hover .evg-icon { color: var(--evg-gold-primary); transform: translateY(-2px); }
 
-    .evg-scale-registry {
-        list-style: none; 
-        padding: 0; 
-        margin: 0;
-    }
+    .evg-scale-registry { list-style: none; padding: 0; margin: 0; }
     .evg-scale-row {
         display: flex; 
         align-items: center; 
@@ -130,35 +134,14 @@ get_header(); ?>
     .evg-scale-row:hover { background: rgba(212, 175, 55, 0.03); }
     
     .evg-grade-badge {
-        width: 46px; 
-        height: 46px; 
-        border-radius: 6px;
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        font-weight: 800; 
-        font-size: 1.2rem; 
-        font-family: monospace; 
-        flex-shrink: 0;
+        width: 46px; height: 46px; border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.2rem; font-family: monospace; flex-shrink: 0;
         border: 1px solid transparent;
     }
-    
-    .evg-grade-10 {
-        background: rgba(212, 175, 55, 0.12); 
-        border-color: var(--evg-gold-primary);
-        color: var(--evg-gold-light); 
-        box-shadow: 0 0 20px var(--evg-gold-glow);
-    }
-    .evg-grade-9 { 
-        background: var(--evg-obsidian-elevated); 
-        border-color: var(--evg-border-gold-faint); 
-        color: var(--evg-gold-primary); 
-    }
-    .evg-grade-standard { 
-        background: var(--evg-obsidian-elevated); 
-        border-color: var(--evg-border-hairline); 
-        color: var(--evg-text-ash); 
-    }
+    .evg-grade-10 { background: rgba(212, 175, 55, 0.12); border-color: var(--evg-gold-primary); color: var(--evg-gold-light); box-shadow: 0 0 20px var(--evg-gold-glow); }
+    .evg-grade-9 { background: var(--evg-obsidian-elevated); border-color: var(--evg-border-gold-faint); color: var(--evg-gold-primary); }
+    .evg-grade-standard { background: var(--evg-obsidian-elevated); border-color: var(--evg-border-hairline); color: var(--evg-text-ash); }
 
     .evg-calc-card {
         background: var(--evg-obsidian-panel);
@@ -167,144 +150,104 @@ get_header(); ?>
         padding: 25px 20px;
         margin-bottom: 40px;
     }
-    .evg-calc-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1.2fr;
-        gap: 15px;
-        align-items: center;
-    }
+    .evg-calc-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 15px; align-items: center; }
     .evg-calc-input {
-        background: var(--evg-obsidian-elevated);
-        border: 1px solid #242428;
-        color: #ffffff;
-        padding: 12px 14px;
-        border-radius: 4px;
-        width: 100%;
-        font-family: monospace;
-        font-size: 0.9rem;
-        box-sizing: border-box;
-        outline: none;
+        background: var(--evg-obsidian-elevated); border: 1px solid #242428; color: #ffffff;
+        padding: 12px 14px; border-radius: 4px; width: 100%; font-family: monospace; font-size: 0.9rem; box-sizing: border-box; outline: none;
     }
-    .evg-calc-input:focus {
-        border-color: var(--evg-gold-primary);
+    .evg-calc-input:focus { border-color: var(--evg-gold-primary); }
+    .evg-calc-result-box { background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 14px 16px; text-align: center; }
+
+    /* Form & Label Option Styles */
+    .evg-form-control {
+        background: var(--evg-obsidian-elevated); border: 1px solid #242428; color: var(--evg-text-pure);
+        border-radius: 4px; padding: 0.85rem 1.25rem; font-size: 0.9rem; width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s ease;
     }
-    .evg-calc-result-box {
-        background: var(--evg-obsidian-base);
-        border: 1px solid var(--evg-border-hairline);
-        border-radius: 6px;
-        padding: 14px 16px;
-        text-align: center;
+    .evg-form-control:focus { border-color: var(--evg-gold-primary); box-shadow: 0 0 0 1px var(--evg-gold-primary); background: #09090b; }
+    
+    .evg-label-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; }
+    .evg-label-option-card {
+        background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline);
+        border-radius: 10px; padding: 24px; display: flex; align-items: center; gap: 22px; cursor: pointer; transition: all 0.2s ease;
     }
+    .evg-label-option-card:hover { border-color: var(--evg-border-gold-faint); background: var(--evg-obsidian-elevated); }
+    .evg-label-option-card input[type="radio"] { accent-color: var(--evg-gold-primary); width: 24px; height: 24px; cursor: pointer; }
+    
+    .evg-label-demo-img-wrap { position: relative; display: inline-block; cursor: zoom-in; }
+    .evg-label-demo-img {
+        width: 130px; height: 160px; object-fit: cover; border-radius: 8px;
+        border: 2px solid var(--evg-border-gold-faint); background: #000; flex-shrink: 0; box-shadow: 0 8px 22px rgba(0,0,0,0.8); transition: transform 0.2s ease;
+    }
+    .evg-label-demo-img-wrap:hover .evg-label-demo-img { transform: scale(1.03); border-color: var(--evg-gold-primary); }
+    .evg-zoom-hint {
+        position: absolute; bottom: 6px; right: 6px; background: rgba(5, 5, 5, 0.8);
+        color: var(--evg-gold-primary); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-family: monospace; border: 1px solid var(--evg-border-gold-faint); pointer-events: none;
+    }
+
+    /* Lightbox Modal Styles */
+    #evgImageLightbox {
+        display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%;
+        background-color: rgba(3, 7, 18, 0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
+    }
+    #evgImageLightbox.is-active { display: flex; }
+    .evg-lightbox-content {
+        position: relative; max-width: 500px; width: 100%; background: var(--evg-obsidian-panel);
+        border: 1px solid var(--evg-border-gold-faint); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+    }
+    .evg-lightbox-content img {
+        max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;
+        border: 2px solid var(--evg-gold-primary); box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;
+    }
+    .evg-lightbox-close {
+        position: absolute; top: 15px; right: 18px; background: var(--evg-obsidian-elevated);
+        border: 1px solid var(--evg-border-hairline); color: #ffffff; font-size: 1.2rem; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+    }
+    .evg-lightbox-close:hover { background: var(--evg-gold-primary); color: var(--evg-text-charcoal); border-color: var(--evg-gold-primary); }
 
     .btn-evg-executive {
-        background: var(--evg-gold-primary); 
-        color: var(--evg-text-charcoal) !important;
-        font-size: 0.82rem; 
-        font-weight: 800; 
-        letter-spacing: 0.15em; 
-        text-transform: uppercase;
-        border: none; 
-        border-radius: 4px; 
-        padding: 1.1rem 2rem; 
-        display: inline-flex; 
-        align-items: center; 
-        justify-content: center;
-        transition: all 0.3s ease; 
-        cursor: pointer; 
-        text-decoration: none;
-        text-align: center;
+        background: var(--evg-gold-primary); color: var(--evg-text-charcoal) !important; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
+        border: none; border-radius: 4px; padding: 1.1rem 2rem; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center; width: 100%; box-sizing: border-box;
     }
-    .btn-evg-executive:hover { 
-        background: var(--evg-gold-light); 
-        box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); 
-    }
-    .btn-evg-executive.disabled {
-        background: #333336;
-        color: #88888e !important;
-        cursor: not-allowed;
-        box-shadow: none;
-    }
+    .btn-evg-executive:hover { background: var(--evg-gold-light); box-shadow: 0 0 25px rgba(212, 175, 55, 0.3); }
+    .btn-evg-executive.disabled { background: #333336; color: #88888e !important; cursor: not-allowed; box-shadow: none; }
     
     .btn-evg-outline {
-        background: transparent; 
-        color: var(--evg-gold-primary) !important;
-        font-size: 0.82rem; 
-        font-weight: 800; 
-        letter-spacing: 0.15em; 
-        text-transform: uppercase;
-        border: 1px solid var(--evg-gold-primary); 
-        border-radius: 4px; 
-        padding: 1.1rem 2rem; 
-        display: inline-flex; 
-        align-items: center; 
-        justify-content: center;
-        transition: all 0.3s ease; 
-        cursor: pointer; 
-        text-decoration: none;
-        text-align: center;
+        background: transparent; color: var(--evg-gold-primary) !important; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase;
+        border: 1px solid var(--evg-gold-primary); border-radius: 4px; padding: 1.1rem 2rem; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s ease; cursor: pointer; text-decoration: none; text-align: center;
     }
-    .btn-evg-outline:hover { 
-        background: rgba(212, 175, 55, 0.1); 
-        color: var(--evg-gold-light) !important; 
-        border-color: var(--evg-gold-light); 
-    }
-
-    .evg-pipeline-matrix { 
-        display: grid; 
-        grid-template-columns: repeat(3, minmax(260px, 1fr));
-        gap: 1px;
-        justify-content: center;
-    }
-    
-    /* Center align the last stage boxes neatly */
-    .evg-pipeline-matrix .evg-grid-cell:nth-child(7) {
-        grid-column: 2 / span 1;
-    }
+    .btn-evg-outline:hover { background: rgba(212, 175, 55, 0.1); color: var(--evg-gold-light) !important; border-color: var(--evg-gold-light); }
 
     @media (max-width: 991.98px) {
-        .evg-pipeline-matrix { 
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
-        }
-        .evg-pipeline-matrix .evg-grid-cell:nth-child(7) {
-            grid-column: auto;
-        }
-    }
-
-    /* Responsive Media Queries */
-    @media (max-width: 991.98px) {
+        .evg-pipeline-matrix { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+        .evg-pipeline-matrix .evg-grid-cell:nth-child(7) { grid-column: auto; }
         .evg-calc-grid { grid-template-columns: 1fr; }
+        .evg-label-options-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 767.98px) {
         .evg-container { padding: 2rem 15px 4rem 15px; }
-        .evg-scale-row {
-            padding: 1rem 1rem;
-            gap: 12px;
-        }
-        .evg-grade-badge {
-            width: 38px;
-            height: 38px;
-            font-size: 1rem;
-        }
-        .btn-evg-executive, .btn-evg-outline { width: 100%; max-width: 320px; }
+        .evg-scale-row { padding: 1rem 1rem; gap: 12px; }
+        .evg-grade-badge { width: 38px; height: 38px; font-size: 1rem; }
+        .btn-evg-outline { width: 100%; max-width: 320px; }
         .evg-module { padding: 25px 15px !important; }
+        .evg-label-demo-img { width: 100px; height: 125px; }
     }
 </style>
 
 <main class="evg-master-wrapper">
     <div class="evg-container">
 
-        <!-- 1. EDITORIAL HEADER -->
-        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px solid var(--evg-border-hairline);">
+        <!-- 1. EDITORIAL HEADER WITH TOP "GRADE NOW" BUTTON -->
+        <header style="text-align: center; margin-bottom: 35px; padding-bottom: 25px; border-bottom: 1px solid var(--evg-border-hairline);">
             <span class="evg-label-micro" style="margin-bottom: 10px;"><?php esc_html_e( 'Architectural Integrity', 'evg-platform' ); ?></span>
             <h1 class="evg-title-xl"><?php esc_html_e( 'Diagnostic', 'evg-platform' ); ?> <span class="evg-text-metallic"><?php esc_html_e( 'Standards & Scale', 'evg-platform' ); ?></span></h1>
-            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 15px auto; font-size: 0.92rem; line-height: 1.6;">
-                <?php esc_html_e( 'Every Pokémon card entrusted to Elite Vault Grading receives a rigorous, consistent, and transparent assessment. From intake check-in to tamper-evident sonic encapsulation, precision drives our entire operational architecture.', 'evg-platform' ); ?>
+            <p style="color: var(--evg-text-ash); max-width: 720px; margin: 0 auto 20px auto; font-size: 0.92rem; line-height: 1.6;">
+                <?php esc_html_e( 'Every Pokémon card entrusted to Elite Vault Grading receives a rigorous, consistent, and transparent assessment from intake to tamper-evident sonic encapsulation.', 'evg-platform' ); ?>
             </p>
-            <div style="display: inline-flex; align-items: center; gap: 10px; font-family: monospace; font-size: 0.72rem; color: var(--evg-gold-light); background: var(--evg-obsidian-elevated); padding: 5px 14px; border-radius: 4px; border: 1px solid var(--evg-border-gold-faint); flex-wrap: wrap; justify-content: center;">
-                <span><?php printf( esc_html__( 'STANDARD BASE RATE: £%s / CARD', 'evg-platform' ), number_format( (float) $price_standard, 2 ) ); ?></span>
-                <span style="color: #4a4f5c; display: inline-block;">|</span>
-                <span><?php printf( esc_html__( 'TURNAROUND: %s', 'evg-platform' ), esc_html( $turnaround_time ) ); ?></span>
+            <div style="display: flex; justify-content: center; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <a href="#grading-form-section" class="btn-evg-executive" style="width: auto; padding: 0.8rem 1.8rem;">
+                    <?php esc_html_e( 'Grade Now ↓', 'evg-platform' ); ?>
+                </a>
             </div>
         </header>
 
@@ -317,59 +260,39 @@ get_header(); ?>
 
             <div class="evg-grid-matrix evg-pipeline-matrix">
                 <div class="evg-grid-cell">
-                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 01', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Registry Check-In', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Consignments are verified, unboxed under secure surveillance, cross-referenced with your declared submission data, and logged into our central tracking database.', 'evg-platform' ); ?>
-                    </p>
+                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;">Stage 01</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Registry Check-In</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Consignments are verified, unboxed under secure surveillance, and logged into our central database.</p>
                 </div>
-
                 <div class="evg-grid-cell">
-                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 02', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Authentication Check', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Optical and structural verification to screen for counterfeit prints, card trimming, recolouring, pressing, or ungradable physical alterations.', 'evg-platform' ); ?>
-                    </p>
+                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;">Stage 02</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Authentication Check</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Optical verification to screen for counterfeit prints, trimming, recolouring, or pressing.</p>
                 </div>
-
                 <div class="evg-grid-cell">
-                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 03', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Diagnostic Assessment', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Rigorous multi-point evaluation across Centring, Corners, Edges, and Surface parameters. High-resolution photo evidence logs all notable flaws.', 'evg-platform' ); ?>
-                    </p>
+                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;">Stage 03</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Diagnostic Assessment</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Multi-point evaluation across Centring, Corners, Edges, and Surface parameters.</p>
                 </div>
-
                 <div class="evg-grid-cell">
-                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 04', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Grade Determination', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Diagnostic category sub-scores and overall eye appeal are synthesized into a definitive whole-number grade on our strict 1–10 scale.', 'evg-platform' ); ?>
-                    </p>
+                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;">Stage 04</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Grade Determination</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Sub-scores and eye appeal synthesized into a whole-number grade on our strict 1–10 scale.</p>
                 </div>
-
                 <div class="evg-grid-cell">
-                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 05', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Quality Control (QC)', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Dual-grader verification ensures label data accuracy, metadata matching, and slab optic cleanliness prior to sealing authorization.', 'evg-platform' ); ?>
-                    </p>
+                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;">Stage 05</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Quality Control (QC)</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Dual-grader verification ensures label data accuracy and slab optic cleanliness.</p>
                 </div>
-
                 <div class="evg-grid-cell">
-                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;"><?php esc_html_e( 'Stage 06', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Sonic Encapsulation', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Ultrasonic welding locks the card permanently inside a durable, tamper-evident protective slab engineered for archival preservation.', 'evg-platform' ); ?>
-                    </p>
+                    <span class="evg-label-micro" style="color: var(--evg-text-ash); margin-bottom: 8px;">Stage 06</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Sonic Encapsulation</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Ultrasonic welding locks the card permanently inside a tamper-evident protective slab.</p>
                 </div>
-
-                <div class="evg-grid-cell" style="grid-column: 1 / -1; background: rgba(212, 175, 55, 0.04);">
-                    <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;"><?php esc_html_e( 'Stage 07 // Finalization', 'evg-platform' ); ?></span>
-                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;"><?php esc_html_e( 'Secure UK Insured Dispatch', 'evg-platform' ); ?></h3>
-                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">
-                        <?php esc_html_e( 'Encapsulated slabs undergo a final optical polish, receive individual protective sleeves, and are securely boxed for tracked return delivery across the United Kingdom.', 'evg-platform' ); ?>
-                    </p>
+                <div class="evg-grid-cell" style="grid-column: 2 / span 1; background: rgba(212, 175, 55, 0.04);">
+                    <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 8px;">Stage 07 // Finalization</span>
+                    <h3 style="color: #ffffff; font-size: 0.98rem; font-weight: 700; margin: 0 0 6px 0;">Secure UK Insured Dispatch</h3>
+                    <p style="color: var(--evg-text-ash); font-size: 0.8rem; line-height: 1.6; margin: 0;">Encapsulated slabs undergo final polish and are securely boxed for tracked return delivery.</p>
                 </div>
             </div>
         </section>
@@ -445,7 +368,7 @@ get_header(); ?>
                     <li class="evg-scale-row">
                         <div class="evg-grade-badge evg-grade-10">10</div>
                         <div>
-                            <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 4px 0;"><?php esc_html_e( 'Grade 10 — Elite Gem', 'evg-platform' ); ?></h3>
+                            <h3 style="color: #ffffff; font-size: 0.95rem; font-weight: 700; margin: 0 0 4px 0;"><?php esc_html_e( 'Grade 10 — Elite Mint', 'evg-platform' ); ?></h3>
                             <p style="color: var(--evg-text-ash); font-size: 0.82rem; line-height: 1.5; margin: 0;"><?php esc_html_e( 'Virtually flawless; exceptional centring (60/40 or better), razor sharp corners, clean edges, and an immaculate surface free of print defects.', 'evg-platform' ); ?></p>
                         </div>
                     </li>
@@ -516,33 +439,177 @@ get_header(); ?>
             </div>
         </section>
 
-        <!-- 6. CALL TO ACTION -->
-        <section class="evg-module" style="padding: 35px 20px; text-align: center;">
-            <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 10px;"><?php esc_html_e( 'Initialize Protocol', 'evg-platform' ); ?></span>
-            <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0 0 10px 0;"><?php esc_html_e( 'Ready to Preserve Your Collection?', 'evg-platform' ); ?></h2>
-            <p style="color: var(--evg-text-ash); max-width: 600px; margin: 0 auto 25px auto; font-size: 0.88rem; line-height: 1.6;">
-                <?php esc_html_e( 'Experience verified assessment standards, tamper-evident sonic encapsulation, and transparent stage tracking.', 'evg-platform' ); ?>
-            </p>
-            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                <?php if ( 'yes' === $accept_submissions ) : ?>
-                    <a href="<?php echo esc_url( home_url( '/grading' ) ); ?>" class="btn-evg-executive">
-                        <?php esc_html_e( 'Grade Now', 'evg-platform' ); ?>
-                    </a>
-                <?php else : ?>
-                    <span class="btn-evg-executive disabled">
-                        <?php esc_html_e( 'Submissions Sold Out', 'evg-platform' ); ?>
-                    </span>
-                <?php endif; ?>
-                <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-evg-outline">
-                    <?php esc_html_e( 'Explore Marketplace', 'evg-platform' ); ?>
-                </a>
+        <!-- 6. OFFICIAL PO BOX DISPATCH ADDRESS -->
+        <section class="evg-module" style="padding: 30px 25px; text-align: center; margin-bottom: 40px; border-color: var(--evg-border-gold-faint);">
+            <div style="margin-bottom: 15px; display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--evg-gold-primary)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    <path d="M12 11h4"></path><path d="M12 15h4"></path><path d="M8 11h.01"></path><path d="M8 15h.01"></path>
+                </svg>
             </div>
+            <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 6px;">Submission Logistics</span>
+            <h2 style="color: #ffffff; font-size: 1.25rem; font-weight: 700; margin: 0 0 8px 0;">Official Card Dispatch Address</h2>
+            <p style="color: var(--evg-text-ash); font-size: 0.84rem; margin: 0 auto 20px auto; max-width: 600px; line-height: 1.5;">
+                Please securely package your cards and dispatch via Royal Mail Signed For or Special Delivery directly to our secure intake facility:
+            </p>
+            <div style="display: inline-block; background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 8px; padding: 20px 35px; text-align: left; font-family: monospace; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);">
+                <div style="color: var(--evg-gold-light); font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; letter-spacing: 0.05em;">Elite Vault Grading</div>
+                <div style="color: #ffffff; font-size: 0.9rem; line-height: 1.6;">PO Box 1755<br>Doncaster<br>DN1 9AS</div>
+            </div>
+        </section>
+
+        <!-- 7. FULL SUBMISSION & LABEL CONFIGURATION FORM AT THE LAST -->
+        <section id="grading-form-section" class="evg-module" style="padding: 35px 25px;">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 6px;">Submission Portal</span>
+                <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;">Card Declaration & Label Configuration</h2>
+            </div>
+
+            <form action="" method="POST" style="max-width: 900px; margin: 0 auto;">
+                <?php wp_nonce_field( 'evg_process_grading_order', 'evg_grading_submit_nonce' ); ?>
+                
+                <!-- Contact Info -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+                    <div>
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Full Name *</label>
+                        <input type="text" name="customer_name" class="evg-form-control" placeholder="John Doe" required>
+                    </div>
+                    <div>
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Email Address *</label>
+                        <input type="email" name="customer_email" class="evg-form-control" placeholder="client@example.com" required>
+                    </div>
+                    <div>
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Phone Number *</label>
+                        <input type="tel" name="customer_phone" class="evg-form-control" placeholder="+44 7000 000000" required>
+                    </div>
+                </div>
+
+                <!-- Dynamic Cards Declaration Table (With Manual Certificate Number Input starting from 0100) -->
+                <div style="margin-bottom: 30px;">
+                    <label class="evg-label-micro" style="margin-bottom: 12px;">Declare Specimens & Manual Cert Numbers (Starting from 0100)</label>
+                    <div id="evgCardsList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+                        <div class="evg-card-row-item" style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 8px; padding: 15px; display: grid; grid-template-columns: 1.8fr 1.3fr 1fr 0.8fr 0.9fr auto; gap: 10px; align-items: center;">
+                            <input type="text" name="card_name[]" class="evg-form-control" placeholder="Card Name (e.g. Charizard)" required>
+                            <input type="text" name="card_set[]" class="evg-form-control" placeholder="Set (e.g. Shining Fates)" required>
+                            <input type="text" name="card_number[]" class="evg-form-control" placeholder="Card No (e.g. SV107)" required>
+                            <input type="number" name="card_qty[]" class="evg-form-control" placeholder="Qty" value="1" min="1" required>
+                            <input type="text" name="cert_number[]" class="evg-form-control" placeholder="Cert # (0100)" value="0100" style="font-family:monospace;" required>
+                            <button type="button" style="background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.3); color: #ff453a; width: 38px; height: 38px; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="removeCardRow(this)">✕</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-evg-outline" onclick="addCardRow()" style="padding: 8px 16px; font-size: 0.75rem;">+ Add Another Card</button>
+                </div>
+
+                <!-- Slab Label Options -->
+                <div style="margin-bottom: 30px;">
+                    <label class="evg-label-micro" style="margin-bottom: 12px;">Select Slab Label Option (Click imej to zoom)</label>
+                    <div class="evg-label-options-grid">
+                        <label class="evg-label-option-card">
+                            <input type="radio" name="slab_label_tier" value="black_basic" checked>
+                            <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
+                                <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/black.jpeg" alt="Black Basic Label" class="evg-label-demo-img">
+                                <span class="evg-zoom-hint">🔍 Zoom</span>
+                            </div>
+                            <div>
+                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Black Basic label</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.00</span>
+                            </div>
+                        </label>
+                        <label class="evg-label-option-card">
+                            <input type="radio" name="slab_label_tier" value="colour_match">
+                            <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
+                                <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/color.jpeg" alt="Colour Match Label" class="evg-label-demo-img">
+                                <span class="evg-zoom-hint">🔍 Zoom</span>
+                            </div>
+                            <div>
+                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Colour match</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.99</span>
+                            </div>
+                        </label>
+                        <label class="evg-label-option-card">
+                            <input type="radio" name="slab_label_tier" value="lightening">
+                            <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
+                                <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/lighting.jpeg" alt="Lightening Label" class="evg-label-demo-img">
+                                <span class="evg-zoom-hint">🔍 Zoom</span>
+                            </div>
+                            <div>
+                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Lightening</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.99</span>
+                            </div>
+                        </label>
+                        <label class="evg-label-option-card">
+                            <input type="radio" name="slab_label_tier" value="extended_art">
+                            <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
+                                <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/extended.jpeg" alt="Extended Artwork Label" class="evg-label-demo-img">
+                                <span class="evg-zoom-hint">🔍 Zoom</span>
+                            </div>
+                            <div>
+                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Extended Artwork</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£2.99</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-evg-executive">
+                    Proceed to Secure Payment
+                </button>
+            </form>
         </section>
 
     </div>
 </main>
 
+<!-- Lightbox Modal Container -->
+<div id="evgImageLightbox" onclick="closeEvgLightbox()">
+    <div class="evg-lightbox-content" onclick="event.stopPropagation()">
+        <button class="evg-lightbox-close" onclick="closeEvgLightbox()">×</button>
+        <img id="evgLightboxImg" src="" alt="Enlarged Label View">
+        <div id="evgLightboxCaption" style="color: var(--evg-gold-light); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;"></div>
+    </div>
+</div>
+
 <script>
+function addCardRow() {
+    var container = document.getElementById('evgCardsList');
+    var firstRow = container.querySelector('.evg-card-row-item');
+    var newRow = firstRow.cloneNode(true);
+    var inputs = newRow.querySelectorAll('input');
+    inputs.forEach(function(input) {
+        if(input.type === 'number') input.value = 1;
+        else if(input.name.includes('cert_number')) input.value = '0101';
+        else input.value = '';
+    });
+    container.appendChild(newRow);
+}
+
+function removeCardRow(btn) {
+    var container = document.getElementById('evgCardsList');
+    if (container.querySelectorAll('.evg-card-row-item').length > 1) {
+        btn.closest('.evg-card-row-item').remove();
+    } else {
+        alert('You must declare at least one card.');
+    }
+}
+
+function openEvgLightbox(element) {
+    var img = element.querySelector('img');
+    var lightbox = document.getElementById('evgImageLightbox');
+    var lightboxImg = document.getElementById('evgLightboxImg');
+    var caption = document.getElementById('evgLightboxCaption');
+    if (img && lightbox && lightboxImg) {
+        lightboxImg.src = img.src;
+        caption.textContent = img.alt || 'Label Preview';
+        lightbox.classList.add('is-active');
+    }
+}
+
+function closeEvgLightbox() {
+    var lightbox = document.getElementById('evgImageLightbox');
+    if (lightbox) lightbox.classList.remove('is-active');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     var borderA = document.getElementById('calcBorderA');
     var borderB = document.getElementById('calcBorderB');
@@ -569,7 +636,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         ratioOutput.textContent = higher + ' / ' + lower;
 
-        // Updated logic: 60/40 or better (e.g., 57/43) qualifies for Gem Mint 10 / Mint 9 eligibility
         if (higher <= 60) {
             verdictOutput.textContent = '✓ GEM MINT 10 / MINT 9 CENTRING ELIGIBLE (60/40 or better)';
             verdictOutput.style.color = '#34c759';

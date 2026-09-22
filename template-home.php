@@ -600,7 +600,7 @@ get_header(); ?>
                         BUY CERTIFIED<br><span class="evg-text-metallic">GRADED SLABS</span>
                     </h2>
                     <p style="font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;">
-                        <?php esc_html_e( 'Explore our live inventory of authenticated Pokémon cards, professionally graded and sonically encapsulated in tamper-evident obsidian shields.', 'evg-platform' ); ?>
+                        <?php esc_html_e( 'Explore our live inventory of authenticated Pokémon cards, professionally graded and sonically encapsulated in tamper-evident premium slabs.', 'evg-platform' ); ?>
                     </p>
                     <a href="<?php echo esc_url( home_url( '/buy-it-now' ) ); ?>" class="btn-gold">
                         <?php esc_html_e( 'Browse Marketplace →', 'evg-platform' ); ?>
