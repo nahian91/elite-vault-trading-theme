@@ -19,38 +19,40 @@ $table_submissions = $wpdb->prefix . 'evg_submissions';
 $table_cards       = $wpdb->prefix . 'evg_cards';
 
 // -------------------------------------------------------------------------
-// 1. DYNAMIC DATA RESOLUTION & ACCESS VERIFICATION
+// 1. DYNAMIC DATA RESOLUTION (Supports order_number string & numeric ID)
 // -------------------------------------------------------------------------
 $current_user_id = get_current_user_id();
-$submission_id   = isset( $_GET['order'] ) ? absint( $_GET['order'] ) : ( isset( $_GET['submission_id'] ) ? absint( $_GET['submission_id'] ) : 0 );
+$order_param     = isset( $_GET['order'] ) ? sanitize_text_field( wp_unslash( $_GET['order'] ) ) : ( isset( $_GET['order_id'] ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : '' );
+$submission_id   = isset( $_GET['submission_id'] ) ? absint( $_GET['submission_id'] ) : ( is_numeric( $order_param ) ? absint( $order_param ) : 0 );
+
 $submission      = null;
 $cards           = array();
 
-if ( $submission_id > 0 ) {
-    // Only allow access to the order if the current user owns it, or if staff member
-    if ( current_user_can( 'manage_options' ) || ( class_exists( 'Elite_Vault_Grading_System' ) && Elite_Vault_Grading_System::has_access( array( 'administrator', 'support_team' ) ) ) ) {
-        $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d", $submission_id ) );
-    } elseif ( $current_user_id > 0 ) {
-        $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d AND customer_id = %d", $submission_id, $current_user_id ) );
-    }
+if ( ! empty( $order_param ) && ! is_numeric( $order_param ) ) {
+    // Lookup by unique order reference string (e.g. EVG-ABC123)
+    $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE order_number = %s", $order_param ) );
+} elseif ( $submission_id > 0 ) {
+    // Lookup by numeric ID
+    $submission = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_submissions} WHERE id = %d", $submission_id ) );
+}
 
-    if ( $submission ) {
-        $cards = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_cards} WHERE submission_id = %d ORDER BY id ASC", $submission_id ) );
-    }
+if ( $submission ) {
+    $cards = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_cards} WHERE submission_id = %d ORDER BY id ASC", $submission->id ) );
 }
 
 // Fallbacks & Parameters
-$order_number    = $submission ? $submission->order_number : ( isset( $_GET['order_id'] ) ? sanitize_text_field( wp_unslash( $_GET['order_id'] ) ) : 'EVG-' . date( 'Y' ) . '-INTAKE' );
-$submission_tier = $submission ? $submission->service_type : ( isset( $_GET['tier'] ) ? sanitize_text_field( wp_unslash( $_GET['tier'] ) ) : 'Standard Base Protocol' );
-$label_option    = $submission ? $submission->label_option : ( isset( $_GET['label'] ) ? sanitize_text_field( wp_unslash( $_GET['label'] ) ) : 'Standard Vault Slab' );
-$card_count      = $submission ? intval( $submission->total_cards ) : ( ! empty( $cards ) ? count( $cards ) : ( isset( $_GET['cards'] ) ? absint( $_GET['cards'] ) : 1 ) );
+$order_number    = $submission ? $submission->order_number : ( ! empty( $order_param ) ? $order_param : 'EVG-' . date( 'Y' ) . '-INTAKE' );
+$submission_tier = $submission ? $submission->service_type : 'Standard';
+$label_option    = $submission ? $submission->label_option : 'Black Basic';
+$card_count      = $submission ? intval( $submission->total_cards ) : ( ! empty( $cards ) ? count( $cards ) : 1 );
 $total_amount    = $submission ? floatval( $submission->total_amount ) : 0.00;
+$fulfilment_type = $submission ? ( $submission->fulfilment_type ?? 'postage' ) : 'postage';
 
 // Resolve Customer Email
-$customer_user = $submission ? get_userdata( $submission->customer_id ) : ( is_user_logged_in() ? wp_get_current_user() : null );
+$customer_user = ( $submission && $submission->customer_id > 0 ) ? get_userdata( $submission->customer_id ) : ( is_user_logged_in() ? wp_get_current_user() : null );
 $raw_email     = $customer_user ? $customer_user->user_email : ( isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : 'collector@domain.co.uk' );
 
-// Mask email for privacy display (e.g., j***e@domain.co.uk)
+// Mask email for privacy display
 $order_email = $raw_email;
 if ( strpos( $raw_email, '@' ) !== false ) {
     list( $user_part, $domain_part ) = explode( '@', $raw_email );
@@ -169,6 +171,15 @@ get_header(); ?>
   .evg-grid-cell:hover { background: var(--evg-obsidian-elevated); }
   .evg-workflow-matrix { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
+  .evg-dispatch-box {
+    background: #141416;
+    border: 1px dashed var(--evg-gold-primary);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 24px 0 0 0;
+    text-align: center;
+  }
+
   .btn-evg-executive {
     background: var(--evg-gold-primary); 
     color: var(--evg-text-charcoal) !important;
@@ -246,14 +257,9 @@ get_header(); ?>
   }
   .evg-meta-list li:last-child { border-bottom: none; }
 
-  /* Responsive Media Queries */
   @media (max-width: 767.98px) {
     .evg-container { padding: 2rem 15px 4rem 15px; }
     .evg-module { padding: 25px 15px; }
-    .evg-module > div[style*="display: flex"] { flex-direction: column; align-items: stretch !important; gap: 15px; }
-    .evg-module > div[style*="display: flex"] > div:last-child { display: grid; grid-template-columns: 1fr; gap: 8px; }
-    .evg-module > div[style*="display: flex"] > div:last-child a, 
-    .evg-module > div[style*="display: flex"] > div:last-child button { width: 100%; }
   }
 </style>
 
@@ -282,7 +288,7 @@ get_header(); ?>
                 <div>
                     <span class="evg-label-micro" style="margin-bottom: 6px;"><?php esc_html_e( 'Official Intake Reference ID', 'evg-platform' ); ?></span>
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
-                        <h2 style="color: #ffffff; font-size: 1.2rem; font-family: monospace; font-weight: 700; margin: 0; letter-spacing: 1px;">
+                        <h2 style="color: #ffffff; font-size: 1.3rem; font-family: monospace; font-weight: 700; margin: 0; letter-spacing: 1px;">
                             #<?php echo esc_html( $order_number ); ?>
                         </h2>
                         <button class="evg-copy-btn" onclick="navigator.clipboard.writeText('<?php echo esc_js( $order_number ); ?>'); alert('<?php esc_attr_e( 'Order Reference copied to clipboard.', 'evg-platform' ); ?>');" title="<?php esc_attr_e( 'Copy Reference', 'evg-platform' ); ?>">
@@ -324,7 +330,7 @@ get_header(); ?>
                 <?php if ( $total_amount > 0 ) : ?>
                     <li>
                         <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Total Billed & Settled', 'evg-platform' ); ?></span>
-                        <span style="color: #34c759; font-family: monospace; font-weight: 700; font-size: 0.92rem;">£<?php echo esc_html( number_format( (float) $total_amount, 2 ) ); ?></span>
+                        <span style="color: #34c759; font-family: monospace; font-weight: 700; font-size: 0.95rem;">£<?php echo esc_html( number_format( (float) $total_amount, 2 ) ); ?></span>
                     </li>
                 <?php endif; ?>
                 <li>
@@ -332,10 +338,41 @@ get_header(); ?>
                     <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;"><?php echo esc_html( $turnaround_time ); ?></span>
                 </li>
                 <li>
-                    <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Return Delivery (UK)', 'evg-platform' ); ?></span>
-                    <span style="color: #34c759; font-family: monospace; font-size: 0.75rem; font-weight: 700;"><?php esc_html_e( 'ROYAL MAIL TRACKED', 'evg-platform' ); ?></span>
+                    <span style="color: var(--evg-text-ash);"><?php esc_html_e( 'Delivery / Handover Method', 'evg-platform' ); ?></span>
+                    <span style="color: <?php echo ( 'collection' === $fulfilment_type ) ? 'var(--evg-gold-primary)' : '#34c759'; ?>; font-family: monospace; font-size: 0.8rem; font-weight: 700;">
+                        <?php echo ( 'collection' === $fulfilment_type ) ? esc_html__( 'COLLECTION – DONCASTER', 'evg-platform' ) : esc_html__( 'ROYAL MAIL INSURED POSTAGE', 'evg-platform' ); ?>
+                    </span>
                 </li>
             </ul>
+
+            <!-- REGISTERED CARDS MANIFEST (IF DECLARED) -->
+            <?php if ( ! empty( $cards ) ) : ?>
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--evg-border-hairline);">
+                    <span class="evg-label-micro" style="margin-bottom: 12px; color: var(--evg-gold-primary);"><?php esc_html_e( 'Declared Collectibles Manifest', 'evg-platform' ); ?></span>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <?php foreach ( $cards as $idx => $card ) : ?>
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: #141416; padding: 10px 14px; border-radius: 6px; border: 1px solid #222224; font-size: 0.85rem;">
+                                <span><strong style="color: #fff;"><?php echo esc_html( ($idx + 1) . '. ' . $card->card_name ); ?></strong> <span style="color: var(--evg-text-ash); font-size: 0.78rem;">(<?php echo esc_html( $card->set_name ); ?>)</span></span>
+                                <span style="font-family: monospace; color: var(--evg-gold-light); font-weight: 600;">#<?php echo esc_html( $card->card_number ? $card->card_number : 'N/A' ); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- OFFICIAL DISPATCH ADDRESS BOX -->
+            <div class="evg-dispatch-box">
+                <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 6px;"><?php esc_html_e( 'Physical Dispatch Destination', 'evg-platform' ); ?></span>
+                <p style="color: var(--evg-text-ash); font-size: 0.85rem; margin: 0 auto 12px auto; max-width: 550px;">
+                    <?php esc_html_e( 'Please clearly write your order reference', 'evg-platform' ); ?> <strong style="color:#ffffff;">#<?php echo esc_html( $order_number ); ?></strong> <?php esc_html_e( 'on paper inside your package and dispatch to:', 'evg-platform' ); ?>
+                </p>
+                <div style="display: inline-block; background: #09090b; border: 1px solid var(--evg-border-gold-faint); border-radius: 6px; padding: 12px 28px; font-family: monospace; font-size: 0.95rem; color: #ffffff; line-height: 1.5;">
+                    <strong style="color: var(--evg-gold-light);">Elite Vault Grading</strong><br>
+                    PO Box 1755<br>
+                    Doncaster<br>
+                    DN1 9AS
+                </div>
+            </div>
         </section>
 
         <!-- 3. PREPARATION WORKFLOW MATRIX -->

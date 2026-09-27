@@ -3,8 +3,9 @@
  * Template Name: Grading Process & Scale - Executive Tier
  * Description: Clean, high-performance grading architecture template for Elite Vault Grading.
  *              Features dynamic turnaround metrics, 7-step pipeline, interactive calculators, 
- *              strict 1-10 whole-number scale, PO Box dispatch address, manual certificate numbering field (starting at 0100), 
- *              full multi-card submission form, and Stripe/Database backend processing.
+ *              strict 1-10 whole-number scale, PO Box dispatch address, Postage vs Collection (Doncaster) declaration logic,
+ *              Classic vs Simple Submission switcher, Ace-Grading style customer detail & address fields, 
+ *              submission notes, promo coupon code & instant auto-updating live summary.
  *
  * @package EliteVaultGrading
  */
@@ -15,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $turnaround_time    = get_option( 'evg_turnaround_time', '5-10 Business Days' );
 $price_standard     = floatval( get_option( 'evg_price_standard', 9.99 ) );
+$shipping_standard  = floatval( get_option( 'evg_return_shipping_fee', 9.99 ) );
 $accept_submissions = get_option( 'evg_accept_submissions', 'yes' );
 
 get_header(); ?>
@@ -158,30 +160,216 @@ get_header(); ?>
     .evg-calc-input:focus { border-color: var(--evg-gold-primary); }
     .evg-calc-result-box { background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 14px 16px; text-align: center; }
 
-    /* Form & Label Option Styles */
+    /* Ace Grading Style Sections */
+    .evg-form-box-section {
+        background: var(--evg-obsidian-base);
+        border: 1px solid var(--evg-border-hairline);
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 22px;
+    }
+
+    .evg-box-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #ffffff;
+        margin: 0 0 4px 0;
+    }
+
+    .evg-box-subtitle {
+        color: var(--evg-text-ash);
+        font-size: 0.8rem;
+        margin: 0 0 16px 0;
+    }
+
     .evg-form-control {
-        background: var(--evg-obsidian-elevated); border: 1px solid #242428; color: var(--evg-text-pure);
-        border-radius: 4px; padding: 0.85rem 1.25rem; font-size: 0.9rem; width: 100%; box-sizing: border-box; outline: none; transition: all 0.2s ease;
+        background: var(--evg-obsidian-elevated);
+        border: 1px solid #242428;
+        color: var(--evg-text-pure);
+        border-radius: 4px;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        transition: all 0.2s ease;
     }
-    .evg-form-control:focus { border-color: var(--evg-gold-primary); box-shadow: 0 0 0 1px var(--evg-gold-primary); background: #09090b; }
+    .evg-form-control:focus {
+        border-color: var(--evg-gold-primary);
+        box-shadow: 0 0 0 1px var(--evg-gold-primary);
+        background: #09090b;
+    }
+
+    /* Style Switcher: Classic vs Simple */
+    .evg-style-switcher {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border: 1px solid var(--evg-border-gold-faint);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .evg-style-btn {
+        padding: 14px;
+        text-align: center;
+        background: var(--evg-obsidian-elevated);
+        color: var(--evg-text-ash);
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .evg-style-btn.active {
+        background: var(--evg-gold-primary);
+        color: var(--evg-text-charcoal);
+    }
     
-    .evg-label-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; }
-    .evg-label-option-card {
-        background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline);
-        border-radius: 10px; padding: 24px; display: flex; align-items: center; gap: 22px; cursor: pointer; transition: all 0.2s ease;
+    .evg-label-options-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
     }
-    .evg-label-option-card:hover { border-color: var(--evg-border-gold-faint); background: var(--evg-obsidian-elevated); }
-    .evg-label-option-card input[type="radio"] { accent-color: var(--evg-gold-primary); width: 24px; height: 24px; cursor: pointer; }
+    .evg-label-option-card {
+        background: var(--evg-obsidian-elevated);
+        border: 1px solid var(--evg-border-hairline);
+        border-radius: 10px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .evg-label-option-card:hover {
+        border-color: var(--evg-border-gold-faint);
+        background: #18181c;
+    }
+    .evg-label-option-card input[type="radio"] {
+        accent-color: var(--evg-gold-primary);
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+    }
     
     .evg-label-demo-img-wrap { position: relative; display: inline-block; cursor: zoom-in; }
     .evg-label-demo-img {
-        width: 130px; height: 160px; object-fit: cover; border-radius: 8px;
-        border: 2px solid var(--evg-border-gold-faint); background: #000; flex-shrink: 0; box-shadow: 0 8px 22px rgba(0,0,0,0.8); transition: transform 0.2s ease;
+        width: 130px;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid var(--evg-border-gold-faint);
+        background: #000;
+        flex-shrink: 0;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.8);
+        transition: transform 0.2s ease;
     }
     .evg-label-demo-img-wrap:hover .evg-label-demo-img { transform: scale(1.03); border-color: var(--evg-gold-primary); }
     .evg-zoom-hint {
         position: absolute; bottom: 6px; right: 6px; background: rgba(5, 5, 5, 0.8);
         color: var(--evg-gold-primary); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-family: monospace; border: 1px solid var(--evg-border-gold-faint); pointer-events: none;
+    }
+
+    /* Summary & Promo Box */
+    .evg-summary-card {
+        background: var(--evg-obsidian-elevated);
+        border: 1px solid var(--evg-border-gold-faint);
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 25px;
+    }
+    .evg-summary-line {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #1c1c20;
+        color: var(--evg-text-ash);
+    }
+    .evg-summary-line strong {
+        color: #ffffff;
+    }
+    .evg-summary-total {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 14px;
+        margin-top: 6px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--evg-gold-primary);
+    }
+
+    .evg-promo-box {
+        background: var(--evg-obsidian-base);
+        border: 1px solid var(--evg-border-hairline);
+        border-radius: 6px;
+        padding: 16px;
+        margin-top: 18px;
+    }
+    .evg-promo-flex {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    /* Delivery & Collection Declaration Styles */
+    .evg-delivery-selector-wrap {
+        background: var(--evg-obsidian-base);
+        border: 1px solid var(--evg-border-hairline);
+        border-radius: 8px;
+        padding: 18px 20px;
+        margin-bottom: 25px;
+    }
+    .evg-delivery-toggle-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 10px;
+    }
+    .evg-delivery-opt-label {
+        background: var(--evg-obsidian-elevated);
+        border: 1px solid #28282c;
+        border-radius: 6px;
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .evg-delivery-opt-label:hover {
+        border-color: var(--evg-gold-primary);
+    }
+    .evg-delivery-opt-label input[type="radio"] {
+        accent-color: var(--evg-gold-primary);
+        width: 18px;
+        height: 18px;
+    }
+    .evg-collection-declaration-box {
+        display: none;
+        margin-top: 15px;
+        padding: 14px 16px;
+        background: rgba(212, 175, 55, 0.05);
+        border: 1px solid var(--evg-border-gold-faint);
+        border-radius: 6px;
+    }
+    .evg-declaration-check-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+        color: #f3e5ab;
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+    .evg-declaration-check-label input[type="checkbox"] {
+        accent-color: var(--evg-gold-primary);
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        flex-shrink: 0;
     }
 
     /* Lightbox Modal Styles */
@@ -222,6 +410,7 @@ get_header(); ?>
         .evg-pipeline-matrix .evg-grid-cell:nth-child(7) { grid-column: auto; }
         .evg-calc-grid { grid-template-columns: 1fr; }
         .evg-label-options-grid { grid-template-columns: 1fr; }
+        .evg-delivery-toggle-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 767.98px) {
@@ -231,6 +420,7 @@ get_header(); ?>
         .btn-evg-outline { width: 100%; max-width: 320px; }
         .evg-module { padding: 25px 15px !important; }
         .evg-label-demo-img { width: 100px; height: 125px; }
+        .evg-card-row-item { grid-template-columns: 1fr !important; }
     }
 </style>
 
@@ -459,100 +649,284 @@ get_header(); ?>
             </div>
         </section>
 
-        <!-- 7. FULL SUBMISSION & LABEL CONFIGURATION FORM AT THE LAST -->
+        <!-- 7. FULL SUBMISSION, ACE-GRADING DETAILS & LABEL CONFIGURATION FORM -->
         <section id="grading-form-section" class="evg-module" style="padding: 35px 25px;">
             <div style="text-align: center; margin-bottom: 25px;">
                 <span class="evg-label-micro" style="color: var(--evg-gold-light); margin-bottom: 6px;">Submission Portal</span>
-                <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;">Card Declaration & Label Configuration</h2>
+                <h2 style="color: #ffffff; font-size: 1.3rem; font-weight: 700; margin: 0;">Card Declaration & Order Configuration</h2>
             </div>
 
-            <form action="" method="POST" style="max-width: 900px; margin: 0 auto;">
+            <form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="POST" id="evgGradingSubmissionForm" style="max-width: 900px; margin: 0 auto;">
+    <input type="hidden" name="action" value="evg_process_stripe_checkout">
+    <?php wp_nonce_field( 'evg_process_grading_order', 'evg_grading_submit_nonce' ); ?>
                 <?php wp_nonce_field( 'evg_process_grading_order', 'evg_grading_submit_nonce' ); ?>
-                
-                <!-- Contact Info -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
-                    <div>
-                        <label class="evg-label-micro" style="margin-bottom: 6px;">Full Name *</label>
-                        <input type="text" name="customer_name" class="evg-form-control" placeholder="John Doe" required>
-                    </div>
-                    <div>
-                        <label class="evg-label-micro" style="margin-bottom: 6px;">Email Address *</label>
-                        <input type="email" name="customer_email" class="evg-form-control" placeholder="client@example.com" required>
-                    </div>
-                    <div>
-                        <label class="evg-label-micro" style="margin-bottom: 6px;">Phone Number *</label>
-                        <input type="tel" name="customer_phone" class="evg-form-control" placeholder="+44 7000 000000" required>
-                    </div>
-                </div>
 
-                <!-- Dynamic Cards Declaration Table (With Manual Certificate Number Input starting from 0100) -->
-                <div style="margin-bottom: 30px;">
-                    <label class="evg-label-micro" style="margin-bottom: 12px;">Declare Specimens & Manual Cert Numbers (Starting from 0100)</label>
-                    <div id="evgCardsList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
-                        <div class="evg-card-row-item" style="background: var(--evg-obsidian-base); border: 1px solid var(--evg-border-hairline); border-radius: 8px; padding: 15px; display: grid; grid-template-columns: 1.8fr 1.3fr 1fr 0.8fr 0.9fr auto; gap: 10px; align-items: center;">
-                            <input type="text" name="card_name[]" class="evg-form-control" placeholder="Card Name (e.g. Charizard)" required>
-                            <input type="text" name="card_set[]" class="evg-form-control" placeholder="Set (e.g. Shining Fates)" required>
-                            <input type="text" name="card_number[]" class="evg-form-control" placeholder="Card No (e.g. SV107)" required>
-                            <input type="number" name="card_qty[]" class="evg-form-control" placeholder="Qty" value="1" min="1" required>
-                            <input type="text" name="cert_number[]" class="evg-form-control" placeholder="Cert # (0100)" value="0100" style="font-family:monospace;" required>
-                            <button type="button" style="background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.3); color: #ff453a; width: 38px; height: 38px; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="removeCardRow(this)">✕</button>
+                <!-- SECTION 1: SUBMISSION STYLE SWITCHER (MATCHING SCREENSHOT 3 & 4) -->
+                <div class="evg-form-box-section">
+                    <h3 class="evg-box-title">Choose Submission Style</h3>
+                    <p class="evg-box-subtitle">Select between declaring your cards manually or sending a bulk batch for us to identify upon receipt.</p>
+                    
+                    <div class="evg-style-switcher">
+                        <div class="evg-style-btn active" id="btnClassicStyle" onclick="switchSubmissionStyle('classic')">
+                            Classic Submission (Itemized)
+                        </div>
+                        <div class="evg-style-btn" id="btnSimpleStyle" onclick="switchSubmissionStyle('simple')">
+                            Simple Submission (Bulk Count)
                         </div>
                     </div>
-                    <button type="button" class="btn-evg-outline" onclick="addCardRow()" style="padding: 8px 16px; font-size: 0.75rem;">+ Add Another Card</button>
+                    <input type="hidden" name="submission_style" id="submissionStyleInput" value="Classic Submission">
+
+                    <!-- Classic Style: Itemized Rows -->
+                    <div id="classicSubmissionContainer">
+                        <div id="evgCardsList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+                            <div class="evg-card-row-item" style="background: var(--evg-obsidian-elevated); border: 1px solid var(--evg-border-hairline); border-radius: 6px; padding: 14px; display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; gap: 10px; align-items: center;">
+                                <input type="text" name="card_name[]" class="evg-form-control" placeholder="Card Name (e.g. Charizard)">
+                                <input type="text" name="card_set[]" class="evg-form-control" placeholder="Set (e.g. Base Set)">
+                                <input type="text" name="card_number[]" class="evg-form-control" placeholder="Card No (e.g. 4/102)">
+                                <input type="number" name="card_qty[]" class="evg-form-control card-qty-input" placeholder="Qty" value="1" min="1">
+                                <button type="button" style="background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.3); color: #ff453a; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; font-weight: bold;" onclick="removeCardRow(this)">✕</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-evg-outline" onclick="addCardRow()">+ Add Another Card</button>
+                    </div>
+
+                    <!-- Simple Style: Bulk Quantity Counter (Screenshot 3) -->
+                    <div id="simpleSubmissionContainer" style="display: none; text-align: center; padding: 15px 0;">
+                        <span class="evg-label-micro" style="margin-bottom: 6px;">Total Cards Being Sent</span>
+                        <input type="number" id="simpleCardQuantityInput" name="simple_card_quantity" class="evg-form-control" value="1" min="1" max="300" style="max-width: 180px; margin: 0 auto; text-align: center; font-size: 1.5rem; font-weight: 800; font-family: monospace;">
+                        <p style="color: var(--evg-text-ash); font-size: 0.8rem; margin-top: 10px;">
+                            Enter the amount of cards you are sending, and our expert receiving team will identify your cards once we receive them.
+                        </p>
+                    </div>
+
+                    <!-- Declared Total Value / Insurance Input -->
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--evg-border-hairline);">
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Estimated Total Declared Value (£)</label>
+                        <input type="number" name="declared_insurance_value" class="evg-form-control" placeholder="e.g. 250.00" step="0.01" style="max-width: 280px;">
+                        <span style="font-size: 0.72rem; color: var(--evg-text-ash); display: block; margin-top: 4px;">Used for tracked return courier insurance protection.</span>
+                    </div>
                 </div>
 
-                <!-- Slab Label Options -->
-                <div style="margin-bottom: 30px;">
-                    <label class="evg-label-micro" style="margin-bottom: 12px;">Select Slab Label Option (Click imej to zoom)</label>
+                <!-- SECTION 2: SLAB LABEL OPTIONS -->
+                <div class="evg-form-box-section">
+                    <h3 class="evg-box-title">Select Slab Label Option</h3>
+                    <p class="evg-box-subtitle">Choose the label design for your encapsulated cards (Click image to zoom).</p>
+                    
                     <div class="evg-label-options-grid">
                         <label class="evg-label-option-card">
-                            <input type="radio" name="slab_label_tier" value="black_basic" checked>
+                            <input type="radio" name="slab_label_tier" value="black_basic" data-price="0.00" checked>
                             <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
                                 <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/black.jpeg" alt="Black Basic Label" class="evg-label-demo-img">
                                 <span class="evg-zoom-hint">🔍 Zoom</span>
                             </div>
                             <div>
-                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Black Basic label</strong>
-                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.00</span>
+                                <strong style="color: #fff; display: block; margin-bottom: 2px;">Black Basic label</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.00 / card</span>
                             </div>
                         </label>
+
                         <label class="evg-label-option-card">
-                            <input type="radio" name="slab_label_tier" value="colour_match">
+                            <input type="radio" name="slab_label_tier" value="colour_match" data-price="0.99">
                             <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
                                 <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/color.jpeg" alt="Colour Match Label" class="evg-label-demo-img">
                                 <span class="evg-zoom-hint">🔍 Zoom</span>
                             </div>
                             <div>
-                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Colour match</strong>
-                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.99</span>
+                                <strong style="color: #fff; display: block; margin-bottom: 2px;">Colour match</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.99 / card</span>
                             </div>
                         </label>
+
                         <label class="evg-label-option-card">
-                            <input type="radio" name="slab_label_tier" value="lightening">
+                            <input type="radio" name="slab_label_tier" value="lightening" data-price="0.99">
                             <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
                                 <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/lighting.jpeg" alt="Lightening Label" class="evg-label-demo-img">
                                 <span class="evg-zoom-hint">🔍 Zoom</span>
                             </div>
                             <div>
-                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Lightening</strong>
-                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.99</span>
+                                <strong style="color: #fff; display: block; margin-bottom: 2px;">Lightening</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£0.99 / card</span>
                             </div>
                         </label>
+
                         <label class="evg-label-option-card">
-                            <input type="radio" name="slab_label_tier" value="extended_art">
+                            <input type="radio" name="slab_label_tier" value="extended_art" data-price="2.99">
                             <div class="evg-label-demo-img-wrap" onclick="openEvgLightbox(this)">
                                 <img src="https://elitevaultgrading.com/wp-content/uploads/2026/09/extended.jpeg" alt="Extended Artwork Label" class="evg-label-demo-img">
                                 <span class="evg-zoom-hint">🔍 Zoom</span>
                             </div>
                             <div>
-                                <strong style="color: #fff; display: block; margin-bottom: 4px;">Extended Artwork</strong>
-                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£2.99</span>
+                                <strong style="color: #fff; display: block; margin-bottom: 2px;">Extended Artwork</strong>
+                                <span style="color: var(--evg-gold-primary); font-family: monospace; font-weight: 700;">£2.99 / card</span>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-evg-executive">
+                <!-- SECTION 3: SUBMISSION NOTES (MATCHING ACE GRADING) -->
+                <div class="evg-form-box-section">
+                    <h3 class="evg-box-title">Submission Notes</h3>
+                    <p class="evg-box-subtitle">Provide any specific notes, instructions or details about your submission below.</p>
+                    <textarea name="submission_notes" class="evg-form-control" rows="3" placeholder="e.g. Please take extra care with vintage holos..."></textarea>
+                </div>
+
+                <!-- SECTION 4: YOUR DETAILS (MATCHING ACE GRADING) -->
+                <div class="evg-form-box-section">
+                    <h3 class="evg-box-title">Your Details</h3>
+                    <p class="evg-box-subtitle">Enter your contact info so we can communicate regarding your card consignments.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">First name *</label>
+                            <input type="text" name="first_name" class="evg-form-control" placeholder="Jamie" required>
+                        </div>
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">Last name *</label>
+                            <input type="text" name="last_name" class="evg-form-control" placeholder="Brister" required>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">Mobile Number *</label>
+                            <input type="tel" name="mobile_number" class="evg-form-control" placeholder="07445690065" required>
+                        </div>
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">Email Address *</label>
+                            <input type="email" name="customer_email" class="evg-form-control" placeholder="client@example.com" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: YOUR ADDRESS (MATCHING ACE GRADING) -->
+                <div class="evg-form-box-section">
+                    <h3 class="evg-box-title">Your Address</h3>
+                    <p class="evg-box-subtitle">The address you would like your cards returned to.</p>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Country / Region *</label>
+                        <select name="country_region" class="evg-form-control" required>
+                            <option value="United Kingdom" selected>United Kingdom</option>
+                            <option value="Ireland">Ireland</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Address line 1 *</label>
+                        <input type="text" name="address_line_1" class="evg-form-control" placeholder="House number and street name" required>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label class="evg-label-micro" style="margin-bottom: 6px;">Address line 2</label>
+                        <input type="text" name="address_line_2" class="evg-form-control" placeholder="Apartment, suite, unit, etc. (optional)">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">City *</label>
+                            <input type="text" name="city" class="evg-form-control" placeholder="City / Town" required>
+                        </div>
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">State / County</label>
+                            <input type="text" name="county" class="evg-form-control" placeholder="County">
+                        </div>
+                        <div>
+                            <label class="evg-label-micro" style="margin-bottom: 6px;">ZIP / Postal Code *</label>
+                            <input type="text" name="postcode" class="evg-form-control" placeholder="e.g. DN1 9AS" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: DELIVERY / FULFILMENT METHOD -->
+                <div class="evg-delivery-selector-wrap">
+                    <label class="evg-label-micro" style="margin-bottom: 6px;">Fulfilment / Delivery Method *</label>
+                    <div class="evg-delivery-toggle-grid">
+                        <label class="evg-delivery-opt-label">
+                            <input type="radio" name="fulfilment_method" value="postage" checked onchange="toggleDeliveryMethod(this.value)">
+                            <div>
+                                <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Royal Mail Insured Tracked Postage</strong>
+                                <span style="color: var(--evg-text-ash); font-size: 0.75rem;">Direct return courier (£<?php echo number_format($shipping_standard, 2); ?>)</span>
+                            </div>
+                        </label>
+
+                        <label class="evg-delivery-opt-label">
+                            <input type="radio" name="fulfilment_method" value="collection" onchange="toggleDeliveryMethod(this.value)">
+                            <div>
+                                <strong style="color: #ffffff; font-size: 0.9rem; display: block;">Collection – Doncaster</strong>
+                                <span style="color: var(--evg-gold-primary); font-size: 0.75rem;">Free pickup (Prior agreement mandatory)</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Mandatory Collection Declaration Checkbox -->
+                    <div id="evgCollectionDeclarationBox" class="evg-collection-declaration-box">
+                        <label class="evg-declaration-check-label">
+                            <input type="checkbox" name="collection_agreement_confirmed" id="evgCollectionAgreementCheckbox" value="yes">
+                            <span>
+                                <strong>Declaration:</strong> I confirm that collection has been agreed with Elite Vault Grading prior to placing this order. I understand that collection is based in Doncaster and that my order will not be fulfilled via collection unless this has been agreed with the company beforehand.
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: LIVE AUTO-UPDATING SUBMISSION SUMMARY & PROMOTIONAL CODE -->
+                <div class="evg-summary-card">
+                    <h3 class="evg-box-title" style="border-bottom: 1px solid var(--evg-border-hairline); padding-bottom: 10px; margin-bottom: 12px;">Submission Summary</h3>
+                    
+                    <div class="evg-summary-line">
+                        <span>Submission Type</span>
+                        <strong id="summarySubmissionStyle">Classic Submission</strong>
+                    </div>
+                    <div class="evg-summary-line">
+                        <span>Service Level</span>
+                        <strong>Standard (<?php echo esc_html($turnaround_time); ?>)</strong>
+                    </div>
+                    <div class="evg-summary-line">
+                        <span>Base Price</span>
+                        <strong>£<?php echo number_format($price_standard, 2); ?> / Card</strong>
+                    </div>
+                    <div class="evg-summary-line">
+                        <span>Collectible Quantity</span>
+                        <strong id="summaryQuantity">1 Cards</strong>
+                    </div>
+                    <div class="evg-summary-line">
+                        <span>Premium Labels Fee</span>
+                        <strong id="summaryLabelFee">£0.00</strong>
+                    </div>
+                    <div class="evg-summary-line">
+                        <span>Subtotal</span>
+                        <strong id="summarySubtotal">£9.99</strong>
+                    </div>
+                    <div class="evg-summary-line">
+                        <span>Return Shipping</span>
+                        <strong id="summaryShipping">£<?php echo number_format($shipping_standard, 2); ?></strong>
+                    </div>
+                    <div class="evg-summary-line" id="discountRow" style="display: none; color: #34c759;">
+                        <span>Promotional Discount</span>
+                        <strong id="summaryDiscount">-£0.00</strong>
+                    </div>
+                    
+                    <div class="evg-summary-total">
+                        <span>Estimated Total</span>
+                        <span id="summaryTotal">£19.98</span>
+                    </div>
+
+                    <!-- ADD PROMOTIONAL CODE -->
+                    <div class="evg-promo-box">
+                        <label class="evg-label-micro" style="margin-bottom: 2px;">ADD PROMOTIONAL CODE</label>
+                        <span style="font-size: 0.75rem; color: var(--evg-text-ash);">Do you have a promotional code? Enter it here:</span>
+                        <div class="evg-promo-flex">
+                            <input type="text" id="couponCodeInput" name="promo_code" class="evg-form-control" placeholder="e.g. EVG10" style="padding: 10px 14px; font-family: monospace;">
+                            <button type="button" class="btn-evg-outline" onclick="applyCouponCode()" style="white-space: nowrap;">Redeem Code</button>
+                        </div>
+                        <div id="couponMessage" style="font-size: 0.75rem; margin-top: 6px;"></div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="calculated_total_amount" id="calculatedTotalInput" value="19.98">
+
+                <button type="submit" class="btn-evg-executive" id="evgSubmitOrderBtn">
                     Proceed to Secure Payment
                 </button>
             </form>
@@ -571,6 +945,140 @@ get_header(); ?>
 </div>
 
 <script>
+var basePricePerCard = <?php echo floatval($price_standard); ?>;
+var baseShippingFee  = <?php echo floatval($shipping_standard); ?>;
+var activeDiscountPct = 0;
+var activeDiscountFixed = 0;
+var activeStyle = 'classic';
+
+// Classic vs Simple Mode Switcher (Screenshot 3 & 4)
+function switchSubmissionStyle(style) {
+    activeStyle = style;
+    var btnClassic = document.getElementById('btnClassicStyle');
+    var btnSimple  = document.getElementById('btnSimpleStyle');
+    var wrapClassic = document.getElementById('classicSubmissionContainer');
+    var wrapSimple  = document.getElementById('simpleSubmissionContainer');
+    var styleInput  = document.getElementById('submissionStyleInput');
+    var summaryStyleEl = document.getElementById('summarySubmissionStyle');
+
+    if (style === 'simple') {
+        btnSimple.classList.add('active');
+        btnClassic.classList.remove('active');
+        wrapSimple.style.display = 'block';
+        wrapClassic.style.display = 'none';
+        styleInput.value = 'Simple Submission';
+        if (summaryStyleEl) summaryStyleEl.textContent = 'Simple Submission';
+    } else {
+        btnClassic.classList.add('active');
+        btnSimple.classList.remove('active');
+        wrapClassic.style.display = 'block';
+        wrapSimple.style.display = 'none';
+        styleInput.value = 'Classic Submission';
+        if (summaryStyleEl) summaryStyleEl.textContent = 'Classic Submission';
+    }
+    recalculateSummary();
+}
+
+// Instant Live Auto Update Function
+function recalculateSummary() {
+    var totalCards = 0;
+
+    if (activeStyle === 'simple') {
+        var simpleInput = document.getElementById('simpleCardQuantityInput');
+        totalCards = simpleInput ? (parseInt(simpleInput.value) || 1) : 1;
+    } else {
+        var qtyInputs = document.querySelectorAll('.card-qty-input');
+        qtyInputs.forEach(function(input) {
+            var val = parseInt(input.value);
+            if (isNaN(val) || val < 1) val = 1;
+            totalCards += val;
+        });
+    }
+
+    if (totalCards < 1) totalCards = 1;
+
+    // Selected Label Fee
+    var selectedLabel = document.querySelector('input[name="slab_label_tier"]:checked');
+    var labelPricePerCard = selectedLabel ? parseFloat(selectedLabel.getAttribute('data-price')) || 0 : 0;
+    var totalLabelFee = totalCards * labelPricePerCard;
+
+    // Base Subtotal
+    var baseCardsCost = totalCards * basePricePerCard;
+    var subtotal = baseCardsCost + totalLabelFee;
+
+    // Shipping Check
+    var deliveryMethodInput = document.querySelector('input[name="fulfilment_method"]:checked');
+    var deliveryMethod = deliveryMethodInput ? deliveryMethodInput.value : 'postage';
+    var shippingFee = (deliveryMethod === 'collection') ? 0.00 : baseShippingFee;
+
+    // Discount Calculation
+    var discount = 0;
+    if (activeDiscountPct > 0) {
+        discount = subtotal * (activeDiscountPct / 100);
+    } else if (activeDiscountFixed > 0) {
+        discount = activeDiscountFixed;
+    }
+    if (discount > subtotal) discount = subtotal;
+
+    var finalTotal = (subtotal - discount) + shippingFee;
+
+    // Update DOM Elements in Real-Time
+    var summaryQtyEl = document.getElementById('summaryQuantity');
+    if (summaryQtyEl) summaryQtyEl.textContent = totalCards + ' Cards';
+
+    var summaryLabelEl = document.getElementById('summaryLabelFee');
+    if (summaryLabelEl) summaryLabelEl.textContent = '£' + totalLabelFee.toFixed(2);
+
+    var summarySubtotalEl = document.getElementById('summarySubtotal');
+    if (summarySubtotalEl) summarySubtotalEl.textContent = '£' + subtotal.toFixed(2);
+
+    var summaryShippingEl = document.getElementById('summaryShipping');
+    if (summaryShippingEl) summaryShippingEl.textContent = (shippingFee === 0) ? '£0.00 (Collection)' : '£' + shippingFee.toFixed(2);
+    
+    var discountRow = document.getElementById('discountRow');
+    var summaryDiscountEl = document.getElementById('summaryDiscount');
+    if (discount > 0) {
+        if (discountRow) discountRow.style.display = 'flex';
+        if (summaryDiscountEl) summaryDiscountEl.textContent = '-£' + discount.toFixed(2);
+    } else {
+        if (discountRow) discountRow.style.display = 'none';
+    }
+
+    var summaryTotalEl = document.getElementById('summaryTotal');
+    if (summaryTotalEl) summaryTotalEl.textContent = '£' + finalTotal.toFixed(2);
+
+    var calcTotalInput = document.getElementById('calculatedTotalInput');
+    if (calcTotalInput) calcTotalInput.value = finalTotal.toFixed(2);
+}
+
+function applyCouponCode() {
+    var code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
+    var msg = document.getElementById('couponMessage');
+
+    if (code === 'EVG10') {
+        activeDiscountPct = 10;
+        activeDiscountFixed = 0;
+        msg.textContent = '✓ Promotional Code EVG10 applied (10% OFF)';
+        msg.style.color = '#34c759';
+    } else if (code === 'VAULT5') {
+        activeDiscountPct = 0;
+        activeDiscountFixed = 5.00;
+        msg.textContent = '✓ Promotional Code VAULT5 applied (£5.00 OFF)';
+        msg.style.color = '#34c759';
+    } else if (code === '') {
+        activeDiscountPct = 0;
+        activeDiscountFixed = 0;
+        msg.textContent = 'Please enter a promotional code';
+        msg.style.color = '#ff9f0a';
+    } else {
+        activeDiscountPct = 0;
+        activeDiscountFixed = 0;
+        msg.textContent = '✕ Invalid or expired promotional code';
+        msg.style.color = '#ff453a';
+    }
+    recalculateSummary();
+}
+
 function addCardRow() {
     var container = document.getElementById('evgCardsList');
     var firstRow = container.querySelector('.evg-card-row-item');
@@ -578,16 +1086,18 @@ function addCardRow() {
     var inputs = newRow.querySelectorAll('input');
     inputs.forEach(function(input) {
         if(input.type === 'number') input.value = 1;
-        else if(input.name.includes('cert_number')) input.value = '0101';
         else input.value = '';
     });
     container.appendChild(newRow);
+    bindAutoUpdateEvents();
+    recalculateSummary();
 }
 
 function removeCardRow(btn) {
     var container = document.getElementById('evgCardsList');
     if (container.querySelectorAll('.evg-card-row-item').length > 1) {
         btn.closest('.evg-card-row-item').remove();
+        recalculateSummary();
     } else {
         alert('You must declare at least one card.');
     }
@@ -610,7 +1120,67 @@ function closeEvgLightbox() {
     if (lightbox) lightbox.classList.remove('is-active');
 }
 
+function toggleDeliveryMethod(method) {
+    var decBox = document.getElementById('evgCollectionDeclarationBox');
+    var checkbox = document.getElementById('evgCollectionAgreementCheckbox');
+    if (method === 'collection') {
+        decBox.style.display = 'block';
+        checkbox.required = true;
+    } else {
+        decBox.style.display = 'none';
+        checkbox.required = false;
+        checkbox.checked = false;
+    }
+    recalculateSummary();
+}
+
+// Attach live input listeners for continuous auto-updates
+function bindAutoUpdateEvents() {
+    var qtyInputs = document.querySelectorAll('.card-qty-input');
+    qtyInputs.forEach(function(input) {
+        input.removeEventListener('input', recalculateSummary);
+        input.removeEventListener('change', recalculateSummary);
+        input.addEventListener('input', recalculateSummary);
+        input.addEventListener('change', recalculateSummary);
+    });
+
+    var simpleQty = document.getElementById('simpleCardQuantityInput');
+    if (simpleQty) {
+        simpleQty.removeEventListener('input', recalculateSummary);
+        simpleQty.removeEventListener('change', recalculateSummary);
+        simpleQty.addEventListener('input', recalculateSummary);
+        simpleQty.addEventListener('change', recalculateSummary);
+    }
+
+    var labelRadios = document.querySelectorAll('input[name="slab_label_tier"]');
+    labelRadios.forEach(function(radio) {
+        radio.removeEventListener('change', recalculateSummary);
+        radio.addEventListener('change', recalculateSummary);
+    });
+
+    var deliveryRadios = document.querySelectorAll('input[name="fulfilment_method"]');
+    deliveryRadios.forEach(function(radio) {
+        radio.removeEventListener('change', recalculateSummary);
+        radio.addEventListener('change', recalculateSummary);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    bindAutoUpdateEvents();
+
+    var form = document.getElementById('evgGradingSubmissionForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            var selectedDelivery = form.querySelector('input[name="fulfilment_method"]:checked');
+            var decCheckbox = document.getElementById('evgCollectionAgreementCheckbox');
+            if (selectedDelivery && selectedDelivery.value === 'collection' && !decCheckbox.checked) {
+                e.preventDefault();
+                alert('You must tick the mandatory declaration confirming prior pickup agreement in Doncaster before placing a collection order.');
+                decCheckbox.focus();
+            }
+        });
+    }
+
     var borderA = document.getElementById('calcBorderA');
     var borderB = document.getElementById('calcBorderB');
     var ratioOutput = document.getElementById('calcRatioOutput');
@@ -652,6 +1222,8 @@ document.addEventListener('DOMContentLoaded', function() {
         borderA.addEventListener('input', calculateCentering);
         borderB.addEventListener('input', calculateCentering);
     }
+
+    recalculateSummary();
 });
 </script>
 
