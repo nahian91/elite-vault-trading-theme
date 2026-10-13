@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $evg_redirect_to = '';
 if ( isset( $_REQUEST['redirect_to'] ) && ! empty( $_REQUEST['redirect_to'] ) ) {
 	$evg_raw_redirect = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
-	$evg_redirect_to  = wp_validate_redirect( $evg_raw_redirect, home_url( '/dashboard' ) );
+	$evg_redirect_to  = wp_validate_redirect( $evg_raw_redirect, home_url( '/my-account' ) );
 }
 // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
@@ -34,7 +34,7 @@ if ( is_user_logged_in() && 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
 	} elseif ( ! empty( $evg_redirect_to ) ) {
 		wp_safe_redirect( $evg_redirect_to );
 	} else {
-		wp_safe_redirect( home_url( '/dashboard' ) );
+		wp_safe_redirect( home_url( '/my-account' ) );
 	}
 	exit;
 }
@@ -188,11 +188,11 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['evg_register_nonce'
 				wp_set_current_user( $evg_user_id );
 				wp_set_auth_cookie( $evg_user_id, true );
 
-				// Direct routing honoring safe redirect_to, defaulting to /dashboard.
+				// Direct routing honoring safe redirect_to, defaulting to /my-account.
 				if ( ! empty( $evg_redirect_to ) ) {
 					wp_safe_redirect( $evg_redirect_to );
 				} else {
-					wp_safe_redirect( home_url( '/dashboard' ) );
+					wp_safe_redirect( home_url( '/my-account' ) );
 				}
 				exit;
 			}

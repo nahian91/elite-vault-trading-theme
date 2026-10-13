@@ -58,7 +58,7 @@ if ( is_user_logged_in() ) {
 			<!-- DESKTOP ACTIONS -->
 			<div class="nav-actions d-none d-lg-flex align-items-center gap-2">
 				<?php if ( is_user_logged_in() ) : ?>
-					<a href="<?php echo esc_url( home_url( '/dashboard' ) ); ?>" class="btn-custom btn-outline-gold">
+					<a href="<?php echo esc_url( home_url( '/my-account' ) ); ?>" class="btn-custom btn-outline-gold">
 						<?php echo esc_html( strtoupper( $evg_full_name ) ); ?>
 					</a>
 					<a href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>" class="btn-custom btn-gold">
@@ -95,7 +95,7 @@ if ( is_user_logged_in() ) {
 			?>
 			<div class="mobile-nav-actions d-flex flex-column gap-2 pt-2 border-top border-secondary">
 				<?php if ( is_user_logged_in() ) : ?>
-					<a href="<?php echo esc_url( home_url( '/dashboard' ) ); ?>" class="btn-custom btn-outline-gold text-center w-100">
+					<a href="<?php echo esc_url( home_url( '/my-account' ) ); ?>" class="btn-custom btn-outline-gold text-center w-100">
 						<?php echo esc_html( strtoupper( $evg_full_name ) ); ?>
 					</a>
 					<a href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>" class="btn-custom btn-gold text-center w-100">
